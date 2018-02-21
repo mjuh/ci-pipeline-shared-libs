@@ -8,6 +8,9 @@ def call() {
 		returnStdout: true
 	).trim()
 
+	println tags
+	println branch
+
 	if (tags.length) {
 		tags[0]
 	} else {
