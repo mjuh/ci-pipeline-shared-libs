@@ -4,5 +4,7 @@ def call(body) {
 	body.delegate = config
 	body()
 
-    config.each{ k, v -> println "${k}:${v}" }
+    println config.var1
+    println config.var2
+    println config.var3
 }
