@@ -6,7 +6,11 @@ class GitRemoteOrigin {
     static Remote getUrl() {
         Grgit.open(dir: env.WORKSPACE).remote.list().find { it.name == 'origin' }
     }
-    static final String group = this.getRemote().url.split(':').tail().join(':').split('/|\\.')[-3]
-    static final String project = this.getRemote().url.split(':').tail().join(':').split('/|\\.')[-2]
+    static final String getGroup() {
+        this.getRemote().url.split(':').tail().join(':').split('/|\\.')[-3]
+    }
+    static final String getProject() {
+        this.getRemote().url.split(':').tail().join(':').split('/|\\.')[-2]
+    }
 }
 
