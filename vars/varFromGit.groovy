@@ -6,9 +6,9 @@ def url = git.remote.list().find { it.name == 'origin' }.url
 def (project, group) = url.split(':').tail().join(':').split('/|\\.')[-2..0]
 
 def getProject() {
-	project
+	return project
 }
 
 def getGroup() {
-	group
+	return group
 }
