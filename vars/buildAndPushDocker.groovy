@@ -4,6 +4,6 @@ def call(Map args) {
 //			def dockerImage = docker.build("${args.image}:${args.tag}")
 //			dockerImage.push()
 //		}
-	sh 'printenv'
+	println 'noop'
 //	}
 }
