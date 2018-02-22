@@ -1,4 +1,8 @@
 def call(Map args) {
-	def image = docker.build("${args.image}:${args.tag}")	
-	image.push()
+	node {
+		docker.withRegistry('https://docker-registry.intr', 'docker-registry') {
+			def image = docker.build("test:test")
+			image.push()
+		}
+	}
 }
