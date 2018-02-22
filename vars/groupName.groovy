@@ -2,7 +2,7 @@
 import org.ajoberstar.grgit.Grgit
 
 def call() {
-	def git = Grgit.open(dir: file(env.WORKSPACE))
+	def git = Grgit.open(dir: env.WORKSPACE)
 	def url = git.remote.list().find { it.name == 'origin' }
 	println url
 }
