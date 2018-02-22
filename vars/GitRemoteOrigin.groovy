@@ -2,7 +2,7 @@
 import org.ajoberstar.grgit.Grgit
 
 class GitRemoteOrigin {
-    static void main(_) {}
+    static void main(_) {}
     static Remote getUrl() {
         Grgit.open(dir: env.WORKSPACE).remote.list().find { it.name == 'origin' }
     }
