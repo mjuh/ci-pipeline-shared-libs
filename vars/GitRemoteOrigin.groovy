@@ -4,7 +4,7 @@ import org.ajoberstar.grgit.Remote
 
 class GitRemoteOrigin {
     static void main(_) {}
-    static Remote getUrl() {
+    static Remote getRemote() {
         Grgit.open(dir: env.WORKSPACE).remote.list().find { it.name == 'origin' }
     }
     static final String getGroup() {
