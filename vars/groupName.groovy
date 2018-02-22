@@ -2,8 +2,7 @@
 import org.ajoberstar.grgit.Grgit
 
 def call() {
-	sh 'ls -la'
-	def git = Grgit.open(dir: '.')
+	def git = Grgit.open(dir: env.PWD)
 	def url = git.remote.list().find { it.name == 'origin' }
 	println url
 }
