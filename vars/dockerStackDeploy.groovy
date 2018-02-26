@@ -11,9 +11,9 @@ def call(Map args) {
 
 	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                     usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-		sh ('''
+		sh '''
 			docker login -u ${USERNAME} -p ${PASSWORD} ${registry}
 			docker pull ${registry}/${namespace}/${image}:${tag}
-		''')
+		'''
 	}
 }
