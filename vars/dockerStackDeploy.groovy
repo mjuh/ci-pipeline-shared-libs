@@ -4,8 +4,8 @@ def call(Map args) {
 	assert args.service : "No service name provided"
 
 	def namespace = args.namespace ?: args.stack
-	def image = agrs.image ?: args.service
-	def tag = agrs.tag ?: "master"
+	def image = args.image ?: args.service
+	def tag = args.tag ?: "master"
 	def registry = args.registry ?: "docker-registry.intr"
 	def credentialsId = args.credentialsId ?: "docker-registry"
 
