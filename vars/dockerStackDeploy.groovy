@@ -1,9 +1,10 @@
 def call(Map args) {
 
-	assert args.image : "No image name provided"
 	assert args.stack : "No stack name provided"
 	assert args.service : "No service name provided"
 
+	def namespace = args.namespace ?: args.stack
+	def image = agrs.image ?: args.service
 	def tag = agrs.tag ?: "master"
 	def registry = args.registry ?: "docker-registry.intr"
 	def credentialsId = args.credentialsId ?: "docker-registry"
@@ -12,7 +13,7 @@ def call(Map args) {
                     usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 		sh '''
 			docker login -u ${USERNAME} -p ${PASSWORD} ${registry}
-			docker pull ${registry}/${args.stack}/${args.service}:${tag}
+			docker pull ${registry}/${namespace}/${image}:${tag}
 		'''
 	}
 }
