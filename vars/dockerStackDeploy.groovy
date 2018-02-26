@@ -14,7 +14,7 @@ def call(Map args) {
                     usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 		sh '''
 			docker login -u ${USERNAME} -p ${PASSWORD} ${REGISTRY}
-			docker pull ${REGISTRY}/${NS}/${IAMGE}:${TAG}
+			docker pull ${REGISTRY}/${NS}/${IMAGE}:${TAG}
 		'''
 	}
 }
