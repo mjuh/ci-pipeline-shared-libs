@@ -15,5 +15,5 @@ def call(Map args) {
 			docker login -u ${USERNAME} -p ${PASSWORD} ${registry}
 			docker pull ${registry}/${namespace}/${image}:${tag}
 		'''
-	}
+	};
 }
