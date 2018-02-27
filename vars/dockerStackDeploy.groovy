@@ -1,13 +1,10 @@
-import groovy.json.JsonSlurper
-
 def call(Map args) {
 	assert args.stack : "No stack name provided"
 
 	def credentialsId = args.credentialsId ?: "docker-registry"
-	def jsonSlurper = new JsonSlurper()
 	def dockerServiceInspect = sh(returnStdout: true, script: "docker service inspect ${args.stack}_${args.service} 2>/dev/null").trim()
 	println dockerServiceInspect
-	def prodService = jsonSlurper.parseText(dockerServiceInspect)
+	def prodService = JSON.parse(dockerServiceInspect)
 
 	env.STACK = args.stack
 	env.SERVICE = prodService ? args.service : ''
