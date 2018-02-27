@@ -27,9 +27,11 @@ def call(Map args) {
 		if(env.SERVICE) {
 			sh 'docker service update --with-registry-auth --force --image $REGISTRY/$NS/$IMAGE:$TAG $STACK_$SERVICE'
 		} else {
-			git(url: 'git@gitlab.intr:_ci/docker-stacks.git',
-				credentialsId: 'd8f04931-9047-413a-80f3-eef23003522c')
-			sh 'docker stack deploy --with-registry-auth -c ./docker-stacks/$STACK.yml $STACK'
+			dir(env.HOME) {
+				git(url: 'git@gitlab.intr:_ci/docker-stacks.git',
+					credentialsId: 'd8f04931-9047-413a-80f3-eef23003522c')
+				sh 'docker stack deploy --with-registry-auth -c $STACK.yml $STACK'
+			}
 		}
 	}
 }
