@@ -5,8 +5,9 @@ def call(Map args) {
 
 	def credentialsId = args.credentialsId ?: "docker-registry"
 	def jsonSlurper = new JsonSlurper()
-	def prodService = jsonSlurper.parseText(sh(returnStdout: true,
-                                               script: "docker service inspect ${args.stack}_${args.service} 2>/dev/null || true").trim())
+	def dockerServiceInspect = sh(returnStdout: true,
+                                  script: "docker service inspect ${args.stack}_${args.service} 2>/dev/null || true").trim()
+	def prodService = jsonSlurper.parseText(dockerServiceInspect)
 
 	env.STACK = args.stack
 	env.SERVICE = prodService ? args.service : ''
