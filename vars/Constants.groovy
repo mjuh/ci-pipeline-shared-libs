@@ -1,7 +1,9 @@
-import groovy.transform.Field
-
-@Field final String dockerRegistryHost = 'docker-registry.intr'
-@Field final String dockerRegistryCredId = 'docker-registry'
-@Field final String dockerImageDefaultTag = 'master'
-@Field final String dockerStacksGitRepoUrl = 'git@gitlab.intr:_ci/docker-stacks.git'
-@Field final String gitCredId = 'd8f04931-9047-413a-80f3-eef23003522c'
+public class Constants {
+	def main (_) {}
+	public static final String dockerRegistryHost = 'docker-registry.intr'
+	public static final String dockerRegistryCredId = 'docker-registry'
+	public static final String dockerImageDefaultTag = 'master'
+	public static final String dockerStacksGitRepoUrl = 'git@gitlab.intr:_ci/docker-stacks.git'
+	public static final String dockerStacksDeployDir = 'docker-stacks'
+	public static final String gitCredId = 'd8f04931-9047-413a-80f3-eef23003522c'
+}

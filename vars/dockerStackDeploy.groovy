@@ -8,7 +8,7 @@ def jsonParse(def json) {
 def call(Map args) {
 	assert args.stack : "No stack name provided"
 
-	def credentialsId = args.credentialsId ?: dockerRegistryCredId
+	def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
 	def prodService = jsonParse(
 		sh(returnStdout: true,
            script: "docker service inspect ${args.stack}_${args.service} 2>/dev/null || true").trim()
@@ -16,8 +16,8 @@ def call(Map args) {
 	def service = prodService ? args.service : ''
 	def ns = args.namespace ?: args.stack
 	def image = args.image ?: args.service
-	def tag = args.tag ?: dockerImageDefaultTag 
-	def registry = args.registry ?: dockerRegistryHost
+	def tag = args.tag ?: Constants.dockerImageDefaultTag 
+	def registry = args.registry ?: Constants.dockerRegistryHost
 
 	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                     usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
@@ -25,11 +25,12 @@ def call(Map args) {
 		if(service) {
 			sh "docker service update --with-registry-auth --force --image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"
 		} else {
-			dir(env.HOME + '/docker-stacks') {
-				git(url: dockerStacksGitRepoUrl,
-					credentialsId: gitCredId)
+			def stacksDir = env.HOME + '/' + Constants.dockerStacksDeployDir
+			dir(stacksDir) {
+				git(url: Constants.dockerStacksGitRepoUrl,
+					credentialsId: Constants.gitCredId)
 			}
-			sh "docker stack deploy --with-registry-auth -c $HOME/docker-stacks/${args.stack}.yml ${args.stack}"
+			sh "docker stack deploy --with-registry-auth -c ${stacksDir}/${args.stack}.yml ${args.stack}"
 		}
 	}
 }
