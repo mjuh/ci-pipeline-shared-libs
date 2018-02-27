@@ -8,30 +8,28 @@ def jsonParse(def json) {
 def call(Map args) {
 	assert args.stack : "No stack name provided"
 
-	def credentialsId = args.credentialsId ?: "docker-registry"
+	def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
 	def prodService = jsonParse(
 		sh(returnStdout: true,
            script: "docker service inspect ${args.stack}_${args.service} 2>/dev/null || true").trim()
 	)
-
-	env.STACK = args.stack
-	env.SERVICE = prodService ? args.service : ''
-	env.NS = args.namespace ?: args.stack
-	env.IMAGE = args.image ?: args.service
-	env.TAG = args.tag ?: "master"
-	env.REGISTRY = args.registry ?: "docker-registry.intr"
+	def service = prodService ? args.service : ''
+	def ns = args.namespace ?: args.stack
+	def image = args.image ?: args.service
+	def tag = args.tag ?: Constants.dockerImageDefaultTag 
+	def registry = args.registry ?: Constants.dockerRegistryHost
 
 	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                     usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
-		sh 'docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD $REGISTRY'
-		if(env.SERVICE) {
-			sh 'docker service update --with-registry-auth --force --image $REGISTRY/$NS/$IMAGE:$TAG $STACK_$SERVICE'
+		sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
+		if(service) {
+			sh "docker service update --with-registry-auth --force --image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"
 		} else {
-			dir(env.HOME+'/docker-stacks') {
-				git(url: 'git@gitlab.intr:_ci/docker-stacks.git',
-					credentialsId: 'd8f04931-9047-413a-80f3-eef23003522c')
+			dir(env.HOME + '/docker-stacks') {
+				git(url: Constants.dockerStacksGitRepoUrl,
+					credentialsId: Constants.gitCredId)
 			}
-			sh 'docker stack deploy --with-registry-auth -c $HOME/docker-stacks/$STACK.yml $STACK'
+			sh "docker stack deploy --with-registry-auth -c $HOME/docker-stacks/${args.stack}.yml ${args.stack}"
 		}
 	}
 }
