@@ -31,7 +31,7 @@ def call(Map args) {
 				git(url: 'git@gitlab.intr:_ci/docker-stacks.git',
 					credentialsId: 'd8f04931-9047-413a-80f3-eef23003522c')
 			}
-			sh 'docker stack deploy --with-registry-auth -c $HOME/docker-stack/$STACK.yml $STACK'
+			sh 'docker stack deploy --with-registry-auth -c $HOME/docker-stacks/$STACK.yml $STACK'
 		}
 	}
 }
