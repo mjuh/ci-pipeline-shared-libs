@@ -2,9 +2,7 @@ def call(Map args) {
 	assert args.stack : "No stack name provided"
 
 	def credentialsId = args.credentialsId ?: "docker-registry"
-	def dockerServiceInspect = sh(returnStdout: true, script: "docker service inspect ${args.stack}_${args.service} 2>/dev/null").trim()
-	println dockerServiceInspect
-	def prodService = JSON.parse(dockerServiceInspect)
+	def prodService = JSON.parse(sh(returnStdout: true, script: "docker service inspect ${args.stack}_${args.service    } 2>/dev/null || true").trim())
 
 	env.STACK = args.stack
 	env.SERVICE = prodService ? args.service : ''
