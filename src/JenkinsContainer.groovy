@@ -5,10 +5,6 @@ class JenkinsContainer {
 		"docker inspect ${Constants.jenkinsContainerName}".execute().text.trim()
 	)[0]
 
-	public getInfo() {
-		this.info
-	}
-
 	public getMountByDestination(String destination) {
 		this.info.Mounts.find { it.Destination == destination }
 	}
