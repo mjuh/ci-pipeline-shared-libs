@@ -9,7 +9,7 @@ def call(Map args) {
 	def phpVersion = args.phpVersion ?: 'php56'
 	def srcDir = args.srcDir ?: 'src'
 
-	println jenkinsContainer.getMountByDestination(env.HOME)
+	println jenkinsContainer.getInfo()
 
 //	def jenkinsHomeOnHost = jenkinsContainer.getMountByDestination(env.HOME).Source
 //	def uid = sh(returnStdout: true, script: 'id -u').trim()
