@@ -1,5 +1,6 @@
 import groovy.json.JsonSlurperClassic
 
+@NonCPS
 class JenkinsContainer {
 	private Map info = new groovy.json.JsonSlurperClassic().parseText(
 		sh(returnStdout: true,
