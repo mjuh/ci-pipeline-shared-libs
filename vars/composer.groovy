@@ -26,8 +26,8 @@ def call(Map args) {
 			-e 'COMPOSER_HOME=/composer/home'						\
 			-v ${workspaceOnHost}/composer-passwd:/etc/passwd:ro	\
 			-v ${workspaceOnHost}/composer-group:/etc/group:ro		\
-			-v $HOME/composer:/composer								\
-			-v $HOME:/home/jenkins									\
+			-v ${jenkinsHomeOnHost}/composer:/composer				\
+			-v ${jenkinsHomeOnHost}:/home/jenkins					\
 			-v ${workspaceOnHost}/build:/app						\
 			${composer} ${cmd}"""
 	}
