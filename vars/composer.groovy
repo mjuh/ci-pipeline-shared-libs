@@ -12,7 +12,7 @@ def call(Map args) {
 	def uid = sh(returnStdout: true, script: 'id -u').trim()
 	def workspaceOnHost = jenkinsHomeOnHost + env.WORKSPACE - env.HOME
 
-	writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash")
+	sh "echo 'jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash' > composer-passwd"
 	sh "mkdir -p $HOME/composer-tmp"
 	sh "cp -R ${srcDir} build"
 
