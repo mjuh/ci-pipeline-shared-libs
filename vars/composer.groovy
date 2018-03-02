@@ -10,7 +10,7 @@ def call(Map args) {
 	def srcDir = args.srcDir ?: 'src'
 	def jenkinsHomeOnHost = jenkinsContainer.getMountByDestination(env.HOME).Source
 	def uid = sh(returnStdout: true, script: 'id -u').trim()
-	def workspaceOnHost = env.WORKSPACE - env.HOME
+	def workspaceOnHost = env.WORKSPACE + env.HOME
 	println workspaceOnHost
 //	def workspaceOnHost = jenkinsHomeOnHost + env.WORKSPACE - env.HOME
 
