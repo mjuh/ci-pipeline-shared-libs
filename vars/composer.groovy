@@ -12,9 +12,9 @@ def call(Map args) {
 	def uid = sh(returnStdout: true, script: 'id -u').trim()
 	def workspaceOnHost = jenkinsHomeOnHost + (env.WORKSPACE - env.HOME)
 
-	writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash")
+	writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash\n")
 	sh "mkdir -p $HOME/composer-tmp"
-	sh "cp -R $WORKSPACE/${srcDir}/ $WORKSPACE/build"
+	sh "cp -pR $WORKSPACE/${srcDir} $WORKSPACE/build"
 
 	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
                       usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
