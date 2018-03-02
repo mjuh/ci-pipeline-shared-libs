@@ -1,7 +1,12 @@
 import groovy.json.JsonSlurperClassic
 
+@NonCPS
+def jsonParse(def json) {
+    new groovy.json.JsonSlurperClassic().parseText(json)
+}
+
 class JenkinsContainer {
-	private Map info = new groovy.json.JsonSlurperClassic().parseText(
+	private Map info = jsonParse(
 		sh(returnStdout: true,
             script: "docker inspect ${Constants.jenkinsContainerName}").trim()
 		)
