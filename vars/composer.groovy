@@ -9,7 +9,9 @@ def call(Map args) {
 	def phpVersion = args.phpVersion ?: 'php56'
 	def srcDir = args.srcDir ?: 'src'
 
-	def jenkinsHomeOnHost = jenkinsContainer.getMountByDestination(env.HOME).Source
+	println jenkinsContainer.getMountByDestination(env.HOME)
+
+//	def jenkinsHomeOnHost = jenkinsContainer.getMountByDestination(env.HOME).Source
 //	def uid = sh(returnStdout: true, script: 'id -u').trim()
 //	def workspaceOnHost = jenkinsHomeOnHost + env.WORKSPACE - env.HOME
 //	def passwd = new File('./composer-passwd')
