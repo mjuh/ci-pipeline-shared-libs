@@ -6,16 +6,15 @@ def jsonParse(def json) {
 }
 
 class JenkinsContainer {
-//	@NonCPS
-//    public getInfo() {
-//        jsonParse(
-//		sh(returnStdout: true,
-//            script: "docker inspect ${Constants.jenkinsContainerName}").trim()
-//		)
-//    }
+	@NonCPS
+    public getInfo() {
+        jsonParse(
+		sh(returnStdout: true,
+            script: "docker inspect ${Constants.jenkinsContainerName}").trim()
+		)
+    }
 	@NonCPS
 	public getMountByDestination(String destination) {
-//		this.getInfo().[0].Mounts.find { it.Destination == destination }
-		return '/test'
+		this.getInfo().[0].Mounts.find { it.Destination == destination }
 	}
 }
