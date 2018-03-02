@@ -14,7 +14,7 @@ def call(Map args) {
 
 	writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash")
 	sh "mkdir -p $HOME/composer-tmp"
-	sh "cp -R ${srcDir} build"
+	sh "cp -R $WORKSPACE/${srcDir} $WORKSPACE/build"
 
 	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
                       usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
