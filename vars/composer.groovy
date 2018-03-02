@@ -28,6 +28,7 @@ def call(Map args) {
 			-v $HOME/composer-tmp:/composer							\
 			-v $HOME:/home/jenkins									\
 			-v ${workspaceOnHost}/build:/app						\
-			${composer} ${cmd}"""
+			--entrypoint='bash' ${composer}"""
+//			${composer} ${cmd}"""
 	}
 }
