@@ -1,6 +1,13 @@
+import groovy.json.JsonSlurperClassic
+
+@NonCPS
+def jsonParse(def json) {
+    new groovy.json.JsonSlurperClassic().parseText(json)
+}
+
 def getInfo() {
-	Utils.jsonParse(sh(returnStdout: true,
-                       script: "docker inspect ${Constants.jenkinsContainerName}").trim())
+	jsonParse(sh(returnStdout: true,
+                 script: "docker inspect ${Constants.jenkinsContainerName}").trim())
 }
 
 def getMountByDestination(String destination) {
