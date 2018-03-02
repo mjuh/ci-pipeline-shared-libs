@@ -11,5 +11,5 @@ def getInfo() {
 }
 
 def getMountByDestination(String destination) {
-	getInfo()[0].HostConfig.Mounts.find { it.Destination == destination }
+	getInfo()[0].Mounts.find { it.Destination == destination }
 }
