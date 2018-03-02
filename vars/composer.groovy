@@ -10,9 +10,8 @@ def call(Map args) {
 	def srcDir = args.srcDir ?: 'src'
 	def jenkinsHomeOnHost = jenkinsContainer.getMountByDestination(env.HOME).Source
 	def uid = sh(returnStdout: true, script: 'id -u').trim()
-	println jenkinsHomeOnHost.getClass()
-	println env.WORKSPACE.getClass()
-	println env.HOME.getClass()
+	def workspaceOnHost = env.WORKSPACE - env.HOME
+	println workspaceOnHost
 //	def workspaceOnHost = jenkinsHomeOnHost + env.WORKSPACE - env.HOME
 
 //	writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash")
