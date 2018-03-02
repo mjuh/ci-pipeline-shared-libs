@@ -13,7 +13,7 @@ class JenkinsContainer {
 		)
 	}
 	public getMountByDestination(String destination) {
-		this.getInfo().[0].Mounts.find { it.Destination == destination }
+		this.getInfo()[0].Mounts.find { it.Destination == destination }
 	}
 }
 
