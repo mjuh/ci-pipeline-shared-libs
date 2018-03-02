@@ -1,4 +1,5 @@
-def call(String cmd = 'install', Map args = [:]) {
+def call(Map args) {
+	def cmd = args.cmd ?: 'install'
 	def registry = args.registry ?: Constants.dockerRegistryHost
 	def dockerCredId = args.credentialsId ?: Constants.dockerRegistryCredId
 	def composerNs = args.composerDockerNamespace ?: Constants.composerDockerNamespace 
