@@ -8,10 +8,9 @@ def call(Map args) {
 	def composer = "${registry}/${composerNs}/${composerImage}:${composerTag}"
 	def phpVersion = args.phpVersion ?: 'php56'
 	def srcDir = args.srcDir ?: 'src'
-	def jenkinsHomeOnHost = new JenkinsContainer().getMountByDestination(env.HOME).Source
-	def uid = sh(returnStdout: true, script: 'id -u').trim()
-	def workspaceOnHost = jenkinsHomeOnHost
-	println workspaceOnHost
+//	def jenkinsHomeOnHost = new JenkinsContainer().getMountByDestination(env.HOME).Source
+//	def uid = sh(returnStdout: true, script: 'id -u').trim()
+//	def workspaceOnHost = jenkinsHomeOnHost
 
 //	writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash")
 //	sh "mkdir -p $HOME/composer-tmp"
