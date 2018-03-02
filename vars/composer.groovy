@@ -5,7 +5,6 @@ def call(Map args) {
 	def composerNs = args.composerDockerNamespace ?: Constants.composerDockerNamespace 
 	def composerImage = args.composerDockerImage ?: Constants.composerDockerImage
 	def composerTag = args.composerDockerTag ?: Constants.composerDockerTag
-	def composer = "${registry}/${composerNs}/${composerImage}:${composerTag}"
 	def phpVersion = args.phpVersion ?: 'php56'
 	def srcDir = args.srcDir ?: 'src'
 
@@ -21,6 +20,6 @@ def call(Map args) {
 	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
                     usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 		sh "docker login -u $USERNAME -p $PASSWORD ${registry}"
-		sh "docker run --rm --user ${uid}:${uid} -e 'PHP_VERSION=${phpVersion}' -v ./composer-passwd:/etc/passwd:ro -v $HOME/composer-tmp:/composer -v $HOME:/home/jenkins -v ${workspaceOnHost}/build:/app ${composer} ${cmd}"
+		sh "docker run --rm --user ${uid}:${uid} -e 'PHP_VERSION=${phpVersion}' -v ./composer-passwd:/etc/passwd:ro -v $HOME/composer-tmp:/composer -v $HOME:/home/jenkins -v ${workspaceOnHost}/build:/app ${registry}/${composerNs}/${composerImage}:${composerTag} ${cmd}"
 	}
 }
