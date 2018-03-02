@@ -12,5 +12,6 @@ def getInfo() {
 
 @NonCPS
 def getMountByDestination(String destination) {
+	println getInfo()
 	getInfo()[0].Mounts.find { it.Destination == destination }
 }
