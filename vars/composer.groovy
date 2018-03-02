@@ -20,11 +20,11 @@ def call(Map args) {
 	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
                       usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 		sh "docker login -u $USERNAME -p $PASSWORD ${registry}"
-		sh """docker run --rm --name composer										\
+		sh """docker run --rm --name composer						\
 			--user ${uid}:${uid}									\
 			-e 'PHP_VERSION=${phpVersion}'							\
 			-v ${workspaceOnHost}/composer-passwd:/etc/passwd:ro	\
-			-v ${workspaceOnHost}/composer-group:/etc/group:ro	\
+			-v ${workspaceOnHost}/composer-group:/etc/group:ro		\
 			-v $HOME/composer-tmp:/composer							\
 			-v $HOME:/home/jenkins									\
 			-v ${workspaceOnHost}/build:/app						\
