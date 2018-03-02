@@ -8,7 +8,8 @@ def call(Map args) {
 	def composer = "${registry}/${composerNs}/${composerImage}:${composerTag}"
 	def phpVersion = args.phpVersion ?: 'php56'
 	def srcDir = args.srcDir ?: 'src'
-	def jenkinsHomeOnHost = new JenkinsContainer().getMountByDestination(env.HOME).Source
+//	def jenkinsHomeOnHost = new JenkinsContainer().getMountByDestination(env.HOME).Source
+	def jc = new JenkinsContainer()
 //	def uid = sh(returnStdout: true, script: 'id -u').trim()
 //	def workspaceOnHost = jenkinsHomeOnHost
 
