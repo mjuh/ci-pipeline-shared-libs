@@ -3,8 +3,7 @@ import groovy.json.JsonSlurperClassic
 class JenkinsContainer {
 	public getInfo() {
 		new groovy.json.JsonSlurperClassic().parseText(jsonParse(
-			sh(returnStdout: true,
-            script: "docker inspect ${Constants.jenkinsContainerName}").trim()
+			"docker inspect ${Constants.jenkinsContainerName}".execute().text.trim()
 		))
 	}
 	public getMountByDestination(String destination) {
