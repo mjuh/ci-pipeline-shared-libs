@@ -14,7 +14,7 @@ def call(Map args) {
 
 	writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash\n")
 	writeFile(file: 'composer-group', text: "jenkins:x:${uid}:jenkins\n")
-	sh "mkdir -p $HOME/composer-tmp"
+	sh "mkdir -p $HOME/composer/home"
 	sh "cp -pR $WORKSPACE/${srcDir} $WORKSPACE/build"
 
 	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
@@ -23,12 +23,12 @@ def call(Map args) {
 		sh """docker run --rm --name composer						\
 			--user ${uid}:${uid}									\
 			-e 'PHP_VERSION=${phpVersion}'							\
+			-e 'COMPOSER_HOME=/composer/home'						\
 			-v ${workspaceOnHost}/composer-passwd:/etc/passwd:ro	\
 			-v ${workspaceOnHost}/composer-group:/etc/group:ro		\
-			-v $HOME/composer-tmp:/composer							\
+			-v $HOME/composer:/composer								\
 			-v $HOME:/home/jenkins									\
 			-v ${workspaceOnHost}/build:/app						\
-			--entrypoint='bash' ${composer}"""
-//			${composer} ${cmd}"""
+			${composer} ${cmd}"""
 	}
 }
