@@ -1,3 +1,9 @@
+@NonCPS
+def test() {
+	def jc = new JenkinsContainer()
+	return 1
+}
+
 def call(Map args) {
 	def cmd = args.cmd ?: 'install'
 	def registry = args.registry ?: Constants.dockerRegistryHost
@@ -8,8 +14,10 @@ def call(Map args) {
 	def composer = "${registry}/${composerNs}/${composerImage}:${composerTag}"
 	def phpVersion = args.phpVersion ?: 'php56'
 	def srcDir = args.srcDir ?: 'src'
+	
+	def t = test()
+
 //	def jenkinsHomeOnHost = new JenkinsContainer().getMountByDestination(env.HOME).Source
-	def jc = new JenkinsContainer()
 //	def uid = sh(returnStdout: true, script: 'id -u').trim()
 //	def workspaceOnHost = jenkinsHomeOnHost
 
