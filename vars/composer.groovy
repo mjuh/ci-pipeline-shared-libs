@@ -13,16 +13,18 @@ def call(Map args) {
 	def workspaceOnHost = jenkinsHomeOnHost + (env.WORKSPACE - env.HOME)
 
 	writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash\n")
+	writeFile(file: 'composer-group', text: "jenkins:x:${uid}:jenkins\n")
 	sh "mkdir -p $HOME/composer-tmp"
 	sh "cp -pR $WORKSPACE/${srcDir} $WORKSPACE/build"
 
 	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
                       usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 		sh "docker login -u $USERNAME -p $PASSWORD ${registry}"
-		sh """docker run --name composer										\
+		sh """docker run --rm --name composer										\
 			--user ${uid}:${uid}									\
 			-e 'PHP_VERSION=${phpVersion}'							\
 			-v ${workspaceOnHost}/composer-passwd:/etc/passwd:ro	\
+			-v ${workspaceOnHost}/composer-group:/etc/group:ro	\
 			-v $HOME/composer-tmp:/composer							\
 			-v $HOME:/home/jenkins									\
 			-v ${workspaceOnHost}/build:/app						\
