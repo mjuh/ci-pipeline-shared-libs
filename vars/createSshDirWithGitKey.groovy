@@ -8,28 +8,28 @@ def call(Map args) {
 
 	sh "mkdir -p -m 700 ${dir}"
 
-	withCredentials([[$class: 'sshUserPrivateKey', credentialsId: gitCredId,
-                      usernameVariable: 'USERNAME', keyFileVariable: 'KEY_FILE']]) {
-		writeFile(
-			file: dir + '/config',
-			text: """
-				Host ${gitHost}
-				User ${USERNAME}
-				HostName ${gitHost}
-				IdentityFile ${localHomedir}/${dir}/git_repos_deploy_key
-			"""
-		)
-		writeFile(
-			file: dir + '/' + sshWrapperFilename,
-			text: """
-				#!/bin/sh
-				/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${localHomedir}/${dir}/git_repos_deploy_key' $1 $2
-			"""
-		)
-		sh """
-			chmod +x ${dir}/${sshWrapperFilename}
-			cp $KEY_FILE ${dir}/git_repos_deploy_key
-			chmod 400 ${dir}/git_repos_deploy_key
-		"""
-	}
+//	withCredentials([[$class: 'sshUserPrivateKey', credentialsId: gitCredId,
+//                      usernameVariable: 'USERNAME', keyFileVariable: 'KEY_FILE']]) {
+//		writeFile(
+//			file: dir + '/config',
+//			text: """
+//				Host ${gitHost}
+//				User $USERNAME
+//				HostName ${gitHost}
+//				IdentityFile ${localHomedir}/${dir}/git_repos_deploy_key
+//			"""
+//		)
+//		writeFile(
+//			file: dir + '/' + sshWrapperFilename,
+//			text: """
+//				#!/bin/sh
+//				/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${localHomedir}/${dir}/git_repos_deploy_key' $1 $2
+//			"""
+//		)
+//		sh """
+//			chmod +x ${dir}/${sshWrapperFilename}
+//			cp $KEY_FILE ${dir}/git_repos_deploy_key
+//			chmod 400 ${dir}/git_repos_deploy_key
+//		"""
+//	}
 }
