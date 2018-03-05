@@ -1,4 +1,4 @@
-def call(Map args = [:]) {
+def call(Map args) {
 	println " createSshDirWithGitKey called"
 	def gitCredId = args.gitCredId ?: Constants.gitCredId
 	def gitHost = args.gitHost ?: Constants.gitHost
