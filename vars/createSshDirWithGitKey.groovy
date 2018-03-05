@@ -6,9 +6,10 @@ def call(Map args) {
 	def dir = args.dir ?: '.ssh'
 	def sshWrapperFilename = args.sshWrapperFilename ?: 'wrap-ssh4git.sh'
 
+	sh "mkdir -p -m 700 ${dir}"
+
 	withCredentials([[$class: 'sshUserPrivateKey', credentialsId: gitCredId,
                       usernameVariable: 'USERNAME', keyFileVariable: 'KEY_FILE']]) {
-		sh "mkdir -p -m 700 ${dir}"
 		writeFile(
 			file: dir + '/config',
 			text: """
