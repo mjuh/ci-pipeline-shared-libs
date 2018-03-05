@@ -8,8 +8,6 @@ def call(Map args) {
 
 	sh "mkdir -p -m 700 ${dir}"
 
-	withCredentials([[$class: 'SSHUserPrivateKeyBinding', credentialsId: gitCredId,
-                      usernameVariable: 'USERNAME', keyFileVariable: 'KEY_FILE']]) {
 		writeFile(
 			file: "${dir}/config",
 			text: """
@@ -26,6 +24,9 @@ def call(Map args) {
 				/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${localHomedir}/${dir}/git_repos_deploy_key' $1 $2
 			"""
 		)
+
+	withCredentials([[$class: 'SSHUserPrivateKeyBinding', credentialsId: gitCredId,
+                      usernameVariable: 'USERNAME', keyFileVariable: 'KEY_FILE']]) {
 		sh """
 			chmod +x ${dir}/${sshWrapperFilename}
 			cp $KEY_FILE ${dir}/git_repos_deploy_key
