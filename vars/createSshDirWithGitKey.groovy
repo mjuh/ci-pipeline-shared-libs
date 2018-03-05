@@ -10,31 +10,32 @@ def call(Map args) {
 
 	withCredentials([[$class: 'SSHUserPrivateKeyBinding', credentialsId: gitCredId,
                       usernameVariable: 'USERNAME', keyFileVariable: 'KEY_FILE']]) {
-		dir(dir) {
-				writeFile(
-					file: 'config',
-					text: """
-						Host ${gitHost}
-						User $USERNAME
-						HostName ${gitHost}
-						IdentityFile ${localHomedir}/${dir}/git_repos_deploy_key
-					"""
-				)
-
-				writeFile(
-					file: sshWrapperFilename,
-					text: """
-						#!/bin/sh
-						/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${localHomedir}/${dir}/git_repos_deploy_key' $1 $2
-					"""
-				)
-
-
-				sh """
-					chmod +x ${sshWrapperFilename}
-					cp $KEY_FILE git_repos_deploy_key
-					chmod 400 git_repos_deploy_key
-				"""
-		}
+//		dir(dir) {
+//				writeFile(
+//					file: 'config',
+//					text: """
+//						Host ${gitHost}
+//						User $USERNAME
+//						HostName ${gitHost}
+//						IdentityFile ${localHomedir}/${dir}/git_repos_deploy_key
+//					"""
+//				)
+//
+//				writeFile(
+//					file: sshWrapperFilename,
+//					text: """
+//						#!/bin/sh
+//						/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${localHomedir}/${dir}/git_repos_deploy_key' $1 $2
+//					"""
+//				)
+//
+//
+//				sh """
+//					chmod +x ${sshWrapperFilename}
+//					cp $KEY_FILE git_repos_deploy_key
+//					chmod 400 git_repos_deploy_key
+//				"""
+//		}
+	println env.KEY_FILE
 	}
 }
