@@ -2,7 +2,7 @@ def call(Map args) {
 	def gitCredId = args.gitCredId ?: Constants.gitCredId
 	def gitHost = args.gitHost ?: Constants.gitHost
 	def localUsername = args.localUsername ?: 'jenkins'
-	def localHomedir = args.localHomedir ?: '/home/jenkins'
+	def localHomedir = args.localHomedir ?: env.HOME
 	def dir = args.dir ?: '.ssh'
 	def sshWrapperFilename = args.sshWrapperFilename ?: 'wrap-ssh4git.sh'
 
