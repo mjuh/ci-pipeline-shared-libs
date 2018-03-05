@@ -11,7 +11,7 @@ def call(Map args) {
 	withCredentials([[$class: 'SSHUserPrivateKeyBinding', credentialsId: gitCredId,
                       usernameVariable: 'USERNAME', keyFileVariable: 'KEY_FILE']]) {
 		writeFile(
-			file: dir + '/config',
+			file: "${dir}/config",
 			text: """
 				Host ${gitHost}
 				User $USERNAME
@@ -20,7 +20,7 @@ def call(Map args) {
 			"""
 		)
 		writeFile(
-			file: dir + '/' + sshWrapperFilename,
+			file: "${dir}/${sshWrapperFilename}",
 			text: """
 				#!/bin/sh
 				/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${localHomedir}/${dir}/git_repos_deploy_key' $1 $2
