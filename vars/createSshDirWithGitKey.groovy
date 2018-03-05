@@ -1,9 +1,8 @@
 def call(Map args) {
-	println " createSshDirWithGitKey called"
 	def gitCredId = args.gitCredId ?: Constants.gitCredId
 	def gitHost = args.gitHost ?: Constants.gitHost
 	def localUsername = args.localUsername ?: 'jenkins'
-	def localHomedir = args.localHomedir ?: env.HOME
+	def localHomedir = args.localHomedir ?: '/home/jenkins'
 	def dir = args.dir ?: '.ssh'
 	def sshWrapperFilename = args.sshWrapperFilename ?: 'wrap-ssh4git.sh'
 
