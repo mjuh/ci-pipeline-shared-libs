@@ -1,4 +1,4 @@
-def call(Map args) {
+def call(Map args = [:]) {
 	def gitCredId = args.gitCredId ?: Constants.gitCredId
 	def gitHost = args.gitHost ?: Constants.gitHost
 	def localUsername = args.localUsername ?: 'jenkins'
