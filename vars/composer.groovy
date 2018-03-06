@@ -18,7 +18,7 @@ def call(Map args) {
                            sshWrapperFilename: 'ssh_wrapper.sh')
     writeFile(file: 'passwd', text: "jenkins:x:${uid}:${uid}:,,,,:${jenkinsHomeInContainer}:/bin/sh\n")
     writeFile(file: 'group', text: "jenkins:x:${uid}:jenkins\n")
-    sh "cp -pR $WORKSPACE/${srcDir} $WORKSPACE/build"
+    sh "cp -a $WORKSPACE/${srcDir}/. $WORKSPACE/build"
 
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
                       usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
