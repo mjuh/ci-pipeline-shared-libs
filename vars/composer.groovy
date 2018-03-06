@@ -38,5 +38,6 @@ def call(Map args) {
                     COMPOSER_HOME: '/composer/home',
                     GIT_SSH: "${jenkinsHomeInContainer}/.ssh/ssh_wrapper.sh"],
               image: "${registry}/${composerNs}/${composerImage}:${composerTag}",
+              name: "composer-${env.BUILD_TAG}",
               cmd: cmd)
 }
