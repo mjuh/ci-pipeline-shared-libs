@@ -12,19 +12,29 @@ def call(Map args) {
     def workspaceOnHost = jenkinsHomeOnHost + (env.WORKSPACE - env.HOME)
     def uid = sh(returnStdout: true, script: 'id -u').trim()
 
+    echo 'Copying src/ to build/'
+    sh "cp -a $WORKSPACE/${srcDir}/. $WORKSPACE/build"
+
+    echo 'Preparing volumes content for Doker container ...'
+
+    echo '... creating composer/home'
     sh "mkdir -p $HOME/composer/home"
+
+    echo '... creating passwd and group files with single user `jenkins`'
+    writeFile(file: 'passwd', text: "jenkins:x:${uid}:${uid}:,,,,:${jenkinsHomeInContainer}:/bin/sh\n")
+    writeFile(file: 'group', text: "jenkins:x:${uid}:jenkins\n")
+
+    echo '... creating .ssh with config, wrapper and key needed for `git clone`'
     createSshDirWithGitKey(dir: env.WORKSPACE + '/jenkins_home/.ssh',
                            inConfigDir: jenkinsHomeInContainer,
                            sshWrapperFilename: 'ssh_wrapper.sh')
-    writeFile(file: 'passwd', text: "jenkins:x:${uid}:${uid}:,,,,:${jenkinsHomeInContainer}:/bin/sh\n")
-    writeFile(file: 'group', text: "jenkins:x:${uid}:jenkins\n")
-    sh "cp -a $WORKSPACE/${srcDir}/. $WORKSPACE/build"
 
+    echo 'Running Docker container'
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
                       usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-        sh "docker login -u $USERNAME -p $PASSWORD ${registry}"
         sh """
-            docker run --rm --name composer                                     \
+            docker login -u $USERNAME -p $PASSWORD ${registry}
+            docker run --rm --name composer-$BUILD_TAG                          \
             --user ${uid}:${uid}                                                \
             -e 'PHP_VERSION=${phpVersion}'                                      \
             -e 'COMPOSER_HOME=/composer/home'                                   \

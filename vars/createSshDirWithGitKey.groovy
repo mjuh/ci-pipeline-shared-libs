@@ -13,19 +13,19 @@ def call(Map args) {
                 writeFile(
                     file: 'config',
                     text: """
-Host ${gitHost}
-User $USERNAME
-HostName ${gitHost}
-IdentityFile ${inConfigDir}/ssh_deploy_key
-                    """
+                            Host ${gitHost}
+                            User $USERNAME
+                            HostName ${gitHost}
+                            IdentityFile ${inConfigDir}/ssh_deploy_key
+                    """.stripMargin().stripIndent()
                 );
 
                 writeFile(
                     file: sshWrapperFilename,
                     text: """
-#!/bin/sh
-/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${inConfigDir}/.ssh/ssh_deploy_key' \$1 \$2
-                    """
+                            #!/bin/sh
+                            /usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${inConfigDir}/.ssh/ssh_deploy_key' \$1 \$2
+                    """.stripMargin().stripIndent()
                 );
 
 

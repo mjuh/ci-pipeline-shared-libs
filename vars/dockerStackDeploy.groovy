@@ -23,9 +23,10 @@ def call(Map args) {
                     usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
         sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
         if(service) {
+            echo "Service ${args.service} exists, info:\n${prodService}"
             sh "docker service update --with-registry-auth --force --image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"
         } else {
-            def stacksDir = env.HOME + '/' + Constants.dockerStacksDeployDir
+            def stacksDir = "${env.HOME}/${Constants.dockerStacksDeployDir}"
             dir(stacksDir) {
                 git(url: Constants.dockerStacksGitRepoUrl,
                     credentialsId: Constants.gitCredId)
