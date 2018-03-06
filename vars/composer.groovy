@@ -12,7 +12,7 @@ def call(Map args) {
     def workspaceOnHost = jenkinsHomeOnHost + (env.WORKSPACE - env.HOME)
 
     sh "mkdir -p $HOME/composer/home"
-    createSshDirWithGitKey(dir: env.WORKSPACE + '/.ssh', localHomedir: '/home/jenkins')
+    createSshDirWithGitKey(dir: env.WORKSPACE + '/jenkins_home/.ssh', localHomedir: '/home/jenkins')
     writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash\n")
     writeFile(file: 'composer-group', text: "jenkins:x:${uid}:jenkins\n")
     sh "cp -pR $WORKSPACE/${srcDir} $WORKSPACE/build"
