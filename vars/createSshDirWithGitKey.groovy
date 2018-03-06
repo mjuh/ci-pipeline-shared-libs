@@ -1,23 +1,22 @@
 def call(Map args) {
 	def gitCredId = args.gitCredId ?: Constants.gitCredId
 	def gitHost = args.gitHost ?: Constants.gitHost
-	def localUsername = args.localUsername ?: 'jenkins'
 	def localHomedir = args.localHomedir ?: env.HOME
-	def dir = args.dir ?: '.ssh'
+	def sshDir = args.dir ?: '.ssh'
 	def sshWrapperFilename = args.sshWrapperFilename ?: 'wrap-ssh4git.sh'
 
-	sh "mkdir -p -m 700 ${dir}"
+	sh "mkdir -p -m 700 ${sshDir}"
 
 	withCredentials([[$class: 'SSHUserPrivateKeyBinding', credentialsId: gitCredId,
                       usernameVariable: 'USERNAME', keyFileVariable: 'KEY_FILE']]) {
-		dir(dir) {
+		dir(sshDir) {
 				writeFile(
 					file: 'config',
 					text: """
 						Host ${gitHost}
 						User $USERNAME
 						HostName ${gitHost}
-						IdentityFile ${localHomedir}/${dir}/git_repos_deploy_key
+						IdentityFile ${localHomedir}/${sshDir}/git_repos_deploy_key
 					"""
 				);
 
@@ -25,7 +24,7 @@ def call(Map args) {
 					file: 'wrap-ssh4git.sh',
 					text: """
 						#!/bin/sh
-						/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${localHomedir}/${dir}/git_repos_deploy_key' $1 $2
+						/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${localHomedir}/${sshDir}/git_repos_deploy_key' \$1 \$2
 					"""
 				);
 
