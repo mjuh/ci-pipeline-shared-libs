@@ -2,13 +2,13 @@
 import org.ajoberstar.grgit.Grgit
 
 def getRemote() {
-	Grgit.open(dir: env.WORKSPACE).remote.list().find { it.name == 'origin' }
+    Grgit.open(dir: env.WORKSPACE).remote.list().find { it.name == 'origin' }
 }
 
 def getProject() {
-	getRemote().url.split(':').tail().join(':').split('/|\\.')[-2]
+    getRemote().url.split(':').tail().join(':').split('/|\\.')[-2]
 }
 
 def getGroup() {
-	getRemote().url.split(':').tail().join(':').split('/|\\.')[-3]
+    getRemote().url.split(':').tail().join(':').split('/|\\.')[-3]
 }
