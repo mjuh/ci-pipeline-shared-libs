@@ -16,7 +16,7 @@ def call(Map args) {
     }
 
     if(args.name) {
-        dockerArgs += "--name ${args.name}"
+        dockerArgs += "--name ${args.name} "
     }
 
     args.volumes.each { k, v ->
