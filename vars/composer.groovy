@@ -1,7 +1,6 @@
 def call(Map args) {
     def cmd = args.cmd ?: 'install'
     def registry = args.registry ?: Constants.dockerRegistryHost
-    def dockerCredId = args.credentialsId ?: Constants.dockerRegistryCredId
     def composerNs = args.composerDockerNamespace ?: Constants.composerDockerNamespace
     def composerImage = args.composerDockerImage ?: Constants.composerDockerImage
     def composerTag = args.composerDockerTag ?: Constants.composerDockerTag
@@ -30,21 +29,14 @@ def call(Map args) {
                            sshWrapperFilename: 'ssh_wrapper.sh')
 
     echo 'Running Docker container'
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
-                      usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-        sh """
-            docker login -u $USERNAME -p $PASSWORD ${registry}
-            docker run --rm --name composer-$BUILD_TAG                          \
-            --user ${uid}:${uid}                                                \
-            -e 'PHP_VERSION=${phpVersion}'                                      \
-            -e 'COMPOSER_HOME=/composer/home'                                   \
-            -e 'GIT_SSH=${jenkinsHomeInContainer}/.ssh/ssh_wrapper.sh'          \
-            -v ${workspaceOnHost}/passwd:/etc/passwd:ro                         \
-            -v ${workspaceOnHost}/group:/etc/group:ro                           \
-            -v ${workspaceOnHost}/jenkins_home:${jenkinsHomeInContainer}        \
-            -v ${jenkinsHomeOnHost}/composer:/composer                          \
-            -v ${workspaceOnHost}/build:/app                                    \
-            ${registry}/${composerNs}/${composerImage}:${composerTag} ${cmd}
-        """
-    }
+    dockerRun(volumes: ["${workspaceOnHost}/passwd": '/etc/passwd',
+                        "${workspaceOnHost}/group": '/etc/group',
+                        "${workspaceOnHost}/jenkins_home": jenkinsHomeInContainer,
+                        "${jenkinsHomeOnHost}/composer": '/composer',
+                        "${workspaceOnHost}/build": '/app'],
+              env: [PHP_VERSION: phpVersion,
+                    COMPOSER_HOME: '/composer/home',
+                    GIT_SSH: "${jenkinsHomeInContainer}/.ssh/ssh_wrapper.sh"],
+              image: "${registry}/${composerNs}/${composerImage}:${composerTag}",
+              cmd: cmd)
 }
