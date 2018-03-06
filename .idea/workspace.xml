@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b311bb54-1656-4858-85d7-5ee591839c4a" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vars/buildAndPushDocker.groovy" afterPath="$PROJECT_DIR$/vars/buildAndPushDocker.groovy" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vars/composer.groovy" afterPath="$PROJECT_DIR$/vars/composer.groovy" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vars/createSshDirWithGitKey.groovy" afterPath="$PROJECT_DIR$/vars/createSshDirWithGitKey.groovy" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vars/dockerRun.groovy" afterPath="$PROJECT_DIR$/vars/dockerRun.groovy" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vars/dockerStackDeploy.groovy" afterPath="$PROJECT_DIR$/vars/dockerStackDeploy.groovy" />
     </list>
     <ignored path="pipeline.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -77,17 +74,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dockerStackDeploy.groovy" pinned="false" current-in-tab="false">
+      <file leaf-file-name="dockerStackDeploy.groovy" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/vars/dockerStackDeploy.groovy">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="493">
-              <caret line="29" column="44" selection-start-line="29" selection-start-column="44" selection-end-line="29" selection-end-column="44" />
-              <folding />
+            <state relative-caret-position="595">
+              <caret line="35" column="36" selection-start-line="35" selection-start-column="36" selection-end-line="35" selection-end-column="36" />
+              <folding>
+                <element signature="e#0#70#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="buildAndPushDocker.groovy" pinned="false" current-in-tab="true">
+      <file leaf-file-name="buildAndPushDocker.groovy" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vars/buildAndPushDocker.groovy">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
@@ -118,12 +117,12 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/vars/gitRemoteOrigin.groovy" />
-        <option value="$PROJECT_DIR$/vars/dockerStackDeploy.groovy" />
         <option value="$PROJECT_DIR$/src/Constants.groovy" />
         <option value="$PROJECT_DIR$/vars/composer.groovy" />
         <option value="$PROJECT_DIR$/vars/dockerRun.groovy" />
         <option value="$PROJECT_DIR$/vars/createSshDirWithGitKey.groovy" />
         <option value="$PROJECT_DIR$/vars/buildAndPushDocker.groovy" />
+        <option value="$PROJECT_DIR$/vars/dockerStackDeploy.groovy" />
       </list>
     </option>
   </component>
@@ -869,12 +868,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1520331862768</updated>
-      <workItem from="1520331871752" duration="18175000" />
+      <workItem from="1520331871752" duration="18927000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="18175000" />
+    <option name="totallyTimeSpent" value="18927000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="16" width="1920" height="1064" extended-state="0" />
@@ -923,6 +922,14 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/vars/buildAndPushDocker.groovy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="22" selection-start-line="0" selection-start-column="22" selection-end-line="0" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/vars/createSshDirWithGitKey.groovy">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -965,17 +972,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/vars/dockerStackDeploy.groovy">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="493">
-          <caret line="29" column="44" selection-start-line="29" selection-start-column="44" selection-end-line="29" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/vars/buildAndPushDocker.groovy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="22" selection-start-line="0" selection-start-column="22" selection-end-line="0" selection-end-column="22" />
-          <folding />
+        <state relative-caret-position="595">
+          <caret line="35" column="36" selection-start-line="35" selection-start-column="36" selection-end-line="35" selection-end-column="36" />
+          <folding>
+            <element signature="e#0#70#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

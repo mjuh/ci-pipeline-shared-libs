@@ -1,8 +1,15 @@
+@Grab('org.yaml:snakeyaml:1.17')
 import groovy.json.JsonSlurperClassic
+import org.yaml.snakeyaml.Yaml
 
 @NonCPS
 def jsonParse(def json) {
     new groovy.json.JsonSlurperClassic().parseText(json)
+}
+
+@NonCPS
+def yamlLoad(def file) {
+    new Yaml().load((file as File).text)
 }
 
 def call(Map args) {
@@ -18,6 +25,15 @@ def call(Map args) {
     def image = args.image ?: args.service
     def tag = args.tag ?: Constants.dockerImageDefaultTag
     def registry = args.registry ?: Constants.dockerRegistryHost
+    def stacksDir = "${env.HOME}/${Constants.dockerStacksDeployDir}"
+    def stackConfigFile = "${stacksDir}/${args.stack}.yml"
+
+    dir(stacksDir) {
+        git(url: Constants.dockerStacksGitRepoUrl,
+            credentialsId: Constants.gitCredId)
+    }
+
+    println yamlLoad(stackConfigFile)
 
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                     usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
@@ -29,14 +45,10 @@ def call(Map args) {
                     image: ${prodService.Spec.TaskTemplate.ContainerSpec.Image}
                     mode: ${prodService.Spec.Mode}
                 """.stripMargin().stripIndent()
-            sh "docker service update --with-registry-auth --force --image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"
+            sh """docker service update --detach=false --with-registry-auth --force \
+                  --image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"""
         } else {
-            def stacksDir = "${env.HOME}/${Constants.dockerStacksDeployDir}"
-            dir(stacksDir) {
-                git(url: Constants.dockerStacksGitRepoUrl,
-                    credentialsId: Constants.gitCredId)
-            }
-            sh "docker stack deploy --with-registry-auth -c ${stacksDir}/${args.stack}.yml ${args.stack}"
+            sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
         }
     }
 }
