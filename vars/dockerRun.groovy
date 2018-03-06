@@ -24,7 +24,7 @@ def call(Map args) {
     def dockerCmd = "docker run ${dockerArgs} ${args.image}"
 
     if(args.cmd) {
-        dockerCmd += " ${cmd}"
+        dockerCmd += " ${args.cmd}"
     }
 
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
