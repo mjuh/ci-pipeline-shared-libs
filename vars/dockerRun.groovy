@@ -1,13 +1,11 @@
 def call(Map args) {
     assert args.image : "No image provided"
 
+    def image = args.image
     def uid = args.uid ?: sh(returnStdout: true, script: 'id -u').trim()
     def dockerCredId = args.credentialsId ?: Constants.dockerRegistryCredId
-    def name = args.name
-    if(!name) {
-        name = args.image.split(":")[0]​.split("/")[-1] ​+ env.BUILD_TAG
-    }
-    
+    def name = args.name ?: image.split(":")[0]​.split("/")[-1] ​+ env.BUILD_TAG
+
     def dockerArgs = "--name ${name} --user ${uid}:${uid} "
 
     if(!args.persist) {

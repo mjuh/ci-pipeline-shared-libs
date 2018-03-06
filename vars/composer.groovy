@@ -14,7 +14,7 @@ def call(Map args) {
     echo 'Copying src/ to build/'
     sh "cp -a $WORKSPACE/${srcDir}/. $WORKSPACE/build"
 
-    echo 'Preparing volumes content for Doker container ...'
+    echo 'Preparing volumes content for Docker container ...'
 
     echo '... creating composer/home'
     sh "mkdir -p $HOME/composer/home"
