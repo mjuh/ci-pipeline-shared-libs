@@ -21,7 +21,7 @@ def call(Map args) {
     def tag = args.tag ?: Constants.dockerImageDefaultTag
     def registry = args.registry ?: Constants.dockerRegistryHost
 
-    dir(${env.HOME}/${Constants.dockerStacksDeployDir}) {
+    dir("${env.HOME}/${Constants.dockerStacksDeployDir}") {
         def stackConfigFile = "${args.stack}.yml"
 
         git(url: Constants.dockerStacksGitRepoUrl,
