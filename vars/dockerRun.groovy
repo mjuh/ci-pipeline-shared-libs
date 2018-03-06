@@ -3,7 +3,11 @@ def call(Map args) {
 
     def uid = args.uid ?: sh(returnStdout: true, script: 'id -u').trim()
     def dockerCredId = args.credentialsId ?: Constants.dockerRegistryCredId
-    def name = args.name ?: args.image.split(":")​[0]​.split("/")[-1]​ + env.BUILD_TAG
+    def name = args.name
+    if(!name) {
+        name = args.image.split(":")[0]​.split("/")[-1] ​+ env.BUILD_TAG
+    }
+    
     def dockerArgs = "--name ${name} --user ${uid}:${uid} "
 
     if(!args.persist) {
@@ -17,7 +21,7 @@ def call(Map args) {
         dockerArgs += "-e '${k}=${v}' "
     }
 
-    def dockerCmd = "docker run ${dockerArgs} ${image}"
+    def dockerCmd = "docker run ${dockerArgs} ${args.image}"
     if(args.cmd) {
         dockerCmd += " ${cmd}"
     }
