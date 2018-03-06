@@ -10,9 +10,11 @@ def call(Map args) {
     def jenkinsHomeOnHost = new JenkinsContainer().getMountByDestination(env.HOME).Source
     def uid = sh(returnStdout: true, script: 'id -u').trim()
     def workspaceOnHost = jenkinsHomeOnHost + (env.WORKSPACE - env.HOME)
+    def composerJenkinsHome = env.WORKSPACE + '/jenkins_home'
 
     sh "mkdir -p $HOME/composer/home"
-    createSshDirWithGitKey(dir: env.WORKSPACE + '/jenkins_home/.ssh', localHomedir: '/home/jenkins')
+    sh "mkdir -p ${composerJenkinsHome}"
+    createSshDirWithGitKey(dir: composerJenkinsHome + '/.ssh', localHomedir: '/home/jenkins')
     writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash\n")
     writeFile(file: 'composer-group', text: "jenkins:x:${uid}:jenkins\n")
     sh "cp -pR $WORKSPACE/${srcDir} $WORKSPACE/build"
