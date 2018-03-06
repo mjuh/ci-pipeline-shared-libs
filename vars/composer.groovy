@@ -1,9 +1,7 @@
 def call(Map args) {
     def cmd = args.cmd ?: 'install'
-    def registry = args.registry ?: Constants.dockerRegistryHost
-    def composerNs = args.composerDockerNamespace ?: Constants.composerDockerNamespace
     def composerImage = args.composerDockerImage ?: Constants.composerDockerImage
-    def composerTag = args.composerDockerTag ?: Constants.composerDockerTag
+    def composerTag = args.composerTag ?: Constants.composerDockerTag
     def phpVersion = args.phpVersion ?: 'php56'
     def srcDir = args.srcDir ?: 'src'
     def jenkinsHomeOnHost = new JenkinsContainer().getMountByDestination(env.HOME).Source
@@ -37,7 +35,7 @@ def call(Map args) {
               env: [PHP_VERSION: phpVersion,
                     COMPOSER_HOME: '/composer/home',
                     GIT_SSH: "${jenkinsHomeInContainer}/.ssh/ssh_wrapper.sh"],
-              image: "${registry}/${composerNs}/${composerImage}:${composerTag}",
+              image: "${composerImage}:${composerTag}",
               name: "composer-${env.BUILD_TAG}",
               cmd: cmd)
 }

@@ -1,9 +1,15 @@
 def call(Map args) {
     assert args.image : "No image provided"
 
+    def image = args.image
     def uid = args.uid ?: sh(returnStdout: true, script: 'id -u').trim()
     def dockerCredId = args.credentialsId ?: Constants.dockerRegistryCredId
+    def registry = args.registry ?: Constants.dockerRegistryHost
     def dockerArgs = "--user ${uid}:${uid} "
+
+    if(args.tag && !image.endsWith(args.tag)) {
+        image = image.split(':')[0] + ':' + args.tag
+    }
 
     if(!args.persist) {
         dockerArgs += "--rm "
@@ -21,7 +27,7 @@ def call(Map args) {
         dockerArgs += "-e '${k}=${v}' "
     }
 
-    def dockerCmd = "docker run ${dockerArgs} ${args.image}"
+    def dockerCmd = "docker run ${dockerArgs} ${image}"
 
     if(args.cmd) {
         dockerCmd += " ${args.cmd}"
