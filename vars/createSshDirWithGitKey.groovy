@@ -1,7 +1,7 @@
 def call(Map args) {
     def gitCredId = args.gitCredId ?: Constants.gitCredId
     def gitHost = args.gitHost ?: Constants.gitHost
-    def localHomedir = args.localHomedir ?: env.HOME
+    def inConfigDir = args.inConfigDir ?: env.HOME + '/.ssh'
     def sshDir = args.dir ?: '.ssh'
     def sshWrapperFilename = args.sshWrapperFilename ?: 'wrap-ssh4git.sh'
 
@@ -13,18 +13,18 @@ def call(Map args) {
                 writeFile(
                     file: 'config',
                     text: """
-                        Host ${gitHost}
-                        User $USERNAME
-                        HostName ${gitHost}
-                        IdentityFile ${localHomedir}/${sshDir}/git_repos_deploy_key
+Host ${gitHost}
+User $USERNAME
+HostName ${gitHost}
+IdentityFile ${inConfigDir}/git_repos_deploy_key
                     """
                 );
 
                 writeFile(
                     file: sshWrapperFilename,
                     text: """
-                        #!/bin/sh
-                        /usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${localHomedir}/${sshDir}/git_repos_deploy_key' \$1 \$2
+#!/bin/sh
+/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${inConfigDir}/git_repos_deploy_key' \$1 \$2
                     """
                 );
 

@@ -8,15 +8,16 @@ def call(Map args) {
     def phpVersion = args.phpVersion ?: 'php56'
     def srcDir = args.srcDir ?: 'src'
     def jenkinsHomeOnHost = new JenkinsContainer().getMountByDestination(env.HOME).Source
-    def uid = sh(returnStdout: true, script: 'id -u').trim()
+    def jenkinsHomeInContainer = '/home/jenkins'
     def workspaceOnHost = jenkinsHomeOnHost + (env.WORKSPACE - env.HOME)
-    def composerJenkinsHome = env.WORKSPACE + '/jenkins_home'
+    def uid = sh(returnStdout: true, script: 'id -u').trim()
 
     sh "mkdir -p $HOME/composer/home"
-    sh "mkdir -p ${composerJenkinsHome}"
-    createSshDirWithGitKey(dir: composerJenkinsHome + '/.ssh', localHomedir: '/home/jenkins')
-    writeFile(file: 'composer-passwd', text: "jenkins:x:${uid}:${uid}:,,,,:/home/jenkins:/bin/bash\n")
-    writeFile(file: 'composer-group', text: "jenkins:x:${uid}:jenkins\n")
+    createSshDirWithGitKey(dir: env.WORKSPACE + '/jenkins_home/.ssh',
+                           inConfigDir: jenkinsHomeInContainer,
+                           sshWrapperFilename: 'ssh_wrapper.sh')
+    writeFile(file: 'passwd', text: "jenkins:x:${uid}:${uid}:,,,,:${jenkinsHomeInContainer}:/bin/sh\n")
+    writeFile(file: 'group', text: "jenkins:x:${uid}:jenkins\n")
     sh "cp -pR $WORKSPACE/${srcDir} $WORKSPACE/build"
 
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredId,
@@ -27,9 +28,10 @@ def call(Map args) {
             --user ${uid}:${uid}                                                \
             -e 'PHP_VERSION=${phpVersion}'                                      \
             -e 'COMPOSER_HOME=/composer/home'                                   \
-            -v ${workspaceOnHost}/composer-passwd:/etc/passwd:ro                \
-            -v ${workspaceOnHost}/composer-group:/etc/group:ro                  \
-            -v ${workspaceOnHost}/jenkins_home:/home/jenkins                    \
+            -e 'GIT_SSH=${jenkinsHomeInContainer}'                              \
+            -v ${workspaceOnHost}/passwd:/etc/passwd:ro                         \
+            -v ${workspaceOnHost}/group:/etc/group:ro                           \
+            -v ${workspaceOnHost}/jenkins_home:${jenkinsHomeInContainer}        \
             -v ${jenkinsHomeOnHost}/composer:/composer                          \
             -v ${workspaceOnHost}/build:/app                                    \
             ${registry}/${composerNs}/${composerImage}:${composerTag} ${cmd}
