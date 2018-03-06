@@ -26,8 +26,8 @@ def call(Map args) {
             echo """
                     Service ${args.service} exists,
                     name: ${prodService.Spec.Name}
-                    image: ${prodService.TaskTemplate.ContainerSpec.Image}
-                    mode: ${prodService.Mode}
+                    image: ${prodService.Spec.TaskTemplate.ContainerSpec.Image}
+                    mode: ${prodService.Spec.Mode}
                 """.stripMargin().stripIndent()
             sh "docker service update --with-registry-auth --force --image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"
         } else {
