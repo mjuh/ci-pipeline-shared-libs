@@ -7,11 +7,6 @@ def jsonParse(def json) {
     new groovy.json.JsonSlurperClassic().parseText(json)
 }
 
-@NonCPS
-def yamlLoad(def file) {
-    new Yaml().load((file as File).text)
-}
-
 def call(Map args) {
     assert args.stack : "No stack name provided"
 
@@ -33,7 +28,7 @@ def call(Map args) {
             credentialsId: Constants.gitCredId)
     }
 
-    println yamlLoad(stackConfigFile)
+    println new Yaml().load((stackConfigFile as File).text)
 
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                     usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
