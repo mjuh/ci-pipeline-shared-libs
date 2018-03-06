@@ -1,6 +1,4 @@
-@Grab('org.yaml:snakeyaml:1.17')
 import groovy.json.JsonSlurperClassic
-import org.yaml.snakeyaml.Yaml
 
 @NonCPS
 def jsonParse(def json) {
@@ -27,7 +25,7 @@ def call(Map args) {
         git(url: Constants.dockerStacksGitRepoUrl,
                 credentialsId: Constants.gitCredId)
 
-        println new Yaml().load((stackConfigFile as File).text)
+        println readYaml(file: stackConfigFile)
 
         withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                           usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
