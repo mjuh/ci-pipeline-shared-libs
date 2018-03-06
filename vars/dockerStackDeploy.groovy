@@ -20,30 +20,30 @@ def call(Map args) {
     def image = args.image ?: args.service
     def tag = args.tag ?: Constants.dockerImageDefaultTag
     def registry = args.registry ?: Constants.dockerRegistryHost
-    def stacksDir = "${env.HOME}/${Constants.dockerStacksDeployDir}"
-    def stackConfigFile = "${stacksDir}/${args.stack}.yml"
 
-    dir(stacksDir) {
+    dir(${env.HOME}/${Constants.dockerStacksDeployDir}) {
+        def stackConfigFile = "${args.stack}.yml"
+
         git(url: Constants.dockerStacksGitRepoUrl,
-            credentialsId: Constants.gitCredId)
-    }
+                credentialsId: Constants.gitCredId)
 
-    println new Yaml().load((stackConfigFile as File).text)
+        println new Yaml().load((stackConfigFile as File).text)
 
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
-                    usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
-        sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
-        if(service) {
-            echo """
+        withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
+                          usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
+            sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
+            if (service) {
+                echo """
                     Service ${args.service} exists,
                     name: ${prodService.Spec.Name}
                     image: ${prodService.Spec.TaskTemplate.ContainerSpec.Image}
                     mode: ${prodService.Spec.Mode}
                 """.stripMargin().stripIndent()
-            sh """docker service update --detach=false --with-registry-auth --force \
+                sh """docker service update --detach=false --with-registry-auth --force \
                   --image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"""
-        } else {
-            sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
+            } else {
+                sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
+            }
         }
     }
 }
