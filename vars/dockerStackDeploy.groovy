@@ -21,16 +21,16 @@ def call(Map args) {
 
     dir("${env.HOME}/${Constants.dockerStacksDeployDir}") {
         def stackConfigFile = "${args.stack}.yml"
+        def stackDeclaration = readYaml(file: stackConfigFile)
 
         git(url: Constants.dockerStacksGitRepoUrl,
                 credentialsId: Constants.gitCredId)
-
-        println readYaml(file: stackConfigFile)
 
         withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                           usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
             sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
             if (service) {
+                def serviceDeclaration = stackDeclaration.services."${service}"
                 echo """
                     Service ${args.service} exists,
                     name: ${prodService.Spec.Name}
@@ -38,6 +38,7 @@ def call(Map args) {
                     mode: ${prodService.Spec.Mode}
                 """.stripMargin().stripIndent()
                 sh """docker service update --detach=false --with-registry-auth --force \
+                  --replicas ${serviceDeclaration.deploy.replicas}                      \
                   --image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"""
             } else {
                 sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
