@@ -19,7 +19,7 @@ def call(Map args) {
 						HostName ${gitHost}
 						IdentityFile ${localHomedir}/${dir}/git_repos_deploy_key
 					"""
-				)
+				);
 
 				writeFile(
 					file: 'wrap-ssh4git.sh',
@@ -27,7 +27,7 @@ def call(Map args) {
 						#!/bin/sh
 						/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${localHomedir}/${dir}/git_repos_deploy_key' $1 $2
 					"""
-				)
+				);
 
 
 				sh """
@@ -36,6 +36,5 @@ def call(Map args) {
 					chmod 400 git_repos_deploy_key
 				"""
 		}
-	println env.KEY_FILE
 	}
 }
