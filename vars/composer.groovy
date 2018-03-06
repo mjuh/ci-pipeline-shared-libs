@@ -28,7 +28,7 @@ def call(Map args) {
             --user ${uid}:${uid}                                                \
             -e 'PHP_VERSION=${phpVersion}'                                      \
             -e 'COMPOSER_HOME=/composer/home'                                   \
-            -e 'GIT_SSH=${jenkinsHomeInContainer}'                              \
+            -e 'GIT_SSH=${jenkinsHomeInContainer}/.ssh/ssh_wrapper.sh'          \
             -v ${workspaceOnHost}/passwd:/etc/passwd:ro                         \
             -v ${workspaceOnHost}/group:/etc/group:ro                           \
             -v ${workspaceOnHost}/jenkins_home:${jenkinsHomeInContainer}        \

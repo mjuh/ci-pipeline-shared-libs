@@ -16,7 +16,7 @@ def call(Map args) {
 Host ${gitHost}
 User $USERNAME
 HostName ${gitHost}
-IdentityFile ${inConfigDir}/git_repos_deploy_key
+IdentityFile ${inConfigDir}/ssh_deploy_key
                     """
                 );
 
@@ -24,15 +24,15 @@ IdentityFile ${inConfigDir}/git_repos_deploy_key
                     file: sshWrapperFilename,
                     text: """
 #!/bin/sh
-/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${inConfigDir}/git_repos_deploy_key' \$1 \$2
+/usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${inConfigDir}/.ssh/ssh_deploy_key' \$1 \$2
                     """
                 );
 
 
                 sh """
                     chmod +x ${sshWrapperFilename}
-                    cp $KEY_FILE git_repos_deploy_key
-                    chmod 400 git_repos_deploy_key
+                    cp $KEY_FILE ssh_deploy_key
+                    chmod 400 ssh_deploy_key
                 """
         }
     }
