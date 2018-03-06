@@ -1,4 +1,4 @@
-def call(Map args) {
+def call(Map args = [:]) {
     def cmd = args.cmd ?: 'install'
     def composerImage = args.composerDockerImage ?: Constants.composerDockerImage
     def composerTag = args.composerTag ?: Constants.composerDockerTag

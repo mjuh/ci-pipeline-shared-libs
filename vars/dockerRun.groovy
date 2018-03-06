@@ -1,4 +1,4 @@
-def call(Map args) {
+def call(Map args =[:]) {
     assert args.image : "No image provided"
 
     def image = args.image

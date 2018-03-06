@@ -1,4 +1,4 @@
-def call(Map args) {
+def call(Map args = [:]) {
 
     assert args.image : "No image name provided"
     assert args.namespace : "No namespace provided"
