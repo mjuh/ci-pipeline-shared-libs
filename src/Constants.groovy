@@ -1,7 +1,5 @@
 public class Constants {
     def main (_) {}
-    public static final String productionNodeLabel = 'dhost-production'
-
     public static final String dockerRegistryHost = 'docker-registry.intr'
     public static final String dockerRegistryCredId = 'docker-registry'
     public static final String dockerImageDefaultTag = 'master'
