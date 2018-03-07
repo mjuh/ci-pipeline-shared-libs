@@ -11,7 +11,7 @@ class JenkinsContainer {
 
     public getHostPath(String path) {
         def hostPath = null
-        def mount = this.info.find { it.Destination.startsWith(path) }
+        def mount = this.info.Mounts.find { it.Destination.startsWith(path) }
         if(mount) {
             hostPath = mount.Source + path - mount.Destination
         }
