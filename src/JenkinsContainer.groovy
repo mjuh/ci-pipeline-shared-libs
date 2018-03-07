@@ -19,7 +19,7 @@ class JenkinsContainer {
     }
 
     public getUid() {
-        "id -u".execute().text
+        "id -u".execute().text.trim()
     }
 }
 
