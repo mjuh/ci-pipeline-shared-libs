@@ -2,7 +2,7 @@ def call(Map args =[:]) {
     assert args.image : "No image provided"
 
     def image = args.image
-    def uid = args.uid ?: sh(returnStdout: true, script: 'id -u').trim()
+    def uid = args.uid ?: new JenkinsContainer().getUid()
     def dockerCredId = args.credentialsId ?: Constants.dockerRegistryCredId
     def registry = args.registry ?: Constants.dockerRegistryHost
     def dockerArgs = "--user ${uid}:${uid} "
