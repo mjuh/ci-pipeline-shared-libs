@@ -9,7 +9,7 @@ def call(Map args = [:]) {
     args.users.each { user, v ->
         assert v.uid : "${user} user has no UID."
         passwdBody += "${user}:x:${v.uid}:${v.gid ?: v.uid}:,,,,:${v.home}:${v.shell ?: '/bin/sh'}\n"
-        if(!args.groups."${user}") {
+        if(args.groups && !args.groups."${user}") {
             groupBody += "${user}:x:${v.gid ?: v.uid}:${user}\n"
         }
     }
