@@ -11,7 +11,6 @@ def call(Map args = [:]) {
 
     docker.withRegistry(registryUrl, credentialsId) {
         def dockerImage = docker.build("${args.namespace}/${args.image}:${tag}", "-f ${dockerfile} ${dockerfileDir}")
-        dockerImage.metaClass.properties.each {println it.name }
         dockerImage.push()
     }
 }

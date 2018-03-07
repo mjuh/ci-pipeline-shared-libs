@@ -11,6 +11,7 @@ public class Constants {
     public static final String gitHost = 'gitlab.intr'
 
     public static final String jenkinsContainerName = 'jenkins'
+    public static final String productionNodeLabel = 'dhost-production'
 
     public static final String composerDockerImage = "${dockerRegistryHost}/base/mj-composer"
     public static final String composerDockerTag = 'master'
