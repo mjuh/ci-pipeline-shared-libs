@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b311bb54-1656-4858-85d7-5ee591839c4a" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/JenkinsContainer.groovy" afterPath="$PROJECT_DIR$/src/JenkinsContainer.groovy" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vars/composer.groovy" afterPath="$PROJECT_DIR$/vars/composer.groovy" />
-    </list>
+    <list default="true" id="b311bb54-1656-4858-85d7-5ee591839c4a" name="Default" comment="" />
     <ignored path="pipeline.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -892,12 +889,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1520331862768</updated>
-      <workItem from="1520331871752" duration="24159000" />
+      <workItem from="1520331871752" duration="24222000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="24159000" />
+    <option name="totallyTimeSpent" value="24222000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="16" width="1920" height="1064" extended-state="0" />
