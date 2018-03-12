@@ -8,12 +8,19 @@ def call(Map args = [:]) {
     def dockerfileDir = args.dockerfileDir ?: "."
     def registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
+    def structureTestConfig = null
+    if(args.structureTestConfig) {
+        assert fileExists(args.structureTestConfig) : "args.structureTestConfig does not exist"
+        structureTestConfig = args.structureTestConfig
+    }
 
     docker.withRegistry(registryUrl, credentialsId) {
         def dockerImage = docker.build("${args.namespace}/${args.image}:${tag}", "-f ${dockerfile} ${dockerfileDir}")
-        if(args.structureTestConfig) {
-            assert fileExists(args.structureTestConfig) : "args.structureTestConfig does not exist"
-            containerStructureTest(namespace: args.namespace, image: args.image, tag: tag)
+        if(structureTestConfig || fileExists('container-structure-test.yaml')) {
+            containerStructureTest(namespace: args.namespace,
+                                   image: args.image,
+                                   tag: tag,
+                                   configFileName: structureTestConfig)
         }
         dockerImage.push()
     }
