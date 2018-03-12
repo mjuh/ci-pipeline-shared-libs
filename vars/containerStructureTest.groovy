@@ -8,9 +8,9 @@ def call(Map args = [:]) {
     def containerStructureTestImage = args.containerStructureTestImage ?: Constants.containerStructureTestImage
     def config = args.configFileName ?: 'container-structure-test.yaml'
     assert config.endsWith('.yaml') || config.endsWith('.json') : 'Supported config file extensions are .yaml and .json'
-    def configOnHost = new JenkinsContainer().getHostPath(env.WORKSPACE + config)
+    def configOnHost = new JenkinsContainer().getHostPath(env.WORKSPACE + '/' + config)
 
-    dockerRun(volumes: [(configOnHost): config],
+    dockerRun(volumes: [(configOnHost): "/${config}"],
               image: containerStructureTestImage,
               name: "containert-structure-test-${env.BUILD_TAG}",
               cmd: "-image ${image} ${config}")
