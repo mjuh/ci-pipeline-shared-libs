@@ -10,7 +10,8 @@ def call(Map args = [:]) {
     assert config.endsWith('.yaml') || config.endsWith('.json') : 'Supported config file extensions are .yaml and .json'
     def configOnHost = new JenkinsContainer().getHostPath(env.WORKSPACE + '/' + config)
 
-    dockerRun(volumes: [(configOnHost): "/${config}"],
+    dockerRun(volumes: [(configOnHost): "/${config}",
+                        '/var/run/docker.sock': '/var/run/docker.sock'],
               image: containerStructureTestImage,
               name: "containert-structure-test-${env.BUILD_TAG}",
               cmd: "-image ${image} ${config}")
