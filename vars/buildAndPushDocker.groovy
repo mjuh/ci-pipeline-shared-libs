@@ -11,6 +11,10 @@ def call(Map args = [:]) {
 
     docker.withRegistry(registryUrl, credentialsId) {
         def dockerImage = docker.build("${args.namespace}/${args.image}:${tag}", "-f ${dockerfile} ${dockerfileDir}")
+        if(args.structureTestConfig) {
+            assert fileExists(args.structureTestConfig) : "args.structureTestConfig does not exist"
+            containerStructureTest(namespace: args.namespace, image: args.image, tag: tag)
+        }
         dockerImage.push()
     }
 }

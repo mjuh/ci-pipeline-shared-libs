@@ -5,11 +5,11 @@ def call(Map args = [:]) {
     def phpVersion = args.phpVersion ?: 'php56'
     def srcDir = args.srcDir ?: 'src'
     def jenkinsContainer = new JenkinsContainer()
-    def passwdHostPath = jenkinsContainer.getHostPath(env.WORKSPACE) + '/passwd'
-    def groupHostPath = jenkinsContainer.getHostPath(env.WORKSPACE) + '/group'
-    def jenkinsHomeHostPath = jenkinsContainer.getHostPath(env.WORKSPACE) + '/jenkins_home'
-    def composerHostPath = jenkinsContainer.getHostPath(env.HOME) + '/composer'
-    def buildHostPath = jenkinsContainer.getHostPath(env.WORKSPACE) + '/build'
+    def passwdHostPath = jenkinsContainer.getHostPath(env.WORKSPACE + '/passwd')
+    def groupHostPath = jenkinsContainer.getHostPath(env.WORKSPACE + '/group')
+    def jenkinsHomeHostPath = jenkinsContainer.getHostPath(env.WORKSPACE + '/jenkins_home')
+    def composerHostPath = jenkinsContainer.getHostPath(env.HOME + '/composer')
+    def buildHostPath = jenkinsContainer.getHostPath(env.WORKSPACE + '/build')
     def uid = jenkinsContainer.getUid()
     def jenkinsHomeInComposerContainer = '/home/jenkins'
 
