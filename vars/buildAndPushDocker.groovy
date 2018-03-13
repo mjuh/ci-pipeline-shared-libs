@@ -1,27 +1,18 @@
 def call(Map args = [:]) {
+    if(!args.imageName) {
+        assert args.name : "No image name provided"
+        assert args.namespace : "No namespace provided"
+    }
 
-    assert args.image : "No image name provided"
-    assert args.namespace : "No namespace provided"
-
+    def imageName = args.imageName ?: "${args.namespace}/${args.name}"
     def tag = args.tag ?: Constants.dockerImageDefaultTag
     def dockerfile = args.dockerfile ?: "Dockerfile"
     def dockerfileDir = args.dockerfileDir ?: "."
     def registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
-    def structureTestConfig = null
-    if(args.structureTestConfig) {
-        assert fileExists(args.structureTestConfig) : "args.structureTestConfig does not exist"
-        structureTestConfig = args.structureTestConfig
-    }
 
     docker.withRegistry(registryUrl, credentialsId) {
-        def dockerImage = docker.build("${args.namespace}/${args.image}:${tag}", "-f ${dockerfile} ${dockerfileDir}")
-        if(structureTestConfig || fileExists('container-structure-test.yaml')) {
-            containerStructureTest(namespace: args.namespace,
-                                   image: args.image,
-                                   tag: tag,
-                                   configFileName: structureTestConfig)
-        }
+        def dockerImage = docker.build("${imageName}:${tag}", "-f ${dockerfile} ${dockerfileDir}")
         dockerImage.push()
     }
 }
