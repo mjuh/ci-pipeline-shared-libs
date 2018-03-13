@@ -4,15 +4,15 @@ def call(Map args = [:]) {
         assert args.namespace : "No namespace provided"
     }
 
-    def imageName = args.imageName ?: "${args.namespace}/${args.name}"
     def tag = args.tag ?: Constants.dockerImageDefaultTag
+    def imageName = args.imageName ?: "${args.namespace}/${args.name}:${tag}"
     def dockerfile = args.dockerfile ?: "Dockerfile"
     def dockerfileDir = args.dockerfileDir ?: "."
     def registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
 
     docker.withRegistry(registryUrl, credentialsId) {
-        def dockerImage = docker.build("${imageName}:${tag}", "-f ${dockerfile} ${dockerfileDir}")
+        def dockerImage = docker.build(imageName, "-f ${dockerfile} ${dockerfileDir}")
         dockerImage.push()
     }
 }

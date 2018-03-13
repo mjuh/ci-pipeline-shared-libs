@@ -5,7 +5,7 @@ def call(Map args = [:]) {
     }
     def registry = args.registry ?: Constants.dockerRegistryHost
     def tag = args.tag ?: Constants.dockerImageDefaultTag
-    def imageName = args.image ? args.image.imageName() : "${registry}/${args.namespace}/${args.name}"
+    def imageName = args.image ? args.image.imageName() : "${registry}/${args.namespace}/${args.name}:${tag}"
     def containerStructureTestImage = args.containerStructureTestImage ?: Constants.containerStructureTestImage
     def config = args.configFileName ?: 'container-structure-test.yaml'
     assert config.endsWith('.yaml') || config.endsWith('.json') : 'Supported config file extensions are .yaml and .json'
@@ -15,5 +15,5 @@ def call(Map args = [:]) {
                         '/var/run/docker.sock': '/var/run/docker.sock'],
               image: containerStructureTestImage,
               name: "containert-structure-test-${env.BUILD_TAG}",
-              cmd: "-image ${imageName}:${tag} ${config}")
+              cmd: "-image ${imageName} ${config}")
 }
