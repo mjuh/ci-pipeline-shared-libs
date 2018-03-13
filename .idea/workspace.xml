@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b311bb54-1656-4858-85d7-5ee591839c4a" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/vars/buildDocker.groovy" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/vars/pushDocker.groovy" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Constants.groovy" afterPath="$PROJECT_DIR$/src/Constants.groovy" />
     </list>
     <ignored path="pipeline.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -57,21 +54,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="buildDocker.groovy" pinned="false" current-in-tab="true">
+      <file leaf-file-name="buildDocker.groovy" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vars/buildDocker.groovy">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
-              <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+            <state relative-caret-position="170">
+              <caret line="10" column="4" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="pushDocker.groovy" pinned="false" current-in-tab="false">
+      <file leaf-file-name="pushDocker.groovy" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/vars/pushDocker.groovy">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="34">
-              <caret line="2" column="1" selection-start-line="2" selection-start-column="1" selection-end-line="2" selection-end-column="1" />
+            <state relative-caret-position="85">
+              <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -922,12 +919,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1520331862768</updated>
-      <workItem from="1520331871752" duration="44872000" />
+      <workItem from="1520331871752" duration="45311000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="44872000" />
+    <option name="totallyTimeSpent" value="45311000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="16" width="1920" height="1064" extended-state="0" />
@@ -1016,14 +1013,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/vars/createPasswdFiles.groovy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="26" selection-start-line="11" selection-start-column="26" selection-end-line="11" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/vars/composer.groovy">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
@@ -1080,18 +1069,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/vars/pushDocker.groovy">
+    <entry file="file://$PROJECT_DIR$/vars/createPasswdFiles.groovy">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="1" selection-start-line="2" selection-start-column="1" selection-end-line="2" selection-end-column="1" />
+        <state relative-caret-position="187">
+          <caret line="11" column="26" selection-start-line="11" selection-start-column="26" selection-end-line="11" selection-end-column="26" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vars/buildDocker.groovy">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+        <state relative-caret-position="170">
+          <caret line="10" column="4" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/vars/pushDocker.groovy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
           <folding />
         </state>
       </provider>

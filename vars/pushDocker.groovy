@@ -5,6 +5,6 @@ def call(Map args = [:]) {
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
 
     docker.withRegistry(registryUrl, credentialsId) {
-        image.push()
+        args.image.push()
     }
 }
