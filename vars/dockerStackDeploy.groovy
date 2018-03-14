@@ -20,11 +20,10 @@ def call(Map args) {
     def registry = args.registry ?: Constants.dockerRegistryHost
 
     dir("${env.HOME}/${Constants.dockerStacksDeployDir}") {
+        git(url: Constants.dockerStacksGitRepoUrl, credentialsId: Constants.gitCredId)
+
         def stackConfigFile = "${args.stack}.yml"
         def stackDeclaration = readYaml(file: stackConfigFile)
-
-        git(url: Constants.dockerStacksGitRepoUrl,
-                credentialsId: Constants.gitCredId)
 
         withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                           usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
