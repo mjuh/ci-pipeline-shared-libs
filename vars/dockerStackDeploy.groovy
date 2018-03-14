@@ -37,9 +37,12 @@ def call(Map args) {
                     image: ${prodService.Spec.TaskTemplate.ContainerSpec.Image}
                     mode: ${prodService.Spec.Mode}
                 """.stripMargin().stripIndent()
-                sh """docker service update --detach=false --with-registry-auth --force \
-                  --replicas ${serviceDeclaration.deploy.replicas}                      \
-                  --image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"""
+                def cmd = 'docker service update --detach=false --with-registry-auth --force '
+                if(serviceDeclaration.deploy.replicas) {
+                    cmd += "--replicas ${serviceDeclaration.deploy.replicas} "
+                }
+                cmd += "--image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"
+                sh cmd
             } else {
                 sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
             }
