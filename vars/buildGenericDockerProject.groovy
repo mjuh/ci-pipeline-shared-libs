@@ -11,52 +11,38 @@ def call() {
         stages {
             stage('Build Docker image') {
                 steps {
-                    notifyGitlab 'running'
-                    script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: BRANCH_NAME }
-                }
-                post {
-                    success { notifyGitlab 'success' }
-                    failure { notifyGitlab 'failure' }
-                    aborted { notifyGitlab 'aborted' }
+                    gitlabCommitStatus(STAGE_NAME) {
+                        script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: BRANCH_NAME }
+                    }
                 }
             }
             stage('Test Docker image structure') {
                 when { expression { fileExists 'container-structure-test.yaml' } }
                 steps {
-                    notifyGitlab 'running'
-                    containerStructureTest image: dockerImage
-                }
-                post {
-                    success { notifyGitlab 'success' }
-                    failure { notifyGitlab 'failure' }
-                    aborted { notifyGitlab 'aborted' }
+                    gitlabCommitStatus(STAGE_NAME) {
+                        containerStructureTest image: dockerImage
+                    }
                 }
             }
             stage('Push Docker image') {
                 steps {
-                    notifyGitlab 'running'
-                    pushDocker image: dockerImage
-                }
-                post {
-                    success { notifyGitlab 'success' }
-                    failure { notifyGitlab 'failure' }
-                    aborted { notifyGitlab 'aborted' }
+                    gitlabCommitStatus(STAGE_NAME) {
+                        pushDocker image: dockerImage
+                    }
                 }
             }
             stage('Deploy service to swarm') {
                 when { branch 'master' }
                 agent { label Constants.productionNodeLabel }
                 steps {
-                    notifyGitlab 'running'
-                    dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME
+                    gitlabCommitStatus(STAGE_NAME) {
+                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME
+                    }
                 }
                 post {
                     success {
-                        notifyGitlab 'success'
                         notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
                     }
-                    failure { notifyGitlab 'failure' }
-                    aborted { notifyGitlab 'aborted' }
                 }
             }
         }
