@@ -6,9 +6,9 @@ def getRemote() {
 }
 
 def getProject() {
-    getRemote().url.split(':').tail().join(':').split('/|\\.')[-2]
+    getRemote().url.split(':').tail().join(':').split('/|\\.')[-2].toLowerCase()
 }
 
 def getGroup() {
-    getRemote().url.split(':').tail().join(':').split('/|\\.')[-3]
+    getRemote().url.split(':').tail().join(':').split('/|\\.')[-3].toLowerCase()
 }
