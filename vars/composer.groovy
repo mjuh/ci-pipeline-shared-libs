@@ -27,7 +27,7 @@ def call(Map args = [:]) {
     echo '... creating .ssh with config, wrapper and key needed for `git clone`'
 
     createSshDirWithGitKey(dir: env.WORKSPACE + '/jenkins_home/.ssh',
-                           inConfigDir: jenkinsHomeInComposerContainer,
+                           inConfigDir: jenkinsHomeInComposerContainer + '/.ssh',
                            sshWrapperFilename: 'ssh_wrapper.sh')
 
     echo 'Running Docker container'

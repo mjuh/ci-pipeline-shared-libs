@@ -51,7 +51,7 @@ def call(Map args) {
                         stackDeclaration.services."${service}".image = imageName
                         sh "rm -f ${stackConfigFile}"
                         writeYaml(file: stackConfigFile, data: stackDeclaration)
-                        createSshDirWithGitKey(dir: HOME + '/.ssh', inConfigDir: HOME)
+                        createSshDirWithGitKey(dir: HOME + '/.ssh')
                         sh """
                             git config --global user.name 'jenkins'
                             git config --global user.email 'jenkins@majordomo.ru'

@@ -24,7 +24,7 @@ def call(Map args = [:]) {
                     file: sshWrapperFilename,
                     text: """
                             #!/bin/sh
-                            /usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${inConfigDir}/.ssh/ssh_deploy_key' \$1 \$2
+                            /usr/bin/env ssh -o 'StrictHostKeyChecking=no' -i '${inConfigDir}/ssh_deploy_key' \$1 \$2
                     """.stripMargin().stripIndent()
                 );
 
