@@ -8,7 +8,7 @@ public class Constants {
     public static final String dockerStacksDeployDir = 'docker-stacks'
 
     public static final String gitCredId = 'd8f04931-9047-413a-80f3-eef23003522c'
-    public static final String gitHost = 'notifyGitlab.intr'
+    public static final String gitHost = 'gitlab.intr'
 
     public static final String gitLabConnection = 'gitlab.intr'
 
