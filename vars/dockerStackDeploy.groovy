@@ -49,6 +49,7 @@ def call(Map args) {
                     sh cmd
                     if(stackDeclaration.services."${service}".image != imageName) {
                         stackDeclaration.services."${service}".image = imageName
+                        sh "rm -f ${stackConfigFile}"
                         writeYaml(file: stackConfigFile, data: stackDeclaration)
                         createSshDirWithGitKey(dir: HOME + '/.ssh', inConfigDir: HOME)
                         sh """
