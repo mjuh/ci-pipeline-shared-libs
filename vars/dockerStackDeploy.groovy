@@ -53,6 +53,7 @@ def call(Map args) {
                         writeYaml(file: stackConfigFile, data: stackDeclaration)
                         createSshDirWithGitKey(dir: HOME + '/.ssh', inConfigDir: HOME)
                         sh """
+                            git config --global user.name 'Jenkins'
                             git add ${stackConfigFile}
                             git commit -m '${args.stack}/${service} image updated: ${imageName}'
                             git push ${Constants.dockerStacksGitRepoUrl} origin master
