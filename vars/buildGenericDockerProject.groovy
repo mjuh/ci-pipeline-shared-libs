@@ -3,7 +3,7 @@ def call() {
 
     pipeline {
         agent { label 'master' }
-        parameters { string(name: 'dockerStacksRepoCommitId', defaultValue: '', description: "ID коммита в репозитории ${Constants.dockerStacksGitRepoUrl}")
+        parameters { string(name: 'dockerStacksRepoCommitId', defaultValue: '', description: "ID коммита в репозитории ${Constants.dockerStacksGitRepoUrl}") }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
