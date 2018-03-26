@@ -59,7 +59,7 @@ def call(Map args) {
                             git checkout master
                             git add ${stackConfigFile}
                             git commit -m '${args.stack}/${service} image updated: ${imageName}'
-                            git push ${Constants.dockerStacksGitRepoUrl} origin master
+                            git push origin master
                         """
                     }
                 } else {
