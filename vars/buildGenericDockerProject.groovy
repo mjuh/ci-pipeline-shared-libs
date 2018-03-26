@@ -3,6 +3,7 @@ def call() {
 
     pipeline {
         agent { label 'master' }
+        parameters { string(name: 'dockerStacksRepoCommitId', defaultValue: '', description: "ID коммита в репозитории ${Constants.dockerStacksGitRepoUrl}")
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
@@ -12,7 +13,7 @@ def call() {
             stage('Build Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: BRANCH_NAME }
+                        script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
                     }
                 }
             }
@@ -36,7 +37,7 @@ def call() {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME
+                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME, tag: GIT_COMMIT[0..7], dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
                     }
                 }
                 post {

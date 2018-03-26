@@ -18,32 +18,48 @@ def call(Map args) {
     def image = args.image ?: args.service
     def tag = args.tag ?: Constants.dockerImageDefaultTag
     def registry = args.registry ?: Constants.dockerRegistryHost
+    def dockerStacksRepoCommitId = args.dockerStacksRepoCommitId ?: 'master'
 
     dir("${env.HOME}/${Constants.dockerStacksDeployDir}") {
-        git(url: Constants.dockerStacksGitRepoUrl, credentialsId: Constants.gitCredId)
+        checkout([$class: 'GitSCM',
+                  branches: [[name: dockerStacksRepoCommitId]],
+                  userRemoteConfigs: [[url: Constants.dockerStacksGitRepoUrl, credentialsId: Constants.gitCredId]]])
 
         def stackConfigFile = "${args.stack}.yml"
         def stackDeclaration = readYaml(file: stackConfigFile)
 
-        withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
-                          usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
-            sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
-            if (service) {
-                def serviceDeclaration = stackDeclaration.services."${service}"
-                echo """
-                    Service ${args.service} exists,
-                    name: ${prodService.Spec.Name}
-                    image: ${prodService.Spec.TaskTemplate.ContainerSpec.Image}
-                    mode: ${prodService.Spec.Mode}
-                """.stripMargin().stripIndent()
-                def cmd = 'docker service update --detach=false --with-registry-auth --force '
-                if(serviceDeclaration.deploy.replicas) {
-                    cmd += "--replicas ${serviceDeclaration.deploy.replicas} "
+        lock('docker-swarm') {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
+                              usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
+                sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
+                if (service) {
+                    def serviceDeclaration = stackDeclaration.services."${service}"
+                    def imageName = "${registry}/${ns}/${image}:${tag}"
+                    echo """
+                        Service ${args.service} exists,
+                        name: ${prodService.Spec.Name}
+                        image: ${prodService.Spec.TaskTemplate.ContainerSpec.Image}
+                        mode: ${prodService.Spec.Mode}
+                    """.stripMargin().stripIndent()
+                    def cmd = 'docker service update --detach=false --with-registry-auth --force '
+                    if(serviceDeclaration.deploy.replicas) {
+                        cmd += "--replicas ${serviceDeclaration.deploy.replicas} "
+                    }
+                    cmd += "--image ${imageName} ${args.stack}_${service}"
+                    sh cmd
+                    if(stackDeclaration.services."${service}".image != imageName) {
+                        stackDeclaration.services."${service}".image = imageName
+                        writeYaml(file: stackConfigFile, data: stackDeclaration)
+                        createSshDirWithGitKey(dir: HOME + '/.ssh', inConfigDir: HOME)
+                        sh """
+                            git add ${stackConfigFile}
+                            git commit -m '${args.stack}/${service} image updated: ${imageName}'
+                            git push ${Constants.dockerStacksGitRepoUrl} origin master
+                        """
+                    }
+                } else {
+                    sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
                 }
-                cmd += "--image ${registry}/${ns}/${image}:${tag} ${args.stack}_${service}"
-                sh cmd
-            } else {
-                sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
             }
         }
     }
