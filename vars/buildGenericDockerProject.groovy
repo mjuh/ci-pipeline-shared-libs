@@ -3,7 +3,13 @@ def call() {
 
     pipeline {
         agent { label 'master' }
-        parameters { string(name: 'dockerStacksRepoCommitId', defaultValue: '', description: "ID коммита в репозитории ${Constants.dockerStacksGitRepoUrl}") }
+        parameters { string(name: 'dockerStacksRepoCommitId',
+                            defaultValue: '',
+                            description: "ID коммита в репозитории ${Constants.dockerStacksGitRepoUrl}, " +
+                                         "если оставить пустым, при деплое будет использован последний коммит в master")
+                     booleanParam(name: 'skipToDeploy',
+                                  defaultValue: false,
+                                  description: 'пропустить сборку и тестирование')}
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
@@ -11,6 +17,7 @@ def call() {
         options { gitLabConnection(Constants.gitLabConnection) }
         stages {
             stage('Build Docker image') {
+                when { not { expression { return params.skipToDeploy } } }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
@@ -18,7 +25,12 @@ def call() {
                 }
             }
             stage('Test Docker image structure') {
-                when { expression { fileExists 'container-structure-test.yaml' } }
+                when {
+                    allOf {
+                        expression { fileExists 'container-structure-test.yaml' }
+                        not { expression { return params.skipToDeploy } }
+                    }
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         containerStructureTest image: dockerImage
@@ -26,6 +38,7 @@ def call() {
                 }
             }
             stage('Push Docker image') {
+                when { not { expression { return params.skipToDeploy } } }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage
