@@ -70,7 +70,7 @@ def call(Map args) {
                     git pull origin master
                     git stash pop
                     git add ${stackConfigFile}
-                    git commit -m '${args.stack}/${service} image updated: ${imageName}'
+                    git commit -m '${args.stack}/${args.service} image updated: ${imageName}'
                     git push origin master
                 """
             }
