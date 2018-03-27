@@ -17,6 +17,7 @@ def call(Map args) {
     def imageName = null
     if(args.image) {
         imageName = args.image.imageName()
+        imageName = "${registry}/" + (imageName - "${registry}/")
     }
     def dockerStacksRepoCommitId = args.dockerStacksRepoCommitId ?: 'master'
 
