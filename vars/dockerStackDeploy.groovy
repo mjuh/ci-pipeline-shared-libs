@@ -5,6 +5,28 @@ def jsonParse(def json) {
     new groovy.json.JsonSlurperClassic().parseText(json)
 }
 
+@NonCPS
+def getProdNodeNames() {
+    jenkins.model.Jenkins.instance.nodes
+            .findAll { node -> node.labelString == Constants.productionNodeLabel }
+            .collect { node -> node.name }
+}
+
+def pullImageEverywhere(String imageName) {
+    def branches = [:]
+    def names = getProdNodeNames()
+    for (int i=0; i<names.size(); ++i) {
+        def nodeName = names[i];
+        branches["node_" + nodeName] = {
+            node(nodeName) {
+                echo "Triggering on " + nodeName
+                sh "docker pull ${imageName}"
+            }
+        }
+    }
+    parallel branches
+}
+
 def call(Map args) {
     assert args.stack : "No stack name provided"
 
@@ -41,18 +63,22 @@ def call(Map args) {
                         image: ${prodService.Spec.TaskTemplate.ContainerSpec.Image}
                         mode: ${prodService.Spec.Mode}
                     """.stripMargin().stripIndent()
+                    pullImageEverywhere(imageName)
                     def cmd = 'docker service update --detach=false --with-registry-auth --force '
                     if(serviceDeclaration.deploy.replicas) {
                         cmd += "--replicas ${serviceDeclaration.deploy.replicas} "
                     }
                     cmd += "--image ${imageName} ${args.stack}_${service}"
                     sh cmd
-                    if(stackDeclaration.services."${service}".image != imageName) {
-                        stackDeclaration.services."${service}".image = imageName
-                        sh "rm -f ${stackConfigFile}"
-                        writeYaml(file: stackConfigFile, data: stackDeclaration)
-                        createSshDirWithGitKey(dir: HOME + '/.ssh')
-                        sh """
+                } else {
+                    sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
+                }
+                if(args.service && stackDeclaration.services."${service}".image != imageName) {
+                    stackDeclaration.services."${service}".image = imageName
+                    sh "rm -f ${stackConfigFile}"
+                    writeYaml(file: stackConfigFile, data: stackDeclaration)
+                    createSshDirWithGitKey(dir: HOME + '/.ssh')
+                    sh """
                             git config --global user.name 'jenkins'
                             git config --global user.email 'jenkins@majordomo.ru'
                             git branch -f master HEAD
@@ -61,9 +87,6 @@ def call(Map args) {
                             git commit -m '${args.stack}/${service} image updated: ${imageName}'
                             git push origin master
                         """
-                    }
-                } else {
-                    sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
                 }
             }
         }
