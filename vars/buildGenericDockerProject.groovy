@@ -32,13 +32,14 @@ def call() {
                     }
                 }
             }
-            stage('Pull Docker image')
+            stage('Pull Docker image') {
                 when { branch 'master' }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         dockerPull image: dockerImage
                     }
                 }
+            }
             stage('Deploy service to swarm') {
                 when { branch 'master' }
                 agent { label Constants.productionNodeLabel }
