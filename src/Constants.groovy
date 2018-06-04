@@ -18,7 +18,7 @@ public class Constants {
     public static final String composerDockerImage = "${dockerRegistryHost}/base/mj-composer"
     public static final String composerDockerTag = 'master'
 
-    public static final String containerStructureTestImage = 'gcr.io/gcp-runtimes/container-structure-test'
+    public static final String containerStructureTestImage = 'gcr.io/gcp-runtimes/container-structure-test:v1.1.0'
 
     public static final String slackChannel = '#git'
     public static final String slackTeam = 'mjru'
