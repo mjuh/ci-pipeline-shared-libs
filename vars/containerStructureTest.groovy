@@ -14,6 +14,6 @@ def call(Map args = [:]) {
     dockerRun(volumes: [(configOnHost): "/${config}",
                         '/var/run/docker.sock': '/var/run/docker.sock'],
               image: containerStructureTestImage,
-              name: "containert-structure-test-${env.BUILD_TAG}",
-              cmd: "-image ${imageName} ${config}")
+              name: "container-structure-test-${env.BUILD_TAG}",
+              cmd: "test --image ${imageName} --config ${config}")
 }
