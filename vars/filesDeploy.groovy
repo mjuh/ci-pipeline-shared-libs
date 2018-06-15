@@ -16,7 +16,7 @@ def call(Map args = [:]) {
     }
 
     def nodes = [:]
-    def names = getNodeNames(nodeLabel)
+    def names = getNodeNames(args.nodeLabel)
     for (int i=0; i<names.size(); ++i) {
         def nodeName = names[i];
         nodes[nodeName] = {
