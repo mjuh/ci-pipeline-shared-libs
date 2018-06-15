@@ -12,7 +12,7 @@ def call(Map args = [:]) {
     stashName = 'transfer'
 
     dir(args.srcPath){
-        stash(name: stashName , includes: "./*" ) 
+        stash(name: stashName) 
     }
 
     def nodes = [:]
