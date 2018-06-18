@@ -6,15 +6,9 @@ def getNodeNames(List<String> labels) {
 }
 
 def call(Map args = [:]) {
-    assert args.srcPath : "No source path provided"
-    assert args.dstPath: "No destinaion path provided"
+    assert args.Cmd: "No command provided"
     assert args.nodeLabels : "No node labels provided"
     assert args.nodeLabels instanceof List<String> : "Node labels should be a list of strings"
-    stashName = 'transfer'
-
-    dir(args.srcPath){
-        stash(name: stashName) 
-    }
 
     def nodes = [:]
     def names = getNodeNames(args.nodeLabels)
@@ -22,9 +16,7 @@ def call(Map args = [:]) {
         def nodeName = names[i];
         nodes[nodeName] = {
             node(nodeName) {
-                dir(args.dstPath) {
-                    unstash(name: stashName)
-                }
+                sh args.Cmd
             }
         }
     }
