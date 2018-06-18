@@ -22,8 +22,14 @@ def call(Map args = [:]) {
         def nodeName = names[i];
         nodes[nodeName] = {
             node(nodeName) {
+                if(arg.preDeployCmd) {
+                    sh args.preDeployCmd
+                }
                 dir(args.dstPath) {
                     unstash(name: stashName)
+                }
+                if(arg.postDeployCmd) {
+                    sh args.preDeployCmd
                 }
             }
         }
