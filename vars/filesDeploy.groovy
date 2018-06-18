@@ -1,14 +1,15 @@
 @NonCPS
-def getNodeNames(String label) {
+def getNodeNames(List<String> labels) {
     jenkins.model.Jenkins.instance.nodes
-            .findAll { node -> node.labelString == label }
+            .findAll { node -> labels.contains(node.labelString) }
             .collect { node -> node.name }
 }
 
 def call(Map args = [:]) {
     assert args.srcPath : "No source path provided"
     assert args.dstPath: "No destinaion path provided"
-    assert args.nodeLabel : "No node label provided"
+    assert args.nodeLabels : "No node labels provided"
+    assert args.nodeLabels instanceof List<String> : "Node labels should be a list of strings"
     stashName = 'transfer'
 
     dir(args.srcPath){
@@ -16,7 +17,7 @@ def call(Map args = [:]) {
     }
 
     def nodes = [:]
-    def names = getNodeNames(args.nodeLabel)
+    def names = getNodeNames(args.nodeLabels)
     for (int i=0; i<names.size(); ++i) {
         def nodeName = names[i];
         nodes[nodeName] = {
