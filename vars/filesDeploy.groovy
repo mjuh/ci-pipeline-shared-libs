@@ -29,7 +29,7 @@ def call(Map args = [:]) {
                     unstash(name: stashName)
                 }
                 if(arg.postDeployCmd) {
-                    sh args.preDeployCmd
+                    sh args.postDeployCmd
                 }
             }
         }
