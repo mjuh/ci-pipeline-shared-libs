@@ -1,10 +1,3 @@
-import groovy.json.JsonSlurperClassic
-
-@NonCPS
-def jsonParse(def json) {
-    new groovy.json.JsonSlurperClassic().parseText(json)
-}
-
 def call(Map args) {
     assert args.project : "No project name provided"
     assert args.service : "No service name provided"
@@ -51,7 +44,6 @@ def call(Map args) {
                 sh "docker-compose -f ${projectConfigFile} create ${args.service}"
                 sh "docker-compose -f ${projectConfigFile} start ${args.service}"
                 }
-            }
             if(imageUpdated) {
                 createSshDirWithGitKey(dir: HOME + '/.ssh')
                 sh """
