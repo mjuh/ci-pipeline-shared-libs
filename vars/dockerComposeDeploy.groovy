@@ -20,7 +20,7 @@ def call(Map args) {
 
             def projectConfigFile = "${args.project}.yml"
             def stackDeclaration = readYaml(file: projectConfigFile)
-            def containerNameBase = "${project}_service_"
+            def containerNameBase = "${args.project}_service_"
             def serviceExists = sh(returnStdout: true,
                                    script: "docker ps --format '{{.Names}}' -a").contains(containerNameBase)
             def serviceRunning = sh(returnStdout: true,
