@@ -38,10 +38,10 @@ def call(Map args) {
                               usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
                 def serviceDeclaration = stackDeclaration.services."${args.service}"
                 if(!serviceDeclaration) { error "${args.service} is not declared in ${args.stack}.yml" }
-                if(serviceRunning){ sh "docker-compose -f ${projectConfigFile} stop ${args.service}" }
-                if(serviceExists){ sh "docker-compose -f ${projectConfigFile} rm -f ${args.service}" }
-                sh "docker-compose -f ${projectConfigFile} create ${args.service}"
-                sh "docker-compose -f ${projectConfigFile} start ${args.service}"
+                if(serviceRunning){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} stop ${args.service}" }
+                if(serviceExists){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} rm -f ${args.service}" }
+                sh "docker-compose -p ${args.project} -f ${projectConfigFile} create ${args.service}"
+                sh "docker-compose -p ${args.project} -f ${projectConfigFile} start ${args.service}"
                 }
             if(imageUpdated) {
                 createSshDirWithGitKey(dir: HOME + '/.ssh')
