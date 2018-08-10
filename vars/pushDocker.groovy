@@ -6,5 +6,6 @@ def call(Map args = [:]) {
 
     docker.withRegistry(registryUrl, credentialsId) {
         args.image.push()
+        args.image.push('latest')
     }
 }
