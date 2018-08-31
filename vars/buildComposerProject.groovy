@@ -19,7 +19,7 @@ def call(String phpVersion) {
             stage('Build Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: BRANCH_NAME }
+                        script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
                     }
                 }
             }
