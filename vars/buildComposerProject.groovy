@@ -43,7 +43,7 @@ def call(String phpVersion) {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME
+                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME, image: dockerImage
                     }
                 }
                 post {
