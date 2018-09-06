@@ -14,7 +14,10 @@ def call() {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
         }
-        options { gitLabConnection(Constants.gitLabConnection) }
+        options {
+            gitLabConnection(Constants.gitLabConnection)
+            gitlabBuilds(builds: ['Build Docker image', 'Test Docker image structure', 'Push Docker image', 'Pull Docker image', 'Deploy service to swarm'])
+        }
         stages {
             stage('Build Docker image') {
                 when { not { expression { return params.skipToDeploy } } }

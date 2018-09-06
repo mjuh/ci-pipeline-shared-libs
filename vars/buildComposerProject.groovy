@@ -7,7 +7,10 @@ def call(String phpVersion) {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
         }
-        options { gitLabConnection(Constants.gitLabConnection) }
+        options {
+            gitLabConnection(Constants.gitLabConnection)
+            gitlabBuilds(builds: ['Install PHP dependencies with Composer', 'Build Docker image', 'Test Docker image structure', 'Push Docker image', 'Pull Docker image', 'Deploy service to swarm'])
+        }
         stages {
             stage('Install PHP dependencies with Composer') {
                 steps {
@@ -35,6 +38,14 @@ def call(String phpVersion) {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage
+                    }
+                }
+            }
+            stage('Pull Docker image') {
+                when { branch 'master' }
+                steps {
+                    gitlabCommitStatus(STAGE_NAME) {
+                        dockerPull image: dockerImage
                     }
                 }
             }
