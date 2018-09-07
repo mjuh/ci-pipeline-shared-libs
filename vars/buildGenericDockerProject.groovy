@@ -16,7 +16,7 @@ def call() {
         }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['Build Docker image', 'Test Docker image structure', 'Push Docker image', 'Pull Docker image', 'Deploy service to swarm'])
+            gitlabBuilds(builds: ['Build Docker image', 'Test Docker image structure', 'Push Docker image', 'Pull Docker image'])
         }
         stages {
             stage('Build Docker image') {
