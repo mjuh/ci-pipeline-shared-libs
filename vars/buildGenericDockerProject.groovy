@@ -16,57 +16,55 @@ def call() {
         }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['Build Docker image', 'Test Docker image structure', 'Push Docker image'])
+            gitlabBuilds(builds: ['Build Docker image', 'Test Docker image structure', 'Push Docker image', 'Deploy service to swarm'])
         }
         stages {
-            stage('Build Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
+            gitlabCommitStatus {
+                stage('Build Docker image') {
+                    when { not { expression { return params.skipToDeploy } } }
+                    steps {
                         script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
                     }
                 }
             }
-            stage('Test Docker image structure') {
-                when {
-                    allOf {
-                        expression { fileExists 'container-structure-test.yaml' }
-                        not { expression { return params.skipToDeploy } }
+            gitlabCommitStatus {
+                stage('Test Docker image structure') {
+                    when {
+                        allOf {
+                            expression { fileExists 'container-structure-test.yaml' }
+                            not { expression { return params.skipToDeploy } }
+                        }
                     }
-                }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
+                    steps {
                         containerStructureTest image: dockerImage
-                    }
+                  }
                 }
             }
-            stage('Push Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
+            gitlabCommitStatus {
+                stage('Push Docker image') {
+                    when { not { expression { return params.skipToDeploy } } }
+                    steps {
                         pushDocker image: dockerImage
                     }
                 }
             }
-            stage('Pull Docker image') {
-                when { branch 'master' }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
+            gitlabCommitStatus {
+                stage('Pull Docker image') {
+                    when { branch 'master' }
+                    steps {
                         dockerPull image: dockerImage
                     }
                 }
             }
-            stage('Deploy service to swarm') {
-                when { branch 'master' }
-                agent { label Constants.productionNodeLabel }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
+            gitlabCommitStatus {
+                stage('Deploy service to swarm') {
+                    when { branch 'master' }
+                    agent { label Constants.productionNodeLabel }
+                    steps {
                         dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
                     }
-                }
-                post {
-                    success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                    post {
+                        success { notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to production" }
                     }
                 }
             }
