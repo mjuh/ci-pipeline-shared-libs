@@ -23,4 +23,6 @@ public class Constants {
     public static final String slackChannel = '#git'
     public static final String slackTeam = 'mjru'
     public static final String slackToken = 'kyUUMqP0xTrsz2TmLUH0V8hV'
+
+    public static final String gradleDefaultCommand = 'build'
 }
