@@ -23,10 +23,7 @@ def call() {
                 when { not { expression { return params.skipToDeploy } } }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-//rtGradle.run rootDir: "projectDir/", buildFile: 'build.gradle', tasks: 'clean artifactoryPublish'
-                        script { 
                             sh ' ./gradlew build ' 
-                        }
                     }
                 }
             stage('Build Docker image') {
