@@ -9,14 +9,14 @@ def getInactive() {
 }
 
 def check() {
-  def nginx1 = new RESTClient('http://nginx1.intr:8080')
-    nginx1.auth.basic 'jenkins', '***REMOVED***'
-  def hms1 = nginx1.get(path: '/hms').data
+  def nginx1 = new RESTClient(Constants.nginx1ApiUrl)
+    nginx1.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
+  def hms1 = nginx1.get(path: Constants.nginxApiPath).data
     hms1.inactive = (hms1.available - hms1.active)[0]
 
-  def nginx2 = new RESTClient('http://nginx2.intr:8080')
-    nginx2.auth.basic 'jenkins', '***REMOVED***'
-  def hms2 = nginx2.get(path: '/hms').data
+  def nginx2 = new RESTClient(Constants.nginx2ApiUrl)
+    nginx2.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
+  def hms2 = nginx2.get(path: Constants.nginxApiPath).data
     hms2.inactive = (hms2.available - hms2.active)[0]
 
   if (hms1.inactive != hms2.inactive) {
