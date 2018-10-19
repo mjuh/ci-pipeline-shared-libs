@@ -25,4 +25,6 @@ public class Constants {
     public static final String slackToken = 'kyUUMqP0xTrsz2TmLUH0V8hV'
 
     public static final String gradleDefaultCommand = 'build'
+
+    public static final Map hmsPorts = [hms1: [apigw: 8080, eureka1: 8711, eureka2: 8712, eureka3: 8713], hms2: [apigw: 8081, eureka1: 8721, eureka2: 8722, eureka3: 8723]]
 }
