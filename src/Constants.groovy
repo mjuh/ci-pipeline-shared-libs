@@ -31,7 +31,6 @@ public class Constants {
 
     public static final String nginx1ApiUrl = 'http://nginx1.intr:8080'
     public static final String nginx2ApiUrl = 'http://nginx2.intr:8080'
-    public static final String nginxApiPath = '/hms'
     public static final String nginxAuthUser = 'jenkins'
     public static final String nginxAuthPass = '***REMOVED***'
 
