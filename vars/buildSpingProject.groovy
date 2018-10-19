@@ -26,6 +26,7 @@ def call() {
                             sh ' ./gradlew build ' 
                     }
                 }
+            }
             stage('Build Docker image') {
                 when { not { expression { return params.skipToDeploy } } }
                 steps {
