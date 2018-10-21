@@ -27,7 +27,7 @@ def call() {
                     }
                 }
             }
-            stage('Build Docker image') {
+/*            stage('Build Docker image') {
                 when { not { expression { return params.skipToDeploy } } }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
@@ -63,7 +63,7 @@ def call() {
                         dockerPull image: dockerImage
                     }
                 }
-            }
+            } */
             stage('Detect InActive stack') {
                 when { branch 'master' }
                 agent { label Constants.productionNodeLabel }
@@ -72,7 +72,7 @@ def call() {
                         script {
                             nginx.check("/hms")
                             i = nginx.getInactive("/hms")
-                            sh ' echo "${i}"' 
+                            sh ' echo "Inactivestack is  ${i}"' 
                         } 
                     }
                 }
