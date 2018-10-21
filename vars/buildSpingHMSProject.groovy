@@ -9,7 +9,11 @@ def call() {
                                          "если оставить пустым, при деплое будет использован последний коммит в master")
                      booleanParam(name: 'skipToDeploy',
                                   defaultValue: false,
-                                  description: 'пропустить сборку и тестирование')}
+                                  description: 'пропустить сборку и тестирование')
+                     booleanParam(name: 'Switch',
+                                  defaultValue: false,
+                                  description: 'Свичнуть стэки?') 
+                    }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
@@ -27,7 +31,7 @@ def call() {
                     }
                 }
             }
-/*            stage('Build Docker image') {
+            stage('Build Docker image') {
                 when { not { expression { return params.skipToDeploy } } }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
@@ -63,16 +67,28 @@ def call() {
                         dockerPull image: dockerImage
                     }
                 }
-            } */
+            } 
             stage('Detect InActive stack') {
                 when { branch 'master' }
-                agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                             script {
                                 nginx.check('/hms')
                                 echo "${nginx.getInactive('/hms')}"
                             }
+                    }
+                }
+            }
+            stage('Switch stacks') {
+                when {
+                    allOf {
+                        branch 'master'
+                        expression { return Switch }
+                    }
+                }
+                steps {
+                    gitlabCommitStatus(STAGE_NAME) {
+                       script {nginx.Switch('/hms')}
                     }
                 }
             }
