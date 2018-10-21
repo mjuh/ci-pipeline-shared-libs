@@ -64,20 +64,6 @@ def call() {
                     }
                 }
             }
-/*            stage('Deploy service to swarm') {
-                when { branch 'master' }
-                agent { label Constants.productionNodeLabel }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
-                    }
-                }
-                post {
-                    success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
-                    }
-                }
-            } */
             stage('Detect InActive stack') {
                 when { branch 'master' }
                 agent { label Constants.productionNodeLabel }
@@ -86,7 +72,7 @@ def call() {
                         script {
                             nginx.check("/hms")
                             i = nginx.getInactive("/hms")
-                            echo "${i}" 
+                            sh ' echo "${i}"' 
                         } 
                     }
                 }
