@@ -10,9 +10,9 @@ def call() {
                      booleanParam(name: 'skipToDeploy',
                                   defaultValue: false,
                                   description: 'пропустить сборку и тестирование')
-                     booleanParam(name: 'Switch',
+                     booleanParam(name: 'switchStacks',
                                   defaultValue: false,
-                                  description: 'Свичнуть стэки?') 
+                                  description: 'Свичнуть стэки') 
                     }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
@@ -83,7 +83,7 @@ def call() {
                 when {
                     allOf {
                         branch 'master'
-                        expression { return Switch }
+                        expression { return params.switchStacks }
                     }
                 }
                 steps {
