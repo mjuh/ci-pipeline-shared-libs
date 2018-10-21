@@ -83,8 +83,10 @@ def call() {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                      nginx.check("/hms")
-                      nginx.getInactive("/hms")
+                        script {
+                            nginx.check("/hms")
+                            nginx.getInactive("/hms")
+                        } 
                     }
                 }
             }
