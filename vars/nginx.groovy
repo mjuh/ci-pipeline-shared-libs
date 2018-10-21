@@ -1,7 +1,10 @@
 @Grab('org.codehaus.groovy.modules.http-builder:http-builder:0.7')
 import groovyx.net.http.RESTClient
+import groovy.json.JsonOutput
+import static groovyx.net.http.ContentType.URLENC
 
 def getInactive(String apipath) {
+  check(apipath)
   def nginx = new RESTClient(Constants.nginx1ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
   def hms = nginx.get(path: apipath).data
@@ -32,4 +35,33 @@ def check(String apipath) {
 //nginx.auth.basic 'jenkins', '***REMOVED***'
 //def hms = nginx.get(path: '/hms').data
 //}
-//def switch() {}
+
+def Switch(String apipath) {
+
+  json = JsonOutput.toJson([setActive: getInactive(apipath)])
+
+  def nginx = new RESTClient(Constants.nginx1ApiUrl)
+    nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
+
+  def resp = nginx.post(
+    path: apipath,
+    body: json,
+    requestContentType: URLENC )
+
+    assert resp.status == 200
+//    assert resp.headers.Status
+
+  nginx = new RESTClient(Constants.nginx2ApiUrl)
+    nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
+  
+  resp = nginx.post(
+    path: apipath,
+    body: json,
+    requestContentType: URLENC )
+
+    assert resp.status == 200
+//    assert resp.headers.Status
+
+  check(apipath)
+}
+
