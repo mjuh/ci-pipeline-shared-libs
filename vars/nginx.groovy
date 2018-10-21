@@ -1,20 +1,14 @@
 @Grab('org.codehaus.groovy.modules.http-builder:http-builder:0.7')
 import groovyx.net.http.RESTClient
 
-def getInactive(Map args =[:]) {
-  assert args.apipath : "No apipath provided"
-  def apipath = args.apipath
+def getInactive(String apipath) {
   def nginx = new RESTClient(Constants.nginx1ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
   def hms = nginx.get(path: apipath).data
     hms.inactive = (hms.available - hms.active)[0]
 }
 
-def check(Map args =[:]) {
-  assert args.apipath : "No apipath provided"
-
-  def apipath = args.apipath
-  
+def check(String apipath) {
   def nginx1 = new RESTClient(Constants.nginx1ApiUrl)
     nginx1.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
   def hms1 = nginx1.get(path: apipath).data
