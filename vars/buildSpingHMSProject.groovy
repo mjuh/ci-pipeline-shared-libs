@@ -71,7 +71,7 @@ def call() {
                     gitlabCommitStatus(STAGE_NAME) {
                             script {
                             nginx.check '/hms'
-                            echo "nginx.getInactive('/hms')"
+                            echo "${nginx.getInactive('/hms')}"
                             }
                     }
                 }
