@@ -16,7 +16,7 @@ def call() {
         }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['Build Gradlew','Build Docker image', 'Test Docker image structure', 'Push Docker image'])
+            gitlabBuilds(builds: ['Build Gradlew', 'Build Docker image', 'Test Docker image structure', 'Push Docker image'])
         }
         stages {
             stage('Build Gradlew') {
@@ -69,11 +69,8 @@ def call() {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        script {
-                            nginx.check("/hms")
-                            i = nginx.getInactive("/hms")
-                            sh ' echo "Inactivestack is  ${i}"' 
-                        } 
+                            nginx.check '/hms'
+                            nginx.getInactive '/hms'
                     }
                 }
             }
