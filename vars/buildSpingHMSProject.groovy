@@ -12,7 +12,7 @@ def call() {
                                   description: 'пропустить сборку и тестирование')
                      booleanParam(name: 'switchStacks',
                                   defaultValue: false,
-                                  description: 'Свичнуть стэки') 
+                                  description: 'Свичнуть стэки?') 
                     }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
