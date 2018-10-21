@@ -87,6 +87,7 @@ def call() {
                       nginx.getInactive("/hms")
                     }
                 }
+            }
         }
         post {
             success { cleanWs() }
