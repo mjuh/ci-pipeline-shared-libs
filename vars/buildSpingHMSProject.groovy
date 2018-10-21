@@ -70,8 +70,8 @@ def call() {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                             script {
-                            nginx.check '/hms'
-                            echo "${nginx.getInactive('/hms')}"
+                                nginx.check('/hms')
+                                echo "${nginx.getInactive('/hms')}"
                             }
                     }
                 }
