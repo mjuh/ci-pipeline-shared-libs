@@ -27,11 +27,12 @@ def call(Map args) {
                       branches: [[name: dockerStacksRepoCommitId]],
                       userRemoteConfigs: [[url: Constants.dockerStacksGitRepoUrl, credentialsId: Constants.gitCredId]]])
 
-            def stackConfigFile = "${args.stack}.yml"
+            def stackConfigFile = args.stackConfigFile ?: "${args.stack}.yml"
             def stackDeclaration = readYaml(file: stackConfigFile)
             def imageUpdated = false
 
             if(args.service && imageName && stackDeclaration.services."${args.service}".image != imageName) {
+                if(args.serviceDeclaration) { stackDeclaration.services."${args.service}" << args.serviceDeclaration }
                 stackDeclaration.services."${args.service}".image = imageName
                 sh "rm -f ${stackConfigFile}"
                 writeYaml(file: stackConfigFile, data: stackDeclaration)
