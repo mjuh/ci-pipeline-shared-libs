@@ -32,7 +32,7 @@ def call(Map args) {
             def imageUpdated = false
 
             if(args.service && imageName && stackDeclaration.services."${args.service}".image != imageName) {
-                if(args.serviceDeclaration) { stackDeclaration.services."${args.service}" << args.serviceDeclaration }
+                if(args.ports) { stackDeclaration.services."${args.service}".ports = args.ports }
                 stackDeclaration.services."${args.service}".image = imageName
                 sh "rm -f ${stackConfigFile}"
                 writeYaml(file: stackConfigFile, data: stackDeclaration)

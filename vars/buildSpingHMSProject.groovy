@@ -17,7 +17,6 @@ def call() {
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
-            PUBLISHED_PORT = Constants.hmsPorts."${nginx.getInactive('/hms')}"."${PROJECT_NAME}"
         }
         options {
             buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
@@ -75,7 +74,7 @@ def call() {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME, image: dockerImage, serviceDeclaration: [ports: [published: PUBLISHED_PORT]], stackConfigFile: 'hms.yml', dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME, image: dockerImage, ports: Constants.hmsPorts."${nginx.getInactive('/hms')}"."${PROJECT_NAME}", stackConfigFile: 'hms.yml', dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
                     }
                 }
                 post {
