@@ -25,18 +25,10 @@ def check(String apipath) {
     if (hms1.inactive != hms2.inactive) {
         error "Inactive stacks mismatch on nginx1/2"
     }
-
 }
 
-//TODO:
-//def getAll() {
-//def nginx = new RESTClient('http://nginx1.intr:8080')
-//nginx.auth.basic 'jenkins', '***REMOVED***'
-//def hms = nginx.get(path: '/hms').data
-//}
-
 def Switch(String apipath) {
-
+    check(apipath)
     json = JsonOutput.toJson([setActive: getInactive(apipath)])
 
     def nginx = new RESTClient(Constants.nginx1ApiUrl)
@@ -48,7 +40,6 @@ def Switch(String apipath) {
             requestContentType: URLENC)
 
     assert resp.status == 200
-//    assert resp.headers.Status
 
     nginx = new RESTClient(Constants.nginx2ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
@@ -59,7 +50,6 @@ def Switch(String apipath) {
             requestContentType: URLENC)
 
     assert resp.status == 200
-//    assert resp.headers.Status
 
     check(apipath)
 }
