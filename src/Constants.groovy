@@ -27,7 +27,20 @@ public class Constants {
     public static final String gradleDefaultCommand = 'build'
 
 
-    public static final Map hmsPorts = [hms1: [apigw: 8080, eureka1: 8711, eureka2: 8712, eureka3: 8713], hms2: [apigw: 8081, eureka1: 8721, eureka2: 8722, eureka3: 8723]]
+    public static final Map hmsPorts = [
+            hms1: [
+                    apigw  : ['8080:8080'],
+                    eureka1: ['8711:8761'],
+                    eureka2: ['8712:8761'],
+                    eureka3: ['8713:8761']
+            ],
+            hms2: [
+                    apigw  : ['8081:8080'],
+                    eureka1: ['8721:8761'],
+                    eureka2: ['8722:8761'],
+                    eureka3: ['8723:8761']
+                    ]
+    ]
 
     public static final String nginx1ApiUrl = 'http://nginx1.intr:8080'
     public static final String nginx2ApiUrl = 'http://nginx2.intr:8080'
