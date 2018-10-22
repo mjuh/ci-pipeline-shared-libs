@@ -55,6 +55,9 @@ def call(Map args) {
                     if(serviceDeclaration.deploy.replicas) {
                         cmd += "--replicas ${serviceDeclaration.deploy.replicas} "
                     }
+                    if(serviceDeclaration.ports) {
+                        cmd += serviceDeclaration.ports.collect {"--port ${it}"}.join(' ')
+                    }
                     cmd += "--image ${imageName} ${args.stack}_${args.service}"
                     sh cmd
                 } else {
