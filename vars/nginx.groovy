@@ -4,30 +4,33 @@ import groovy.json.JsonOutput
 import static groovyx.net.http.ContentType.URLENC
 
 def getInactive(String apipath) {
-  check(apipath)
-  def nginx = new RESTClient(Constants.nginx1ApiUrl)
+    check(apipath)
+    def nginx = new RESTClient(Constants.nginx1ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
-  def hms = nginx.get(path: apipath).data
+    def hms = nginx.get(path: apipath).data
     hms.inactive = (hms.available - hms.active)[0]
+    println(apipath)
+    println(hms)
+    println(hms.inactive)
+    hms.inactive
 }
 
 def check(String apipath) {
-  def nginx1 = new RESTClient(Constants.nginx1ApiUrl)
+    def nginx1 = new RESTClient(Constants.nginx1ApiUrl)
     nginx1.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
-  def hms1 = nginx1.get(path: apipath).data
+    def hms1 = nginx1.get(path: apipath).data
     hms1.inactive = (hms1.available - hms1.active)[0]
 
-  def nginx2 = new RESTClient(Constants.nginx2ApiUrl)
+    def nginx2 = new RESTClient(Constants.nginx2ApiUrl)
     nginx2.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
-  def hms2 = nginx2.get(path: apipath).data
+    def hms2 = nginx2.get(path: apipath).data
     hms2.inactive = (hms2.available - hms2.active)[0]
 
-  if (hms1.inactive != hms2.inactive) {
-    error "Inactive stacks mismatch on nginx1/2"
-  }
+    if (hms1.inactive != hms2.inactive) {
+        error "Inactive stacks mismatch on nginx1/2"
+    }
 
 }
-
 
 //TODO:
 //def getAll() {
@@ -38,30 +41,30 @@ def check(String apipath) {
 
 def Switch(String apipath) {
 
-  json = JsonOutput.toJson([setActive: getInactive(apipath)])
+    json = JsonOutput.toJson([setActive: getInactive(apipath)])
 
-  def nginx = new RESTClient(Constants.nginx1ApiUrl)
+    def nginx = new RESTClient(Constants.nginx1ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
 
-  def resp = nginx.post(
-    path: apipath,
-    body: json,
-    requestContentType: URLENC )
+    def resp = nginx.post(
+            path: apipath,
+            body: json,
+            requestContentType: URLENC)
 
     assert resp.status == 200
 //    assert resp.headers.Status
 
-  nginx = new RESTClient(Constants.nginx2ApiUrl)
+    nginx = new RESTClient(Constants.nginx2ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
-  
-  resp = nginx.post(
-    path: apipath,
-    body: json,
-    requestContentType: URLENC )
+
+    resp = nginx.post(
+            path: apipath,
+            body: json,
+            requestContentType: URLENC)
 
     assert resp.status == 200
 //    assert resp.headers.Status
 
-  check(apipath)
+    check(apipath)
 }
 
