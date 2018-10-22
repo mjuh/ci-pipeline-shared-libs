@@ -19,6 +19,7 @@ def call() {
             GROUP_NAME = gitRemoteOrigin.getGroup()
         }
         options {
+            buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['Build Gradlew', 'Build Docker image', 'Test Docker image structure', 'Push Docker image'])
         }
@@ -68,7 +69,7 @@ def call() {
                     }
                 }
             } 
-            stage('Detect InActive stack') {
+/*            stage('Detect InActive stack') {
                 when { branch 'master' }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
@@ -79,6 +80,7 @@ def call() {
                     }
                 }
             }
+*/
             stage('Switch stacks') {
                 when {
                     allOf {
