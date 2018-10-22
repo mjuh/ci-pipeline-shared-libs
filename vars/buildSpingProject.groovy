@@ -1,4 +1,4 @@
-def call() {
+def call(String stack) {
     def dockerImage = null
 
     pipeline {
@@ -69,7 +69,7 @@ def call() {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                        dockerStackDeploy stack: stack, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
                     }
                 }
                 post {
