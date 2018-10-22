@@ -8,11 +8,7 @@ def getInactive(String apipath) {
     def nginx = new RESTClient(Constants.nginx1ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
     def hms = nginx.get(path: apipath).data
-    hms.inactive = (hms.available - hms.active)[0]
-    println(apipath)
-    println(hms)
-    println(hms.inactive)
-    hms.inactive
+    (hms.available - hms.active)[0]
 }
 
 def check(String apipath) {
