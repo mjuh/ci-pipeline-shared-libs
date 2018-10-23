@@ -18,12 +18,15 @@ def call(String stack) {
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['Build Gradlew','Build Docker image', 'Test Docker image structure', 'Push Docker image'])
         }
+        tools {
+            gradle "latest"
+        }
         stages {
             stage('Build Gradlew') {
                 when { not { expression { return params.skipToDeploy } } }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                            sh ' ./gradlew build ' 
+                            sh ' gradle build ' 
                     }
                 }
             }
