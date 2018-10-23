@@ -22,13 +22,13 @@ def call() {
         options {
             buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['Build Gradlew', 'Build Docker image', 'Test Docker image structure', 'Push Docker image'])
+            gitlabBuilds(builds: ['Build Gradle', 'Build Docker image', 'Push Docker image'])
         }
        tools {
             gradle "latest"
         }
         stages {
-            stage('Build Gradlew') {
+            stage('Build Gradle') {
                 when { not { expression { return params.skipToDeploy } } }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
