@@ -33,6 +33,7 @@ public class Constants {
                     eureka1: ['8711:8761'],
                     eureka2: ['8712:8761'],
                     eureka3: ['8713:8761'],
+                    configserver: ['18888:8888'],
                     'spring-hello-world': ['9090:8080']
             ],
             hms2: [
@@ -40,6 +41,7 @@ public class Constants {
                     eureka1: ['8721:8761'],
                     eureka2: ['8722:8761'],
                     eureka3: ['8723:8761'],
+                    configserver: ['28888:8888'],
                     'spring-hello-world': ['9091:8080']
                     ]
     ]
