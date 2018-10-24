@@ -5,20 +5,12 @@ def jsonParse(def json) {
     new groovy.json.JsonSlurperClassic().parseText(json)
 }
 
-//Map.metaClass.merge = { Map rhs ->
-//       def lhs = delegate
-//       rhs.each { k, v -> lhs[k] = lhs[k] in Map ? lhs[k].merge(v) : v }   
-//       lhs
-//}
-
-def call(Map args) {
-
-Map.metaClass.merge = { Map rhs ->
-       def lhs = delegate
-       rhs.each { k, v -> lhs[k] = lhs[k] in Map ? lhs[k].merge(v) : v }
-       lhs
+def mergeMaps(first, second) {
+    second.each {k, _ -> first[k] = first[k] instanceof Map ? mergeMaps(first[k], second[k]) : second[k] ?: first[k] }
+    first
 }
 
+def call(Map args) {
     assert args.stack : "No stack name provided"
 
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
@@ -49,13 +41,7 @@ Map.metaClass.merge = { Map rhs ->
                 stackDeclaration.services."${args.service}".image = imageName
                 sh "rm -f ${stackConfigFile}"
                 if(stackDeclaration."x-${args.stack}-override".services) {
-//                    println(stackDeclaration."x-${args.stack}-override".services)
-//                    println(stackDeclaration.services)
-                    a = stackDeclaration.services
-                    b = stackDeclaration."x-${args.stack}-override".services
-                    a.merge(b)
-                    println(a)
-                    stackDeclaration.services.merge(stackDeclaration."x-${args.stack}-override".services)
+                    mergeMaps(stackDeclaration.services, stackDeclaration."x-${args.stack}-override".services)
                     println(stackDeclaration.services)
                 }
                 writeYaml(file: stackConfigFile, data: stackDeclaration)
