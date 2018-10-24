@@ -51,7 +51,7 @@ Map.metaClass.merge = { Map rhs ->
                 if(stackDeclaration."x-${args.stack}-override".services) {
 //                    println(stackDeclaration."x-${args.stack}-override".services)
 //                    println(stackDeclaration.services)
-                    a =  stackDeclaration.services
+                    a = stackDeclaration.services
                     b = stackDeclaration."x-${args.stack}-override".services
                     a.merge(b)
                     println(a)
