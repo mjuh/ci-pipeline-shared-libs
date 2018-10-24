@@ -37,12 +37,10 @@ def call(Map args) {
             def imageUpdated = false
 
             if(args.service && imageName && stackDeclaration.services."${args.service}".image != imageName) {
-                if(args.ports) { stackDeclaration.services."${args.service}".ports = args.ports }
                 stackDeclaration.services."${args.service}".image = imageName
                 sh "rm -f ${stackConfigFile}"
                 if(stackDeclaration."x-${args.stack}-override".services) {
                     mergeMaps(stackDeclaration.services, stackDeclaration."x-${args.stack}-override".services)
-                    println(stackDeclaration.services)
                 }
                 writeYaml(file: stackConfigFile, data: stackDeclaration)
                 imageUpdated = true
