@@ -42,8 +42,8 @@ def call(Map args) {
                 stackDeclaration.services."${args.service}".image = imageName
                 sh "rm -f ${stackConfigFile}"
                 if(stackDeclaration."x-${args.stack}-override".services) {
-                    println(stackDeclaration."x-${args.stack}-override".services)
-                    println(stackDeclaration.services)
+//                    println(stackDeclaration."x-${args.stack}-override".services)
+//                    println(stackDeclaration.services)
                     stackDeclaration.services.merge(stackDeclaration."x-${args.stack}-override".services)
                     println(stackDeclaration.services)
                 }
