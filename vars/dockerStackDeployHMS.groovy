@@ -5,6 +5,7 @@ def jsonParse(def json) {
     new groovy.json.JsonSlurperClassic().parseText(json)
 }
 
+@NonCPS
 Map.metaClass.merge = { Map rhs ->
        def lhs = delegate
        rhs.each { k, v -> lhs[k] = lhs[k] in Map ? lhs[k].merge(v) : v }   
