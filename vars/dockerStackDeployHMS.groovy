@@ -5,13 +5,20 @@ def jsonParse(def json) {
     new groovy.json.JsonSlurperClassic().parseText(json)
 }
 
+//Map.metaClass.merge = { Map rhs ->
+//       def lhs = delegate
+//       rhs.each { k, v -> lhs[k] = lhs[k] in Map ? lhs[k].merge(v) : v }   
+//       lhs
+//}
+
+def call(Map args) {
+
 Map.metaClass.merge = { Map rhs ->
        def lhs = delegate
-       rhs.each { k, v -> lhs[k] = lhs[k] in Map ? lhs[k].merge(v) : v }   
+       rhs.each { k, v -> lhs[k] = lhs[k] in Map ? lhs[k].merge(v) : v }
        lhs
 }
 
-def call(Map args) {
     assert args.stack : "No stack name provided"
 
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
