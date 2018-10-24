@@ -27,25 +27,6 @@ public class Constants {
     public static final String gradleDefaultCommand = 'build'
 
 
-    public static final Map hmsPorts = [
-            hms1: [
-                    apigw  : ['8080:8080'],
-                    eureka1: ['8711:8761'],
-                    eureka2: ['8712:8761'],
-                    eureka3: ['8713:8761'],
-                    configserver: ['18888:8888'],
-                    'spring-hello-world': ['9090:8080']
-            ],
-            hms2: [
-                    apigw  : ['8081:8080'],
-                    eureka1: ['8721:8761'],
-                    eureka2: ['8722:8761'],
-                    eureka3: ['8723:8761'],
-                    configserver: ['28888:8888'],
-                    'spring-hello-world': ['9091:8080']
-                    ]
-    ]
-
     public static final String nginx1ApiUrl = 'http://nginx1.intr:8080'
     public static final String nginx2ApiUrl = 'http://nginx2.intr:8080'
     public static final String nginxAuthUser = 'jenkins'
