@@ -5,6 +5,11 @@ def jsonParse(def json) {
     new groovy.json.JsonSlurperClassic().parseText(json)
 }
 
+def mergeMaps(first, second) {
+    second.each {k, _ -> first[k] = first[k] instanceof Map ? mergeMaps(first[k], second[k]) : second[k] ?: first[k] }
+    first
+}
+
 def call(Map args) {
     assert args.stack : "No stack name provided"
 
@@ -35,6 +40,10 @@ def call(Map args) {
                 if(args.ports) { stackDeclaration.services."${args.service}".ports = args.ports }
                 stackDeclaration.services."${args.service}".image = imageName
                 sh "rm -f ${stackConfigFile}"
+                if(stackDeclaration."x-${args.stack}-override".services) {
+                    mergeMaps(stackDeclaration.services, stackDeclaration."x-${args.stack}-override".services)
+                    println(stackDeclaration.services)
+                }
                 writeYaml(file: stackConfigFile, data: stackDeclaration)
                 imageUpdated = true
             }
@@ -84,3 +93,4 @@ def call(Map args) {
         }
     }
 }
+

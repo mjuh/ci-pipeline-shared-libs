@@ -20,7 +20,7 @@ def call() {
             INACTIVE_STACK = nginx.getInactive('/hms')
         }
         options {
-            buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
+            buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['Build Gradle', 'Build Docker image', 'Push Docker image'])
         }
@@ -78,7 +78,7 @@ def call() {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy stack: INACTIVE_STACK, service: PROJECT_NAME, image: dockerImage, ports: Constants.hmsPorts."${INACTIVE_STACK}"."${PROJECT_NAME}", stackConfigFile: 'hms.yml', dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                        dockerStackDeploy stack: INACTIVE_STACK, service: PROJECT_NAME, image: dockerImage, stackConfigFile: 'hms.yml', dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
                     }
                 }
                 post {
