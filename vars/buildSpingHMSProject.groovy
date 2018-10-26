@@ -83,7 +83,7 @@ def call() {
                 }
                 post {
                     success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to ${INACTIVE_STACK} stack"
                     }
                 }
             }
