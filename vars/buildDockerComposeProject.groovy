@@ -14,7 +14,11 @@ def call(String composeProject) {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
         }
-        options { gitLabConnection(Constants.gitLabConnection) }
+        options {
+            buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+            gitLabConnection(Constants.gitLabConnection)
+            gitlabBuilds(builds: ['Build Docker image', 'Test Docker image structure', 'Push Docker image'])
+        }
         stages {
             stage('Build Docker image') {
                 when { not { expression { return params.skipToDeploy } } }
