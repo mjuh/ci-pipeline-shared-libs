@@ -70,7 +70,11 @@ def call(Map args) {
                     }
                     cmd += "--image ${imageName} ${args.stack}_${args.service}"
                     sh cmd
-                } else {
+                } 
+                if(args.force) {
+                    sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
+                }
+                else {
                     sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
                 }
             }
