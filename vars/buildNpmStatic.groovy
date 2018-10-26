@@ -16,6 +16,7 @@ def call(String dstpath) {
             stage('npm operations') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
+                        sh 'npm --version'
                         sh 'NODE_ENV=production npm install'
                         sh 'NODE_ENV=production npm run-script build'
                     }
