@@ -16,9 +16,9 @@ def call(String dstpath) {
               when { branch 'master' }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        sh 'npm install'
-                        sh 'npm run-script build'
-                        sh 'npm run-script build-test'
+                        sh 'NODE_ENV=production npm install'
+                        sh 'NODE_ENV=production npm run-script build'
+                        sh 'NODE_ENV=production npm run-script build-test'
                     }
                 }
             }
