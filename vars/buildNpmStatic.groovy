@@ -7,6 +7,7 @@ def call(String dstpath) {
             GROUP_NAME = gitRemoteOrigin.getGroup()
         }
         options {
+            buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['npm operations', 'stash', 'unstash'])
         }
@@ -51,5 +52,5 @@ def call(String dstpath) {
             success { cleanWs() }
             failure { notifySlack "Build failled: ${JOB_NAME} [<${RUN_DISPLAY_URL}|${BUILD_NUMBER}>]", "red" }
         }
-}
+    }
 }
