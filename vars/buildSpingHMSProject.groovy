@@ -78,7 +78,7 @@ def call() {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy stack: INACTIVE_STACK, service: PROJECT_NAME, image: dockerImage, stackConfigFile: 'hms.yml', dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                        dockerStackDeploy stack: INACTIVE_STACK, service: PROJECT_NAME, image: dockerImage, stackConfigFile: 'hms.yml', dockerStacksRepoCommitId: params.dockerStacksRepoCommitId, force: true
                     }
                 }
                 post {
