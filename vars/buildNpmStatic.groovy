@@ -26,7 +26,7 @@ def call(String dstpath) {
               when { branch 'master' }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                       stash name: "my-stash", includes: "public/*"
+                       stash name: "my-stash", includes: "public/**"
                     }
                 }
             }
