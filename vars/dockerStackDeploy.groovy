@@ -49,7 +49,7 @@ def call(Map args) {
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                               usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
                 sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
-                if (args.service && prodService && imageName) {
+                if (args.service && prodService && imageName && !stackDeclaration."x-${args.stack}-override") {
                     def serviceDeclaration = stackDeclaration.services."${args.service}"
                     if(!serviceDeclaration) { error "${args.service} is not declared in ${args.stack}.yml" }
                     echo """
