@@ -71,7 +71,7 @@ def call(Map args) {
                     cmd += "--image ${imageName} ${args.stack}_${args.service}"
                     sh cmd
                 } 
-                if(stackDeclaration."x-${args.stack}-override" && stackDeclaration."x-${args.stack}-override".services) {
+                else if(stackDeclaration."x-${args.stack}-override" && stackDeclaration."x-${args.stack}-override".services) {
                     sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
                 }
                 else {
