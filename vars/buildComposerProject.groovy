@@ -10,6 +10,7 @@ def call(String phpVersion) {
         options {
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['Install PHP dependencies with Composer', 'Build Docker image', 'Test Docker image structure', 'Push Docker image'])
+            buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
         stages {
             stage('Install PHP dependencies with Composer') {
