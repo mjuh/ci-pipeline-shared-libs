@@ -99,6 +99,11 @@ def call() {
                        script {nginx.Switch('/hms')}
                     }
                 }
+                post {
+                    success {
+                        notifySlack "Switched to ${INACTIVE_STACK} stack"
+                    }
+                }
             }
         }
         post {
