@@ -52,3 +52,4 @@ def call(String dstpath) {
             failure { notifySlack "Build failled: ${JOB_NAME} [<${RUN_DISPLAY_URL}|${BUILD_NUMBER}>]", "red" }
         }
 }
+}
