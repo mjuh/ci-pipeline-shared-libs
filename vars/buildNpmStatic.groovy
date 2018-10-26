@@ -5,7 +5,6 @@ def call(String dstpath) {
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
-            NODE_ENV = 'production'
         }
         options {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
@@ -17,8 +16,8 @@ def call(String dstpath) {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         sh 'npm --version'
-                        sh 'NODE_ENV=production npm install'
-                        sh 'NODE_ENV=production npm run-script build'
+                        sh 'npm install'
+                        sh 'npm run-script build'
                     }
                 }
             }
