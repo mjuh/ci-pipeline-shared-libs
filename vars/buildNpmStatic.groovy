@@ -19,7 +19,6 @@ def call(String dstpath) {
                     gitlabCommitStatus(STAGE_NAME) {
                         sh 'NODE_ENV=production npm install'
                         sh 'NODE_ENV=production npm run-script build'
-                        sh 'NODE_ENV=production npm run-script build-test'
                     }
                 }
             }
