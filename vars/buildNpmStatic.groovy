@@ -42,6 +42,12 @@ def call(String dstpath) {
                     }
                  }
               }
+              post {
+                 success {
+                    notifySlack "${PROJECT_NAME} deployed to production"
+                 }
+              }
+            }
             stage('unstash') {
               steps {
                  gitlabCommitStatus(STAGE_NAME) {
@@ -52,10 +58,9 @@ def call(String dstpath) {
                     }
                  }
               }
-
               post {
                  success {
-                    notifySlack "${PROJECT_NAME} deployed"
+                    notifySlack "${PROJECT_NAME} deployed to ci"
                  }
               }
             }
