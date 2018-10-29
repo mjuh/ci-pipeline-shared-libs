@@ -9,7 +9,7 @@ def call(String dstpath) {
         options {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['npm operations', 'stash', 'unstash'])
+            gitlabBuilds(builds: ['npm operations', 'stash', 'unstash-ci'])
         }
         stages {
             stage('npm operations') {
@@ -48,7 +48,7 @@ def call(String dstpath) {
                  }
               }
             }
-            stage('unstash') {
+            stage('unstash-ci') {
               steps {
                  gitlabCommitStatus(STAGE_NAME) {
                     node('ci') {
