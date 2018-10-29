@@ -36,7 +36,7 @@ def call(Map args) {
             def stackDeclaration = readYaml(file: stackConfigFile)
             def imageUpdated = false
 
-            if(args.service && imageName && stackDeclaration.services."${args.service}".image != imageName) {
+            if(args.service && imageName) {
                 stackDeclaration.services."${args.service}".image = imageName
                 sh "rm -f ${stackConfigFile}"
                 if(stackDeclaration."x-${args.stack}-override" && stackDeclaration."x-${args.stack}-override".services) {
