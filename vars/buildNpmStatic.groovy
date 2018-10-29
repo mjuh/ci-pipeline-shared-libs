@@ -9,15 +9,30 @@ def call(String dstpath) {
         options {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['npm operations', 'stash', 'unstash-ci'])
+            gitlabBuilds(builds: ['npm install', 'stash', 'unstash-ci'])
         }
         stages {
-            stage('npm operations') {
+            stage('npm install') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         sh 'npm --version'
                         sh 'npm install'
+                    }
+                }
+            }
+            stage('npm build') {
+                steps {
+                    when { branch 'master' }
+                    gitlabCommitStatus(STAGE_NAME) {
                         sh 'npm run-script build'
+                    }
+                }
+            }
+            stage('npm build ci') {
+                steps {
+                    when { not { branch 'master' }}
+                    gitlabCommitStatus(STAGE_NAME) {
+                        sh 'npm run-script build-test'
                     }
                 }
             }
@@ -48,6 +63,7 @@ def call(String dstpath) {
               }
             }
             stage('unstash-ci') {
+              when { not { branch 'master' }}
               steps {
                  gitlabCommitStatus(STAGE_NAME) {
                     node('ci') {
