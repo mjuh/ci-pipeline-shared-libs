@@ -29,7 +29,12 @@ def call() {
         }
         stages {
             stage('Build Gradle') {
-                when { not { expression { return params.skipToDeploy } } }
+                when {
+                    allOf {
+                        not { expression { return params.skipToDeploy } }
+                        not { expression { return params.switchStacks } }
+                    }
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                             sh ' gradle build ' 
@@ -37,7 +42,12 @@ def call() {
                 }
             }
             stage('Build Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
+                when {
+                    allOf {
+                        not { expression { return params.skipToDeploy } }
+                        not { expression { return params.switchStacks } }
+                    }
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
@@ -49,6 +59,7 @@ def call() {
                     allOf {
                         expression { fileExists 'container-structure-test.yaml' }
                         not { expression { return params.skipToDeploy } }
+                        not { expression { return params.switchStacks } }
                     }
                 }
                 steps {
@@ -58,7 +69,12 @@ def call() {
                 }
             }
             stage('Push Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
+               when {
+                    allOf {
+                        not { expression { return params.skipToDeploy } }
+                        not { expression { return params.switchStacks } }
+                    }
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage
@@ -66,7 +82,12 @@ def call() {
                 }
             }
             stage('Pull Docker image') {
-                when { branch 'master' }
+                when { 
+                    allOf { 
+                        branch 'master'
+                        not { expression { return params.switchStacks } } 
+                    }
+                }    
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         dockerPull image: dockerImage
@@ -74,7 +95,12 @@ def call() {
                 }
             }
             stage('Deploy service to swarm') {
-                when { branch 'master' }
+                when { 
+                    allOf { 
+                        branch 'master' 
+                        not { expression { return params.switchStacks } } 
+                    }
+                 }   
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
