@@ -42,6 +42,17 @@ def call(String dstpath) {
                     }
                  }
               }
+            stage('unstash') {
+              steps {
+                 gitlabCommitStatus(STAGE_NAME) {
+                    node('ci') {
+                        dir(dstpath) {
+                            unstash "my-stash"
+                        }
+                    }
+                 }
+              }
+
               post {
                  success {
                     notifySlack "${PROJECT_NAME} deployed"
