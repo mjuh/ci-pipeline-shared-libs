@@ -22,7 +22,6 @@ def call(String dstpath) {
                 }
             }
             stage('stash') {
-              when { branch 'master' }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         dir('public') {
