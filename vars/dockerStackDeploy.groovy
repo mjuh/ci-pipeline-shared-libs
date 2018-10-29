@@ -41,6 +41,7 @@ def call(Map args) {
                 sh "rm -f ${stackConfigFile}"
                 if(stackDeclaration."x-${args.stack}-override" && stackDeclaration."x-${args.stack}-override".services) {
                     mergeMaps(stackDeclaration.services, stackDeclaration."x-${args.stack}-override".services)
+                    mergeMaps(stackDeclaration.networks, stackDeclaration."x-${args.stack}-override".networks)
                 }
                 writeYaml(file: stackConfigFile, data: stackDeclaration)
                 imageUpdated = true
