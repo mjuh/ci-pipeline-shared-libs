@@ -16,6 +16,7 @@ def call(String phpVersion) {
             stage('Install PHP dependencies with Composer') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
+                        println "id".execute().text
                         composer phpVersion: phpVersion
                     }
                 }
