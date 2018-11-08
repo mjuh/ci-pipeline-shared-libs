@@ -15,5 +15,6 @@ def call(Map args = [:]) {
                         '/var/run/docker.sock': '/var/run/docker.sock'],
               image: containerStructureTestImage,
               name: "container-structure-test-${env.BUILD_TAG}",
-              cmd: "test --image ${imageName} --config ${config}")
+              cmd: "test --image ${imageName} --config ${config}",
+              uid: '999')
 }
