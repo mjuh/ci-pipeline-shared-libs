@@ -32,7 +32,7 @@ def call(String phpVersion) {
                 when { expression { fileExists 'container-structure-test.yaml' } }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        containerStructureTest image: dockerImage, uid '999'
+                        containerStructureTest image: dockerImage, uid: '999'
                     }
                 }
             }
