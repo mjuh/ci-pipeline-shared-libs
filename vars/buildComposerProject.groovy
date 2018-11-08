@@ -16,7 +16,7 @@ def call(String phpVersion) {
             stage('Install PHP dependencies with Composer') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        println "docker inspect ${Constants.jenkinsContainerName}".execute().text.trim()
+                        println "docker inspect ${Constants.jenkinsContainerName}".execute().text
                         composer phpVersion: phpVersion
                     }
                 }
