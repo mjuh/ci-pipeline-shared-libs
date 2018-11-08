@@ -1,9 +1,9 @@
 import groovy.json.JsonSlurperClassic
 
 class JenkinsContainer {
-    private def env = System.getenv()
+    private def hostname = System.getenv("HOSTNAME")
     private Map info = new groovy.json.JsonSlurperClassic().parseText(
-        "docker inspect ${env.HOSTNAME}".execute().text.trim()
+        "docker inspect $hostname".execute().text.trim()
     )[0]
 
     public getMountByDestination(String destination) {
