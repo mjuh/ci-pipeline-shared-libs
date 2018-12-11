@@ -42,4 +42,6 @@ def call(Map args = [:]) {
               image: "${composerImage}:${composerTag}",
               name: "composer-${env.BUILD_TAG}",
               cmd: cmd)
+    echo 'Removing composer.lock for next build'
+    sh "rm -f $WORKSPACE/build/composer.lock"
 }
