@@ -12,7 +12,10 @@ def call() {
                                   description: 'пропустить сборку и тестирование')
                      booleanParam(name: 'switchStacks',
                                   defaultValue: false,
-                                  description: 'Свичнуть стэки?') 
+                                  description: 'Свичнуть стэки?')
+                     booleanParam(name: 'deployDevStack',
+                                  defaultValue: false,
+                                  description: 'ЗадеплоитЬ в testing стЭк ?') 
                     }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
@@ -94,6 +97,27 @@ def call() {
                     }
                 }
             }
+            stage('Deploy devstack to swarm') {
+                when {
+                    allOf {
+                        not { branch 'master' }
+                        not { expression { return params.switchStacks } }
+                        expression { return params.deployDevStack }
+                    }
+                 }
+                agent { label Constants.productionNodeLabel }
+                steps {
+                    gitlabCommitStatus(STAGE_NAME) {
+                        //need to set stack as GROUP_NAME + testing
+                        dockerStackDeploy stack: 'test-testing', service: PROJECT_NAME, image: dockerImage, stackConfigFile: 'test.yml', dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                    }
+                }
+                post {
+                    success {
+                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to ${INACTIVE_STACK} stack, на самом деле нет"
+                    }
+                }
+            }
             stage('Deploy service to swarm') {
                 when { 
                     allOf { 
@@ -104,6 +128,7 @@ def call() {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
+                        //stack is INACTIVE_STACK =)
                         dockerStackDeploy stack: 'test1', service: PROJECT_NAME, image: dockerImage, stackConfigFile: 'test.yml', dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
                     }
                 }
