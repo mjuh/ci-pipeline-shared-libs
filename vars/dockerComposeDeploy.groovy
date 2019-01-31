@@ -36,6 +36,7 @@ def call(Map args) {
 
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                               usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
+                sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
                 def serviceDeclaration = stackDeclaration.services."${args.service}"
                 if(!serviceDeclaration) { error "${args.service} is not declared in ${args.stack}.yml" }
                 if(serviceRunning){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} stop ${args.service}" }
