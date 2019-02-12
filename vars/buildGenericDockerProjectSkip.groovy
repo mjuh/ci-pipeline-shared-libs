@@ -15,13 +15,9 @@ def call() {
             GROUP_NAME = gitRemoteOrigin.getGroup()
         }
         options {
-            buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+            buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
             gitLabConnection(Constants.gitLabConnection)
-        }
-        triggers {
-            gitlab(
-                cancelPendingBuildsOnUpdate: true
-            )
+            gitlabBuilds(builds: ['Build Docker image', 'Test Docker image structure', 'Push Docker image'])
         }
         stages {
             stage('Build Docker image') {
@@ -32,19 +28,6 @@ def call() {
                     }
                 }
             }
-            stage('Test Docker image structure') {
-                when {
-                    allOf {
-                        expression { fileExists 'container-structure-test.yaml' }
-                        not { expression { return params.skipToDeploy } }
-                    }
-                }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        containerStructureTest image: dockerImage
-                    }
-                }
-            }
             stage('Push Docker image') {
                 when { not { expression { return params.skipToDeploy } } }
                 steps {
@@ -52,26 +35,9 @@ def call() {
                         pushDocker image: dockerImage
                     }
                 }
-            }
-            stage('Pull Docker image') {
-                when { branch 'master' }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerPull image: dockerImage
-                    }
-                }
-            }
-            stage('Deploy service to swarm') {
-                when { branch 'master' }
-                agent { label Constants.productionNodeLabel }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
-                    }
-                }
                 post {
                     success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} builded and pushed"
                     }
                 }
             }
@@ -82,4 +48,3 @@ def call() {
         }
     }
 }
-
