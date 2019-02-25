@@ -30,6 +30,31 @@ def call(String stack) {
                     }
                 }
             }
+            stage('Build Docker jdk image') {
+                when {
+                    allOf {
+                        expression { fileExists 'Dockerfile.jdk' }
+                        not { expression { return params.skipToDeploy } }
+                        not { expression { return params.switchStacks } }
+                    }
+                }
+                steps {
+                        script { dockerImage = buildDocker namespace: GROUP_NAME, dockerfile: 'Dockerfile.jdk',name: PROJECT_NAME, tag: GIT_COMMIT[0..7]+'-jdk' }
+                }
+            }
+            stage('Push Docker jdk image') {
+               when {
+                    allOf {
+                        not { expression { return params.skipToDeploy } }
+                        not { expression { return params.switchStacks } }
+                    }
+                }
+                steps {
+                    gitlabCommitStatus(STAGE_NAME) {
+                        pushDocker image: dockerImage
+                    }
+                }
+            }
             stage('Build Docker image') {
                 when { not { expression { return params.skipToDeploy } } }
                 steps {
