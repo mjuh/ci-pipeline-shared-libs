@@ -50,14 +50,10 @@ def call() {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
                         script { dockerImage = buildDocker namespace: GROUP_NAME, dockerfile: 'Dockerfile.jdk',name: PROJECT_NAME, tag: GIT_COMMIT[0..7]-jdk }
-                    }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage
-                    }
                 }
             }
             stage('Build Docker jre image') {
