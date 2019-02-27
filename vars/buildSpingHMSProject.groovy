@@ -56,6 +56,7 @@ def call() {
             stage('Push Docker jdk image') {
                when {
                     allOf {
+                        expression { fileExists 'Dockerfile.jdk' }
                         not { expression { return params.skipToDeploy } }
                         not { expression { return params.switchStacks } }
                     }
