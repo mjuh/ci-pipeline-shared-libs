@@ -13,9 +13,9 @@ def call(Map args = [:]) {
         sh '. /var/jenkins_home/.nix-profile/etc/profile.d/nix.sh && docker load --input \$(nix-build --cores 8 default.nix --show-trace)'
         sh 'tar xzf result manifest.json'
         def repoTag = readJSON(file: 'manifest.json')[0].RepoTags[0]
-        println('Nix produced image: ' + repoTag)
+        println("Nix produced image '${repoTag}' will be tagged as '${tag}'")
         def image = docker.image(repoTag)
-        image.tag("${imageName}:${tag}")
+        image.tag("${tag}")
         image
     }
 }
