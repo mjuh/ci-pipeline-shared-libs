@@ -15,6 +15,6 @@ def call(Map args = [:]) {
         def repoTag = readJSON(file: 'manifest.json')[0].RepoTags[0]
         println("Nix produced image '${repoTag}' will be tagged as '${tag}'")
         def image = docker.image(repoTag)
-        image.tag("${tag}")
+        docker.image(image.tag("${tag}"))
     }
 }
