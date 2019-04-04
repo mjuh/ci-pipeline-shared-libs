@@ -16,6 +16,5 @@ def call(Map args = [:]) {
         println("Nix produced image '${repoTag}' will be tagged as '${tag}'")
         def image = docker.image(repoTag)
         image.tag("${tag}")
-        image
     }
 }
