@@ -3,7 +3,6 @@ import java.io.File
 import groovyx.net.http.*
 import static groovyx.net.http.MultipartContent.multipart
 
-@NonCPS
 def upload(File file, String repoPath, String name) {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: Constants.nexusCredId,
                       usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD']]) {
