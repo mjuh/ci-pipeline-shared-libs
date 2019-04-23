@@ -25,6 +25,9 @@ public class Constants {
 
     public static final String gradleDefaultCommand = 'build'
 
+    public static final String nexusUrl = 'http://nexus.intr'
+    public static final String nexusCredId = '38c03ef4-ea3c-43e4-98d8-addb213b5e16'
+    public static final String nexusDefaultRawRepo  = "plain-files"
 
     public static final String nginx1ApiUrl = 'http://nginx1.intr:8080'
     public static final String nginx2ApiUrl = 'http://nginx2.intr:8080'
