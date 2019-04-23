@@ -17,8 +17,8 @@ def upload(File file, String repoPath, String name) {
                 part '', '', 'application/octet-stream', file
             }
             request.encoder 'multipart/form-data', CoreEncoders.&multipart
-            response.exception { e -> e }
         }
+        println("${file} uploaded to ${Constants.nexusUrl}/repository/${repoPath}/${name}")
     }
 }
 def call(Map args = [:]) {
@@ -28,10 +28,5 @@ def call(Map args = [:]) {
     def version = args.version ?: 'latest'
     def (name, ext) = args.file.split("/")[-1].split("\\.", 2) as List
     def versionedName = name + "-${version}." + ext
-    def err = upload(new File(args.file), repo + group, versionedName)
-    if(err) {
-        println(err)
-    } else {
-        println("${file} uploaded to ${Constants.nexusUrl}/repository/${repo + group}/${versionedName}")
-    }
+    upload(new File(args.file), repo + group, versionedName)
 }
