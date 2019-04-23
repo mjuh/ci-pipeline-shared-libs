@@ -26,7 +26,7 @@ def call(Map args = [:]) {
     def repo = args.repo ?: Constants.nexusDefaultRawRepo
     def group = args.group ? "/${args.group}" : ''
     def version = args.version ?: 'latest'
-    def (name, ext) = file.split("/")[-1].split("\\.", 2) as List
+    def (name, ext) = args.file.split("/")[-1].split("\\.", 2) as List
     def err = upload(new File(args.file), repo + group, name + "-${version}." + ext)
     if(err) {error(err)}
 }
