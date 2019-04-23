@@ -20,13 +20,17 @@ def upload(File file, String repoPath, String name, String user, String password
 }
 def call(Map args = [:]) {
     assert args.file : 'No file provided'
+    String file = args.file
     def repo = args.repo ?: Constants.nexusDefaultRawRepo
     def group = args.group ? "/${args.group}" : ''
     def version = args.version ?: 'latest'
-    def (name, ext) = args.file.split("/")[-1].split("\\.", 2) as List
+    def (name, ext) = file.split("/")[-1].split("\\.", 2) as List
     def versionedName = name + "-${version}." + ext
+    if(!file.startsWith('./') && !file.startsWith('/')) {
+        file = './' + file
+    }
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: Constants.nexusCredId,
                       usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD']]) {
-        upload(new File(args.file), repo + group, versionedName, env.NEXUS_USER, env.NEXUS_PASSWORD)
+        upload(new File(file), repo + group, versionedName, env.NEXUS_USER, env.NEXUS_PASSWORD)
     }
 }
