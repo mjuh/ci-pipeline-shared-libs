@@ -26,8 +26,8 @@ def call(Map args = [:]) {
     def version = args.version ?: 'latest'
     def (name, ext) = filePath.split("/")[-1].split("\\.", 2) as List
     def versionedName = name + "-${version}." + ext
-    if(!filePath.startsWith('./') && !filePath.startsWith('/')) {
-        filePath = './' + filePath
+    if(!filePath.startsWith('/')) {
+        filePath = pwd() + "/${filePath}"
     }
     File file = new File(filePath)
     println(pwd())
