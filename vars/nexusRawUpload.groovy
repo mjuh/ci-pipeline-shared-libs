@@ -27,6 +27,11 @@ def call(Map args = [:]) {
     def group = args.group ? "/${args.group}" : ''
     def version = args.version ?: 'latest'
     def (name, ext) = args.file.split("/")[-1].split("\\.", 2) as List
-    def err = upload(new File(args.file), repo + group, name + "-${version}." + ext)
-    if(err) {error(err)}
+    def versionedName = name + "-${version}." + ext
+    def err = upload(new File(args.file), repo + group, versionedName)
+    if(err) {
+        println(err)
+    } else {
+        println("${file} uploaded to ${Constants.nexusUrl}/repository/${repo + group}/${versionedName}")
+    }
 }
