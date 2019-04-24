@@ -9,7 +9,7 @@ def upload(File file, String repoPath, String name, String user, String password
         request.auth.basic user, password
     }.put {
         request.uri.path = "/repository/${repoPath}/${name}"
-        request.contentType = 'multipart/form-data'
+        request.contentType = 'application/octet-stream'
         request.body = file
     }
     def url = "${Constants.nexusUrl}/repository/${repoPath}/${name}"
