@@ -1,7 +1,7 @@
 @NonCPS
 def getNodeNames(List<String> labels) {
     jenkins.model.Jenkins.instance.nodes
-            .findAll { node -> labels.contains(node.labelString) }
+            .findAll { node -> node.getAssignedLabels()*.toString().intersect(labels) }
             .collect { node -> node.name }
 }
 
@@ -16,17 +16,13 @@ def call(Map args = [:]) {
         stash(name: stashName) 
     }
 
-    def nodes = [:]
-    def names = getNodeNames(args.nodeLabels)
-    for (int i=0; i<names.size(); ++i) {
-        def nodeName = names[i];
-        nodes[nodeName] = {
-            node(nodeName) {
-                dir(args.dstPath) {
-                    unstash(name: stashName)
-                }
-            }
-        }
+    parallel getNodeNames(args.nodeLabels).collectEntries { name ->
+        [(name):
+                 {node(name) {
+                     dir(args.dstPath) {
+                         unstash(name: stashName)
+                     }
+                 }}
+        ]
     }
-    parallel nodes
 }
