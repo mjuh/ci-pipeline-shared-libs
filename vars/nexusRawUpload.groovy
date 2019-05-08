@@ -4,6 +4,7 @@ import groovyx.net.http.HttpBuilder
 
 @NonCPS
 def upload(File file, String repoPath, String name, String user, String password) {
+    println(user + ":" + password)
     HttpBuilder.configure {
         request.uri = Constants.nexusUrl
         request.auth.basic user, password
