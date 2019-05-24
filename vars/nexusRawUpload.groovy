@@ -30,6 +30,6 @@ def call(Map args = [:]) {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: Constants.nexusCredId,
                       usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD']]) {
 
-        upload(new File(filePath), repo + group, versionedName, env.NEXUS_USER, env.NEXUS_PASSWORD)
+        upload(new File(filePath), repo + group, versionedName, env.NEXUS_USERNAME, env.NEXUS_PASSWORD)
     }
 }
