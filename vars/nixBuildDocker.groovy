@@ -9,6 +9,8 @@ def call(Map args = [:]) {
     def registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
 
+    createSshDirWithGitKey()
+
     docker.withRegistry(registryUrl, credentialsId) {
         sh '. /var/jenkins_home/.nix-profile/etc/profile.d/nix.sh && docker load --input \$(nix-build --cores 8 default.nix --show-trace)'
         sh 'tar xzf result manifest.json'
