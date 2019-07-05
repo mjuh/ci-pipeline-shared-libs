@@ -2,7 +2,7 @@ def call(Map args = [:]) {
     def gitCredId = args.gitCredId ?: Constants.gitCredId
     def gitHost = args.gitHost ?: Constants.gitHost
     def inConfigDir = args.inConfigDir ?: env.JENKINS_HOME + '/.ssh'
-    def sshDir = args.dir ?: '.ssh'
+    def sshDir = args.dir ?: env.JENKINS_HOME + '.ssh'
     def sshWrapperFilename = args.sshWrapperFilename ?: 'wrap-ssh4git.sh'
 
     sh "mkdir -p -m 700 ${sshDir}"
