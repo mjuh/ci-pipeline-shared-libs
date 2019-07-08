@@ -7,5 +7,11 @@ def call(Map args = [:]) {
     docker.withRegistry(registryUrl, credentialsId) {
         args.image.push()
         args.image.push('latest')
+        if(env.GIT_COMMIT) {
+            args.image.push(env.GIT_COMMIT[0..7])
+        }
+        if(env.BRANCH_NAME) {
+            args.image.push(env.BRANCH_NAME)
+        }
     }
 }
