@@ -11,8 +11,8 @@ def call(Map args = [:]) {
     createSshDirWithGitKey()
 
     docker.withRegistry(registryUrl, credentialsId) {
-        sh '. /var/jenkins_home/.nix-profile/etc/profile.d/nix.sh'
-        sh 'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
+        sh '. /var/jenkins_home/.nix-profile/etc/profile.d/nix.sh && ' +
+           'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
         sh 'tar xzf result manifest.json'
         def repoTag = readJSON(file: 'manifest.json')[0].RepoTags[0]
         def image = docker.image(repoTag)
