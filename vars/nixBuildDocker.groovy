@@ -15,9 +15,9 @@ def call(Map args = [:]) {
            'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
         sh 'tar xzf result manifest.json'
         def repoTag = readJSON(file: 'manifest.json')[0].RepoTags[0]
-        def image = docker.image(repoTag)
         def fqImageName = "${Constants.dockerRegistryHost}/${imageName}:${args.tag ?: repoTag.split(':')[-1]}"
         println("Nix produced image '${repoTag}' will be tagged as '${fqImageName}'")
-        docker.image(image.tag(fqImageName))
+        sh "docker tag ${repoTag} ${fqImageName}"
+        docker.image(fqImageName)
     }
 }
