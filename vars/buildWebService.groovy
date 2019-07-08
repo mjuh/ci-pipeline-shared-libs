@@ -16,7 +16,7 @@ def call() {
             stage('Build Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        script { dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: BRANCH_NAME }
+                        script { dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME }
                     }
                 }
             }
