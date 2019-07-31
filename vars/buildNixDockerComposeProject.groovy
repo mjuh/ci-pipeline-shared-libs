@@ -2,7 +2,7 @@ def call(String composeProject) {
     def dockerImage = null
 
     pipeline {
-        agent { label 'master' }
+        agent { label 'nixbld' }
         parameters { string(name: 'dockerStacksRepoCommitId',
                 defaultValue: '',
                 description: "ID коммита в репозитории ${Constants.dockerStacksGitRepoUrl}, " +
