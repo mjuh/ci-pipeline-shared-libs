@@ -2,7 +2,7 @@ def call() {
     def dockerImage = null
 
     pipeline {
-        agent { label 'master' }
+        agent { label 'nixbld' }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
