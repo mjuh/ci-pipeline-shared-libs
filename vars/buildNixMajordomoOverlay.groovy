@@ -10,7 +10,8 @@ def call() {
             stage('Build Nix overlay') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        sh 'nix-build build.nix --cores 8 -A nixpkgsUnstable'
+                        sh '. /var/jenkins_home/.nix-profile/etc/profile.d/nix.sh && ' +
+                            'nix-build build.nix --cores 8 -A nixpkgsUnstable'
                     }
                 }
             }
