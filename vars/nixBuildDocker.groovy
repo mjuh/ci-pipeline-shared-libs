@@ -10,14 +10,15 @@ def call(Map args = [:]) {
 
     createSshDirWithGitKey()
 
-    docker.withRegistry(registryUrl, credentialsId) {
-        sh '. /var/jenkins_home/.nix-profile/etc/profile.d/nix.sh && ' +
-           'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
-        sh 'tar xzf result manifest.json'
-        def repoTag = readJSON(file: 'manifest.json')[0].RepoTags[0]
-        def fqImageName = "${Constants.dockerRegistryHost}/${imageName}:${args.tag ?: repoTag.split(':')[-1]}"
-        println("Nix produced image '${repoTag}' will be tagged as '${fqImageName}'")
-        sh "docker tag ${repoTag} ${fqImageName}"
-        docker.image(fqImageName)
+    withEnv((['bash', '-c', "source /home/jenkins/.nix-profile/etc/profile.d/nix.sh && nix-shell -p docker --run env"].execute().text.split('\n'))) {
+        docker.withRegistry(registryUrl, credentialsId) {
+            sh 'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
+            sh 'tar xzf result manifest.json'
+            def repoTag = readJSON(file: 'manifest.json')[0].RepoTags[0]
+            def fqImageName = "${Constants.dockerRegistryHost}/${imageName}:${args.tag ?: repoTag.split(':')[-1]}"
+            println("Nix produced image '${repoTag}' will be tagged as '${fqImageName}'")
+            sh "docker tag ${repoTag} ${fqImageName}"
+            docker.image(fqImageName)
+        }
     }
 }
