@@ -9,11 +9,11 @@ def call(Map args = [:]) {
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
     def env = sh(returnStdout: true, script: """#!/bin/bash
                  source /home/jenkins/.nix-profile/etc/profile.d/nix.sh
-                 nix-shell -p docker --run env""").trim()
+                 nix-shell -p docker --run env""").split('\n')
 
     createSshDirWithGitKey()
 
-    withEnv(env.split('\n')) {
+    withEnv(env) {
         docker.withRegistry(registryUrl, credentialsId) {
             sh 'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
             sh 'tar xzf result manifest.json'
