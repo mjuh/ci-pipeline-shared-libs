@@ -3,10 +3,6 @@ def call() {
 
     pipeline {
         agent { label 'nixbld' }
-        environment {
-            PROJECT_NAME = gitRemoteOrigin.getProject()
-            GROUP_NAME = gitRemoteOrigin.getGroup()
-        }
         options {
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['Build Docker image', 'Push Docker image'])
@@ -16,8 +12,8 @@ def call() {
             stage('Build Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        sh 'env'
-                        script { dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME }
+                        sh 'hostname'
+                        script { dockerImage = nixBuildDocker namespace: JOB_NAME, name: JOB_BASE_NAME }
                     }
                 }
             }
