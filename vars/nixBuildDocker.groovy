@@ -11,6 +11,7 @@ def call(Map args = [:]) {
                  source /home/jenkins/.nix-profile/etc/profile.d/nix.sh
                  nix-shell -p docker --run env""").trim().split('\n')
 
+    println(env)
     createSshDirWithGitKey()
 
     withEnv(env) {
