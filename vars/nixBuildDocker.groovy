@@ -7,8 +7,9 @@ def call(Map args = [:]) {
     def imageName = args.imageName ?: "${args.namespace}/${args.name}"
     def registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
-    def env = sh(returnStdout: true,
-                 script: "source /home/jenkins/.nix-profile/etc/profile.d/nix.sh && nix-shell -p docker --run env").trim().split('\n')
+    def env = sh(returnStdout: true, script: """#!/bin/bash
+                 source /home/jenkins/.nix-profile/etc/profile.d/nix.sh
+                 nix-shell -p docker --run env""").trim().split('\n')
 
     createSshDirWithGitKey()
 
