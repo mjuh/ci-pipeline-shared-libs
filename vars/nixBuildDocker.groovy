@@ -9,7 +9,7 @@ def call(Map args = [:]) {
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
     def env = sh(returnStdout: true, script: """#!/bin/bash
                  source /home/jenkins/.nix-profile/etc/profile.d/nix.sh
-                 nix-shell -p docker --run env""").split('\n')
+                 nix-shell -p docker --run env""").split('\n') as java.util.List
     println(env)
 
     createSshDirWithGitKey()
