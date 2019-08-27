@@ -10,6 +10,7 @@ def call(Map args = [:]) {
     def env = sh(returnStdout: true, script: """#!/bin/bash
                  source /home/jenkins/.nix-profile/etc/profile.d/nix.sh
                  nix-shell -p docker --run env""").split('\n')
+    println(env)
 
     createSshDirWithGitKey()
 
