@@ -12,8 +12,7 @@ def call() {
             stage('Build Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        sh 'hostname'
-                        script { dockerImage = nixBuildDocker namespace: JOB_NAME, name: JOB_BASE_NAME }
+                        script { dockerImage = nixBuildDocker namespace: env.JOB_NAME, name: env.JOB_BASE_NAME }
                     }
                 }
             }
