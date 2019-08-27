@@ -7,11 +7,12 @@ def call(Map args = [:]) {
     def imageName = args.imageName ?: "${args.namespace}/${args.name}"
     def registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
+    def env = sh(returnStdout: true,
+                 script: "source /home/jenkins/.nix-profile/etc/profile.d/nix.sh && nix-shell -p docker --run env").trim().split('\n')
 
     createSshDirWithGitKey()
 
-    println(['bash', '-c', "source /home/jenkins/.nix-profile/etc/profile.d/nix.sh && nix-shell -p docker --run env"].execute().text.split('\n'))
-    withEnv(['bash', '-c', "source /home/jenkins/.nix-profile/etc/profile.d/nix.sh && nix-shell -p docker --run env"].execute().text.split('\n')) {
+    withEnv(env) {
         docker.withRegistry(registryUrl, credentialsId) {
             sh 'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
             sh 'tar xzf result manifest.json'
