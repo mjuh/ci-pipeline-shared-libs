@@ -10,11 +10,11 @@ def call(Map args = [:]) {
     def env = sh(returnStdout: true, script: """#!/bin/bash
                  source /home/jenkins/.nix-profile/etc/profile.d/nix.sh
                  nix-shell -p docker --run env""").split('\n') as java.util.List
-    println(env)
 
     createSshDirWithGitKey()
 
     withEnv(env) {
+        sh 'docker images'
         docker.withRegistry(registryUrl, credentialsId) {
             sh 'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
             sh 'tar xzf result manifest.json'
