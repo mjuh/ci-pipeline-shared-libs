@@ -11,10 +11,9 @@ def call(Map args = [:]) {
                  source /home/jenkins/.nix-profile/etc/profile.d/nix.sh
                  nix-shell -p docker --run env""").trim()
 
-    println(env)
     createSshDirWithGitKey()
 
-    withEnv(env) {
+    withEnv(env.split('\n')) {
         docker.withRegistry(registryUrl, credentialsId) {
             sh 'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
             sh 'tar xzf result manifest.json'
