@@ -14,7 +14,7 @@ def call(Map args = [:]) {
     createSshDirWithGitKey()
 
     withEnv(env) {
-        sh 'docker images'
+        sh 'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
         docker.withRegistry(registryUrl, credentialsId) {
             sh 'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
             sh 'tar xzf result manifest.json'
