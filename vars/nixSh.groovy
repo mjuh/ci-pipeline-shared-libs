@@ -1,7 +1,7 @@
 def call(Map args = [:]) {
     assert args.cmd : "No cmd provided"
 
-    def home = new File(args.home ?: System.getenv('HOME'))
+    def home = new File(args.home ?: env.HOME)
     def env = ['sh', '-c', '. .nix-profile/etc/profile.d/nix.sh && env'].execute(null, home).text.trim().split('\n')
     def pkgs = ['nix']
     if (args.env) {
