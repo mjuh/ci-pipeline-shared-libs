@@ -3,7 +3,7 @@ def call(Map args = [:]) {
 
     def env = sh(script: """
 #!/bin/sh
-. .nix-profile/etc/profile.d/nix.sh
+. ${env.HOME}/.nix-profile/etc/profile.d/nix.sh
 env
 """, returnStdout: true).trim().split('\n')
     if (args.env) {
