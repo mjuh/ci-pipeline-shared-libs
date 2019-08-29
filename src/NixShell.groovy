@@ -2,7 +2,7 @@ import com.cloudbees.groovy.cps.NonCPS
 
 class NixShell {
     private File home
-    private List<String> env
+    public List<String> env
     private List<String> pkgs
 
     NixShell(Map args = [:]) {

@@ -10,7 +10,7 @@ def call(Map args = [:]) {
 
     println('get nix shell')
     def nixSh = new NixShell()
-    println('run nix shell')
+    println(nixSh.env)
     nixSh.run 'nix-build --tarball-ttl 10 --show-trace'
 
     def image = new DockerImageTarball('result')
