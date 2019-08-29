@@ -7,7 +7,10 @@ def call(Map args = [:]) {
     def imageName = args.imageName ?: "${args.namespace}/${args.name}"
 
     createSshDirWithGitKey()
+
+    println('get nix shell')
     def nixSh = new NixShell()
+    println('run nix shell')
     nixSh.run 'nix-build --tarball-ttl 10 --show-trace'
 
     def image = new DockerImageTarball('result')
