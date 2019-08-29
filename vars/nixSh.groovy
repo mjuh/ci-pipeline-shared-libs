@@ -9,6 +9,7 @@ env
     if (args.env) {
         env += args.env.collect { it }
     }
+    println(env)
     withEnv(env) {
         def pkgs = ['nix']
         if (args.pkgs) {
