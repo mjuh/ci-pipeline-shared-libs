@@ -11,5 +11,5 @@ def call(Map args = [:]) {
         pkgs += args.pkgs
     }
     def pkgStr = pkgs.collect { "-p ${it}" }.join(' ')
-    ['sh', '-c', "nix-shell --quiet ${pkgStr} --run '${cmd}'"].execute(env, home).text
+    ['sh', '-c', "nix-shell --quiet ${pkgStr} --run '${args.cmd}'"].execute(env, home).text
 }
