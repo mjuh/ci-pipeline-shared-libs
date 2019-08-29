@@ -12,7 +12,7 @@ def call(Map args = [:]) {
         extraTags += env.BRANCH_NAME
     }
 
-    if(image.metaClass.respondsTo(image, 'push')) {
+    if(image.metaClass.respondsTo(args.image, 'push')) {
         docker.withRegistry(registryUrl, credentialsId) {
             args.image.push()
             extraTags.each {
