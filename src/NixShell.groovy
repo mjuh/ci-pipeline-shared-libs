@@ -1,9 +1,11 @@
+import com.cloudbees.groovy.cps.NonCPS
+
 class NixShell {
     private File home
     private List<String> env
     private List<String> pkgs
-    private String expr
 
+    @NonCPS
     NixShell(Map args = [:]) {
         this.home = new File(args.home ?: System.getenv('HOME'))
         this.env = ['sh', '-c', '. .nix-profile/etc/profile.d/nix.sh && env'].execute(null, this.home).text.trim().split('\n')
