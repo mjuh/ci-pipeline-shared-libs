@@ -1,6 +1,15 @@
 def call(Map args = [:]) {
     assert args.cmd : "No cmd provided"
 
-    def shell = new NixShell(home: args.home, env: args.env, pkgs: args.pkgs)
-    shell.run(args.cmd)
+    def home = new File(args.home ?: System.getenv('HOME'))
+    def env = ['sh', '-c', '. .nix-profile/etc/profile.d/nix.sh && env'].execute(null, home).text.trim().split('\n')
+    def pkgs = ['nix']
+    if (args.env) {
+        env += args.env.collect { it }
+    }
+    if (args.pkgs) {
+        pkgs += args.pkgs
+    }
+    def pkgStr = pkgs.collect { "-p ${it}" }.join(' ')
+    ['sh', '-c', "nix-shell --quiet ${pkgStr} --run '${cmd}'"].execute(env, home).text
 }
