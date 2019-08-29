@@ -6,11 +6,6 @@ class NixShell {
     private List<String> pkgs
 
     NixShell(Map args = [:]) {
-        this.setup(args)
-    }
-
-    @NonCPS
-    private setup(Map args) {
         this.home = new File(args.home ?: System.getenv('HOME'))
         this.env = ['sh', '-c', '. .nix-profile/etc/profile.d/nix.sh && env'].execute(null, this.home).text.trim().split('\n')
         this.pkgs = ['nix']
@@ -22,6 +17,7 @@ class NixShell {
         }
     }
 
+    @NonCPS
     public run(String cmd) {
         def pkgStr = this.pkgs.collect { "-p ${it}" }.join(' ')
         ['sh', '-c', "nix-shell --quiet ${pkgStr} --run '${cmd}'"].execute(this.env, this.home).text
