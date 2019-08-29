@@ -22,6 +22,6 @@ env
         sh(script: """
 #!/bin/sh
 nix-shell --quiet ${pkgStr} --run '${args.cmd}'
-""", returnStdout: true).text
+""", returnStdout: true).trim()
     }
 }

@@ -22,12 +22,12 @@ def call(Map args = [:]) {
     } else {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                           usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
-            def nixSh = new NixShell(pkgs: ['skopeo'])
             (args.image.getTag() + extraTags).each { tag ->
-                nixSh.run "skopeo copy --dest-creds=${env.REGISTRY_USERNAME}:${env.REGISTRY_PASSWORD} " +
-                        "--dest-tls-verify=false " +
-                        "docker-archive:${args.image.path} " +
-                        "docker://docker-registry.intr/webservices/ssh-guest-room:${tag}"
+                nixSh cmd: "skopeo copy --dest-creds=${env.REGISTRY_USERNAME}:${env.REGISTRY_PASSWORD} " +
+                           "--dest-tls-verify=false " +
+                           "docker-archive:${args.image.path} " +
+                           "docker://docker-registry.intr/webservices/ssh-guest-room:${tag}",
+                      pkgs: ['skopeo']
             }
         }
     }
