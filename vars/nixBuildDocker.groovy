@@ -14,8 +14,8 @@ def call(Map args = [:]) {
     createSshDirWithGitKey()
 
     withEnv(env) {
-        sh 'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
         docker.withRegistry(registryUrl, credentialsId) {
+            sh 'env'
             sh 'docker load --input $(nix-build --cores 8 --tarball-ttl 10 --show-trace)'
             sh 'tar xzf result manifest.json'
             def repoTag = readJSON(file: 'manifest.json')[0].RepoTags[0]
