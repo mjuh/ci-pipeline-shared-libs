@@ -9,8 +9,11 @@ env
     if (args.env) {
         env += args.env.collect { it }
     }
-    println(env)
-    withEnv(env) {
+    java.util.List<java.lang.String> envList = []
+    env.each {
+        envList.add(it)
+    }
+    withEnv(envList) {
         def pkgs = ['nix']
         if (args.pkgs) {
             pkgs += args.pkgs
