@@ -4,7 +4,7 @@ class NixShell {
     private List<String> pkgs
     private String expr
 
-    NixShell(Map args) {
+    NixShell(Map args = [:]) {
         this.home = new File(args.home ?: System.getenv('HOME'))
         this.env = ['sh', '-c', '. .nix-profile/etc/profile.d/nix.sh && env'].execute(null, this.home).text.trim().split('\n')
         this.pkgs = ['nix']
