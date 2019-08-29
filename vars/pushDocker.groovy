@@ -3,15 +3,32 @@ def call(Map args = [:]) {
 
     def registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
+    def extraTags = ['latest']
 
-    docker.withRegistry(registryUrl, credentialsId) {
-        args.image.push()
-        args.image.push('latest')
-        if(env.GIT_COMMIT) {
-            args.image.push(env.GIT_COMMIT[0..7])
+    if (env.GIT_COMMIT) {
+        extraTags += env.GIT_COMMIT[0..7]
+    }
+    if (env.BRANCH_NAME) {
+        extraTags += env.BRANCH_NAME
+    }
+
+    if(image.metaClass.respondsTo(image, 'push')) {
+        docker.withRegistry(registryUrl, credentialsId) {
+            args.image.push()
+            extraTags.each {
+                args.image.push(it)
+            }
         }
-        if(env.BRANCH_NAME) {
-            args.image.push(env.BRANCH_NAME)
+    } else {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
+                          usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
+            def nixSh = new NixShell(pkgs: ['skopeo'])
+            (args.image.getTag() + extraTags).each { tag ->
+                nixSh.run "skopeo copy --dest-creds=${env.REGISTRY_USERNAME}:${env.REGISTRY_PASSWORD} " +
+                        "--dest-tls-verify=false " +
+                        "docker-archive:${args.image.path} " +
+                        "docker://docker-registry.intr/webservices/ssh-guest-room:${tag}"
+            }
         }
     }
 }
