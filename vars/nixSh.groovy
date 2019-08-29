@@ -5,7 +5,7 @@ def call(Map args = [:]) {
     if (args.env) {
         env += args.env.collect { it }
     }
-    withEnv(env>) {
+    withEnv(env) {
         def pkgs = ['nix']
         if (args.pkgs) {
             pkgs += args.pkgs
