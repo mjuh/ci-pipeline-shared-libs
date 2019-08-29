@@ -1,8 +1,6 @@
-import com.cloudbees.groovy.cps.NonCPS
-
 class NixShell {
     private File home
-    public List<String> env
+    private List<String> env
     private List<String> pkgs
 
     NixShell(Map args = [:]) {
@@ -17,10 +15,8 @@ class NixShell {
         }
     }
 
-    @NonCPS
     public run(String cmd) {
         def pkgStr = this.pkgs.collect { "-p ${it}" }.join(' ')
         ['sh', '-c', "nix-shell --quiet ${pkgStr} --run '${cmd}'"].execute(this.env, this.home).text
     }
-
 }
