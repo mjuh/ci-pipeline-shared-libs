@@ -1,7 +1,11 @@
 def call(Map args = [:]) {
     assert args.cmd: "No cmd provided"
 
-    def env = ['sh', '-c', '. .nix-profile/etc/profile.d/nix.sh && env'].execute().text.trim().split('\n').collect {it}
+    def env = sh(script: """
+#!/bin/sh
+. .nix-profile/etc/profile.d/nix.sh
+env
+""", returnStdout: true).trim().split('\n')
     if (args.env) {
         env += args.env.collect { it }
     }
@@ -11,6 +15,9 @@ def call(Map args = [:]) {
             pkgs += args.pkgs
         }
         def pkgStr = pkgs.collect { "-p ${it}" }.join(' ')
-        sh(script: ['sh', '-c', "nix-shell --quiet ${pkgStr} --run '${args.cmd}'"], returnStdout: true).text
+        sh(script: """
+#!/bin/sh
+nix-shell --quiet ${pkgStr} --run '${args.cmd}'
+""", returnStdout: true).text
     }
 }
