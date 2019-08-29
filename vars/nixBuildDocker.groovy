@@ -8,10 +8,7 @@ def call(Map args = [:]) {
 
     createSshDirWithGitKey()
 
-    println('get nix shell')
-    def nixSh = new NixShell()
-    println(nixSh.env)
-    nixSh.run 'nix-build --tarball-ttl 10 --show-trace'
+    nixSh cmd: 'nix-build --tarball-ttl 10 --show-trace'
 
     def image = new DockerImageTarball('result')
     def fqImageName = "${Constants.dockerRegistryHost}/${imageName}:${args.tag ?: image.getTag()}"
