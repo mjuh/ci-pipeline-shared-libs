@@ -8,11 +8,7 @@ def call(Map args = [:]) {
     if (args.env) {
         env += args.env.collect { it }
     }
-    java.util.List<java.lang.String> envList = []
-    env.each {
-        envList.add(it)
-    }
-    withEnv(envList) {
+    withEnv(env) {
         def pkgs = ['nix']
         if (args.pkgs) {
             pkgs += args.pkgs
