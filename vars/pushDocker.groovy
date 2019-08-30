@@ -26,6 +26,7 @@ def call(Map args = [:]) {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                           usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
             tags.each { tag ->
+                println("Uploading ${args.image.path} to ${baseName}:${tag}")
                 nixSh cmd: "skopeo copy " +
                            "--dest-creds=${env.REGISTRY_USERNAME}:${env.REGISTRY_PASSWORD} --dest-tls-verify=false " +
                            "docker-archive:${args.image.path} docker://${baseName}:${tag}",
