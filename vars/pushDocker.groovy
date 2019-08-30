@@ -20,13 +20,15 @@ def call(Map args = [:]) {
             }
         }
     } else {
+        def baseName = args.image.split(':')[0..-2].join()
+        def origTag = args.image.split(':')[-1]
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                           usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
-            (args.image.getTag() + extraTags).each { tag ->
+            (origTag + extraTags).each { tag ->
                 nixSh cmd: "skopeo copy --dest-creds=${env.REGISTRY_USERNAME}:${env.REGISTRY_PASSWORD} " +
                            "--dest-tls-verify=false " +
                            "docker-archive:${args.image.path} " +
-                           "docker://docker-registry.intr/webservices/ssh-guest-room:${tag}",
+                           "docker://docker-registry.intr/webservices/${baseName}:${tag}",
                       pkgs: ['skopeo']
             }
         }
