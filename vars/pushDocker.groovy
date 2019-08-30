@@ -20,8 +20,8 @@ def call(Map args = [:]) {
             }
         }
     } else {
-        def baseName = args.image.split(':')[0..-2].join()
-        def origTag = args.image.split(':')[-1]
+        def baseName = args.image.imageName.split(':')[0..-2].join()
+        def origTag = args.image.imageName.split(':')[-1]
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                           usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
             (origTag + extraTags).each { tag ->
