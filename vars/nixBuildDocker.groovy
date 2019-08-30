@@ -8,12 +8,10 @@ def call(Map args = [:]) {
 
     createSshDirWithGitKey()
 
-    nixSh cmd: 'nix-build --tarball-ttl 10 --show-trace'
-
-    def image = new DockerImageTarball('result')
-    def fqImageName = "${Constants.dockerRegistryHost}/${imageName}:${args.tag ?: image.getTag()}"
-    if (fqImageName != image.imageName()) {
-        image.setImageName(fqImageName)
-    }
-    image
+    sh 'nix-build --tarball-ttl 10 --show-trace'
+    def path = sh(returnStdout: true, script: 'readlink result').trim()
+    sh 'tar xzf result manifest.json'
+    def repoTag = readJSON(file: 'manifest.json')[0].RepoTags[0]
+    def fqImageName = "${Constants.dockerRegistryHost}/${imageName}:${args.tag ?: repoTag.split(':')[-1]}"
+    new DockerImageTarball(imageName: fqImageName, path: path)
 }
