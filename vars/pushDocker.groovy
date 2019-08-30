@@ -29,7 +29,7 @@ def call(Map args = [:]) {
             tags.each { tag ->
                 nixSh cmd: "skopeo copy " +
                            "--dest-creds=${user}:${password} --dest-tls-verify=false " +
-                           "docker-archive:${args.image.path} docker://${baseName}:${origTag}",
+                           "docker-archive:${args.image.path} docker://${baseName}:${tag}",
                       pkgs: ['skopeo']
             }
         }
