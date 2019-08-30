@@ -21,7 +21,7 @@ def call(Map args = [:]) {
         }
     } else {
         String baseName = args.image.imageName.split(':')[0..-2].join()
-        List tags = args.image.imageName.split(':')[-1] + extraTags
+        List tags = [args.image.imageName.split(':')[-1]] + extraTags
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                           usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
             String user = env.REGISTRY_USERNAME
