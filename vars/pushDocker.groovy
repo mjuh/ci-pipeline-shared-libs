@@ -20,13 +20,15 @@ def call(Map args = [:]) {
             }
         }
     } else {
-        def baseName = args.image.imageName.split(':')[0..-2].join()
-        def origTag = args.image.imageName.split(':')[-1]
+        String baseName = args.image.imageName.split(':')[0..-2].join()
+        List tags = args.image.imageName.split(':')[-1] + extraTags
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                           usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
-            (origTag + extraTags).each { tag ->
+            String user = env.REGISTRY_USERNAME
+            String password = env.REGISTRY_PASSWORD
+            tags.each { tag ->
                 nixSh cmd: "skopeo copy " +
-                           "--dest-creds=${env.REGISTRY_USERNAME}:${env.REGISTRY_PASSWORD} --dest-tls-verify=false " +
+                           "--dest-creds=${user}:${password} --dest-tls-verify=false " +
                            "docker-archive:${args.image.path} docker://${baseName}:${origTag}",
                       pkgs: ['skopeo']
             }
