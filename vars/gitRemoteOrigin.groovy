@@ -6,9 +6,11 @@ def getRemote() {
 }
 
 def getProject() {
-    (getRemote().url.split(':').tail().join(':').split('/').tail().join('/') - '.git').toLowerCase()
+    def url = env.GIT_URL ?: getRemote().url
+    (url.split(':').tail().join(':').split('/').tail().join('/') - '.git').toLowerCase()
 }
 
 def getGroup() {
-    getRemote().url.split(':').tail().join(':').split('/')[0].toLowerCase()
+    def url = env.GIT_URL ?: getRemote().url
+    url.split(':').tail().join(':').split('/')[0].toLowerCase()
 }
