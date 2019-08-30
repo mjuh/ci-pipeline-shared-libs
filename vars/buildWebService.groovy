@@ -8,11 +8,15 @@ def call() {
             gitlabBuilds(builds: ['Build Docker image', 'Push Docker image'])
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
+        environment {
+            PROJECT_NAME = gitRemoteOrigin.getProject()
+            GROUP_NAME = gitRemoteOrigin.getGroup()
+        }
         stages {
             stage('Build Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        script { dockerImage = nixBuildDocker namespace: env.JOB_NAME, name: env.JOB_BASE_NAME }
+                        script { dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME }
                     }
                 }
             }

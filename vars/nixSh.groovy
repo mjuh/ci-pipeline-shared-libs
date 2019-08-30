@@ -16,6 +16,6 @@ def call(Map args = [:]) {
         def pkgStr = pkgs.collect { "-p ${it}" }.join(' ')
         sh(script: """#!/bin/sh
                       nix-shell --quiet ${pkgStr} --run '${args.cmd}'
-                   """, returnStdout: true).trim()
+                   """, returnStdout: args.returnStdout ?: false).trim()
     }
 }
