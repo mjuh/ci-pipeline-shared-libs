@@ -29,7 +29,7 @@ def call(Map args = [:]) {
                            "--dest-creds=${env.REGISTRY_USERNAME}:${env.REGISTRY_PASSWORD} --dest-tls-verify=false " +
                            "docker-archive:${args.image.path} docker://${baseName}:${origTag}",
                       pkgs: ['skopeo']
-            }
+//            }
         }
     }
 }
