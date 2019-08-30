@@ -2,7 +2,7 @@
 import org.ajoberstar.grgit.Grgit
 
 def getRemote() {
-    Grgit.open(dir: env.WORKSPACE).remote.list().find { it.name == 'origin' }
+    Grgit.open(dir: '.').remote.list().find { it.name == 'origin' }
 }
 
 def getProject() {
