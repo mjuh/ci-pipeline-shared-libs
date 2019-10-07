@@ -20,6 +20,26 @@ def call() {
                     }
                 }
             }
+            stage('Test Docker image') {
+                steps {
+                    script {
+                        if(PROJECT_NAME.contains('php')) {
+                            nixSh cmd: 'nix-build test.nix --out-link test-result --show-trace'
+                            reportDir = 'test-result/coverage-data/vm-state-docker'
+                            publishHTML (target: [
+                                    allowMissing: false,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll: true,
+                                    reportDir: reportDir,
+                                    reportFiles: dir(reportDir) {
+                                        findFiles(glob: '*.html').join(',')
+                                    },
+                                    reportName: 'coverage-data'
+                                ])
+                        }
+                    }
+                }
+            }
             stage('Push Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
