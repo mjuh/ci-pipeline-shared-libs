@@ -40,10 +40,23 @@ def call() {
                     }
                 }
             }
+            stage('Test Docker image structure') {
+                when { expression { fileExists 'container-structure-test.yaml' } }
+                steps {
+                    gitlabCommitStatus(STAGE_NAME) {
+                        containerStructureTest image: dockerImage
+                    }
+                }
+            }
             stage('Push Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage
+                    }
+                }
+                post {
+                    success {
+                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} pushed to registry"
                     }
                 }
             }
