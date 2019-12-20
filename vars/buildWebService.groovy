@@ -1,3 +1,5 @@
+import groovy.json.JsonOutput
+
 def call() {
     def dockerImage = null
 
@@ -8,6 +10,11 @@ def call() {
             gitlabBuilds(builds: ['Build Docker image', 'Push Docker image'])
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
+        parameters {
+            string(name: 'OVERLAY_BRANCH_NAME',
+                   defaultValue: 'master',
+                   description: 'Git Branch at https://gitlab.intr/_ci/nixpkgs/ repository')
+        }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
@@ -16,26 +23,57 @@ def call() {
             stage('Build Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        script { dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME }
+                        script {
+                            echo "Building image with ${OVERLAY_BRANCH_NAME} branch in https://gitlab.intr/_ci/nixpkgs/tree/${OVERLAY_BRANCH_NAME}/"
+                            dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
+                        }
                     }
                 }
             }
             stage('Test Docker image') {
+                when { expression { fileExists 'test.nix' } }
                 steps {
                     script {
-                        if(PROJECT_NAME.contains('php')) {
-                            nixSh cmd: 'nix-build test.nix --out-link test-result --show-trace'
-                            reportDir = 'test-result/coverage-data/vm-state-docker'
-                            publishHTML (target: [
-                                    allowMissing: false,
-                                    alwaysLinkToLastBuild: true,
-                                    keepAll: true,
-                                    reportDir: reportDir,
-                                    reportFiles: dir(reportDir) {
-                                        findFiles(glob: '*.html').join(',')
-                                    },
-                                    reportName: 'coverage-data'
-                                ])
+                        nixSh cmd: "nix-build test.nix --argstr ref ${OVERLAY_BRANCH_NAME} --out-link test-result --show-trace"
+                        reportDir = 'test-result/coverage-data/vm-state-docker'
+                        publishHTML (target: [
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: reportDir,
+                                reportFiles: dir(reportDir) {
+                                    findFiles(glob: '*.html').join(',')
+                                },
+                                reportName: 'coverage-data'
+                            ])}
+                }
+            }
+            stage("phpinfo difference") {
+                when {
+                    allOf {
+                        expression {
+                            fileExists 'test-result/coverage-data/vm-state-docker/deepdiff.html'
+                        }
+                        expression {
+                            fileExists 'test-result/coverage-data/vm-state-docker/deepdiff-with-excludes.html'
+                        }
+                    }
+                }
+                steps {
+                    script {
+                        def json = readJSON file: 'test-result/coverage-data/vm-state-docker/deepdiff.html'
+                        def jsonFormat = JsonOutput.toJson(json)
+                        prettyJSON = JsonOutput.prettyPrint(jsonFormat)
+                        echo "${prettyJSON}"
+                    }
+                    script {
+                        def json = readJSON file: 'test-result/coverage-data/vm-state-docker/deepdiff-with-excludes.html'
+                        if (! json.empty)
+                        {
+                            def jsonFormat = JsonOutput.toJson(json)
+                            prettyJSON = JsonOutput.prettyPrint(jsonFormat)
+                            echo "${prettyJSON}"
+                            // error "phpinfo sample differs phpinfo in container"
                         }
                     }
                 }
@@ -51,12 +89,12 @@ def call() {
             stage('Push Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        pushDocker image: dockerImage
+                        pushDocker image: dockerImage, pushToBranchName: false
                     }
                 }
                 post {
                     success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} pushed to registry"
+                        notifySlack "${GROUP_NAME}/${PROJECT_NAME}:${params.OVERLAY_BRANCH_NAME} pushed to registry"
                     }
                 }
             }
