@@ -25,7 +25,7 @@ def call() {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
                             echo "Building image with ${OVERLAY_BRANCH_NAME} branch in https://gitlab.intr/_ci/nixpkgs/tree/${OVERLAY_BRANCH_NAME}/"
-                            dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
+                            dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
                         }
                     }
                 }
@@ -94,7 +94,7 @@ def call() {
                 }
                 post {
                     success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME}:${params.OVERLAY_BRANCH_NAME} pushed to registry"
+                        notifySlack "${GROUP_NAME}/${PROJECT_NAME}:${OVERLAY_BRANCH_NAME} pushed to registry"
                     }
                 }
             }
