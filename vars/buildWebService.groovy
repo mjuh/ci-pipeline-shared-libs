@@ -35,7 +35,7 @@ def call() {
                 steps {
                     script {
                         nixSh cmd: "nix-build test.nix --argstr ref ${OVERLAY_BRANCH_NAME} --out-link test-result --show-trace"
-                        reportDir = 'test-result/coverage-data/vm-state-docker'
+                        reportDir = 'test-result/coverage-data/vm-state-dockerNode'
                         publishHTML (target: [
                                 allowMissing: false,
                                 alwaysLinkToLastBuild: true,
@@ -52,22 +52,22 @@ def call() {
                 when {
                     allOf {
                         expression {
-                            fileExists 'test-result/coverage-data/vm-state-docker/deepdiff.html'
+                            fileExists 'test-result/coverage-data/vm-state-dockerNode/deepdiff.html'
                         }
                         expression {
-                            fileExists 'test-result/coverage-data/vm-state-docker/deepdiff-with-excludes.html'
+                            fileExists 'test-result/coverage-data/vm-state-dockerNode/deepdiff-with-excludes.html'
                         }
                     }
                 }
                 steps {
                     script {
-                        def json = readJSON file: 'test-result/coverage-data/vm-state-docker/deepdiff.html'
+                        def json = readJSON file: 'test-result/coverage-data/vm-state-dockerNode/deepdiff.html'
                         def jsonFormat = JsonOutput.toJson(json)
                         prettyJSON = JsonOutput.prettyPrint(jsonFormat)
                         echo "${prettyJSON}"
                     }
                     script {
-                        def json = readJSON file: 'test-result/coverage-data/vm-state-docker/deepdiff-with-excludes.html'
+                        def json = readJSON file: 'test-result/coverage-data/vm-state-dockerNode/deepdiff-with-excludes.html'
                         if (! json.empty)
                         {
                             def jsonFormat = JsonOutput.toJson(json)
