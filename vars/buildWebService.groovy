@@ -78,14 +78,6 @@ def call() {
                     }
                 }
             }
-            stage('Test Docker image structure') {
-                when { expression { fileExists 'container-structure-test.yaml' } }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        containerStructureTest image: dockerImage
-                    }
-                }
-            }
             stage('Push Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
