@@ -2,20 +2,20 @@ def call(Map args = [:]) {
     if(!args.imageName) {
         assert args.name : "No image name provided"
         assert args.namespace : "No namespace provided"
-        assert args.overlaybranch : "No overlay branch provided"
         assert args.currentProjectBranch : "No current project branch provided"
     }
 
     def imageName = args.imageName ?: "${args.namespace}/${args.name}"
+    def overlaybranch = args.overlaybranch ?: "master"
 
     createSshDirWithGitKey()
 
-    nixSh cmd: "nix-build --tarball-ttl 10 --argstr ref $args.overlaybranch --show-trace"
+    nixSh cmd: "nix-build --tarball-ttl 10 --argstr ref $overlaybranch --show-trace"
     def path = sh(returnStdout: true, script: 'readlink result').trim()
-    if (args.overlaybranch == args.currentProjectBranch) {
-        repoTag = args.overlaybranch
+    if (overlaybranch == args.currentProjectBranch) {
+        repoTag = overlaybranch
     } else {
-        repoTag = args.overlaybranch + "_" + args.currentProjectBranch
+        repoTag = overlaybranch + "_" + args.currentProjectBranch
     }
 
     def fqImageName = "${Constants.dockerRegistryHost}/${imageName}:$repoTag"
