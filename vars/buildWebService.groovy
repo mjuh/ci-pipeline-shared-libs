@@ -11,7 +11,7 @@ def call() {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
         parameters {
-            string(name: 'OVERLAY_BRANCH_NAME',
+            string(name: 'params.OVERLAY_BRANCH_NAME',
                    defaultValue: 'master',
                    description: 'Git Branch at https://gitlab.intr/_ci/nixpkgs/ repository')
         }
@@ -24,8 +24,8 @@ def call() {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
-                            echo "Building image with ${OVERLAY_BRANCH_NAME} branch in https://gitlab.intr/_ci/nixpkgs/tree/${OVERLAY_BRANCH_NAME}/"
-                            dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
+                            echo "Building image with ${params.OVERLAY_BRANCH_NAME} branch in https://gitlab.intr/_ci/nixpkgs/tree/${params.OVERLAY_BRANCH_NAME}/"
+                            dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
                         }
                     }
                 }
@@ -34,7 +34,7 @@ def call() {
                 when { expression { fileExists 'test.nix' } }
                 steps {
                     script {
-                        nixSh cmd: "nix-build test.nix --argstr ref ${OVERLAY_BRANCH_NAME} --out-link test-result --show-trace"
+                        nixSh cmd: "nix-build test.nix --argstr ref ${params.OVERLAY_BRANCH_NAME} --out-link test-result --show-trace"
                         reportDir = 'test-result/coverage-data/vm-state-dockerNode'
                         publishHTML (target: [
                                 allowMissing: false,
@@ -86,7 +86,7 @@ def call() {
                 }
                 post {
                     success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME}:${OVERLAY_BRANCH_NAME} pushed to registry"
+                        notifySlack "${GROUP_NAME}/${PROJECT_NAME}:${params.OVERLAY_BRANCH_NAME} pushed to registry"
                     }
                 }
             }
