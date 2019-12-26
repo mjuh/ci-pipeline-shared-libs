@@ -11,7 +11,7 @@ def call() {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
         parameters {
-            string(name: 'params.OVERLAY_BRANCH_NAME',
+            string(name: 'OVERLAY_BRANCH_NAME',
                    defaultValue: 'master',
                    description: 'Git Branch at https://gitlab.intr/_ci/nixpkgs/ repository')
         }
