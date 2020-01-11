@@ -18,6 +18,8 @@ def call() {
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
+            IMAGE_TAG = nixRepoTag overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
+            DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${IMAGE_TAG}"
         }
         stages {
             stage('Build Docker image') {
@@ -86,7 +88,7 @@ def call() {
                 }
                 post {
                     success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME}:${params.OVERLAY_BRANCH_NAME} pushed to registry"
+                        notifySlack "${GROUP_NAME}/${PROJECT_NAME}:${GIT_BRANCH} pushed to <${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
                     }
                 }
             }
