@@ -12,11 +12,9 @@ def call(Map args = [:]) {
 
     nixSh cmd: "nix-build --tarball-ttl 10 --argstr ref $overlaybranch --show-trace"
     def path = sh(returnStdout: true, script: 'readlink result').trim()
-    if (overlaybranch == args.currentProjectBranch) {
-        repoTag = overlaybranch
-    } else {
-        repoTag = overlaybranch + "_" + args.currentProjectBranch
-    }
+
+    def repoTag = nixRepoTag overlaybranch: overlaybranch,
+    currentProjectBranch: args.currentProjectBranch
 
     def fqImageName = "${Constants.dockerRegistryHost}/${imageName}:$repoTag"
     new DockerImageTarball(imageName: fqImageName, path: path)
