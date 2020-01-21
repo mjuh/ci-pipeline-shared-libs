@@ -4,5 +4,5 @@ def call(msg, color = 'green') {
                red: '#ff0000',
                good: '#00ff00',
                bad: '#ff0000'][color.toLowerCase()]
-    slackSend(colorCode: rgb, message: msg)
+    slackSend(color: rgb, message: msg)
 }
