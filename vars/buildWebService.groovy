@@ -83,8 +83,8 @@ def call() {
             }
             stage('Push Docker image') {
                 when { anyOf {
-                        { not { branch "wip-*" } }
-                        { not { params.OVERLAY_BRANCH_NAME "wip-*" } }
+                        not { branch "wip-*" }
+                        not { expression { return params.OVERLAY_BRANCH_NAME.contains("wip-") } }
                     }
                 }
                 steps {
