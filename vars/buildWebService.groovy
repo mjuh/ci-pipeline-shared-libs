@@ -20,6 +20,8 @@ def call() {
             GROUP_NAME = gitRemoteOrigin.getGroup()
             IMAGE_TAG = nixRepoTag overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
             DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${IMAGE_TAG}"
+            WIP_PROJECT_BRANCH = GIT_BRANCH.startsWith("wip-")
+            WIP_OVERLAY_BRANCH = params.OVERLAY_BRANCH_NAME.startsWith("wip-")
         }
         stages {
             stage('Build Docker image') {
@@ -82,9 +84,10 @@ def call() {
                 }
             }
             stage('Push Docker image') {
-                when { anyOf {
-                        not { branch "wip-*" }
-                        not { expression { return params.OVERLAY_BRANCH_NAME.contains("wip-") } }
+                when {
+                    anyOf {
+                        not { expression { return WIP_PROJECT_BRANCH } }
+                        not { expression { return WIP_OVERLAY_BRANCH } }
                     }
                 }
                 steps {
