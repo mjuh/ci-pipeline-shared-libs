@@ -82,6 +82,7 @@ def call() {
                 }
             }
             stage('Push Docker image') {
+                when { not { branch "wip-*" } }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage, pushToBranchName: false
