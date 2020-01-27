@@ -20,7 +20,6 @@ def call() {
             GROUP_NAME = gitRemoteOrigin.getGroup()
             IMAGE_TAG = nixRepoTag overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
             DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${IMAGE_TAG}"
-            NIXPKGS_CONFIG = "${WORKSPACE}/config.nix"
         }
         stages {
             stage('Build Docker image') {
