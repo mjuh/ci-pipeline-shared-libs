@@ -36,6 +36,7 @@ def call() {
                 when { expression { fileExists 'test.nix' } }
                 steps {
                     script {
+                        print("Invoking: nix-build test.nix --argstr ref ${params.OVERLAY_BRANCH_NAME} --out-link test-result --show-trace")
                         nixSh cmd: "nix-build test.nix --argstr ref ${params.OVERLAY_BRANCH_NAME} --out-link test-result --show-trace"
                         reportDir = 'test-result/coverage-data/vm-state-dockerNode'
                         publishHTML (target: [
