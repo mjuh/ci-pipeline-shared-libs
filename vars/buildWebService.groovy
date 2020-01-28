@@ -82,6 +82,14 @@ def call() {
                 }
             }
             stage('Push Docker image') {
+                when {
+                    not {
+                        anyOf {
+                            expression { return GIT_BRANCH.startsWith("wip-") }
+                            expression { return params.OVERLAY_BRANCH_NAME.startsWith("wip-") }
+                        }
+                    }
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage, pushToBranchName: false
