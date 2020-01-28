@@ -36,10 +36,27 @@ def call() {
                 when { expression { fileExists 'test.nix' } }
                 steps {
                     script {
-                        print("Invoking: nix-build test.nix --argstr ref ${params.OVERLAY_BRANCH_NAME} --out-link test-result --show-trace")
-                        nixSh cmd: "nix-build test.nix --argstr ref ${params.OVERLAY_BRANCH_NAME} --out-link test-result --show-trace"
+                        def BUILD_CMD_TEMPLATE = [
+                            "nix-build", "test.nix",
+                            "--argstr", "ref", "${params.OVERLAY_BRANCH_NAME}",
+                            "--show-trace"
+                        ]
+
+                        def BUILD_CMD = (BUILD_CMD_TEMPLATE + [
+                                "--out-link", "test-result"]).join(" ")
+                        def BUILD_CMD_DEBUG = (BUILD_CMD_TEMPLATE + [
+                                "--arg", "debug", "true",
+                                "--out-link", "test-result-debug"
+                            ]).join(" ")
+
+                        [BUILD_CMD, BUILD_CMD_DEBUG].each{
+                            print("Invoking ${it}")
+                            nixSh cmd: it
+                        }
+
                         archiveArtifacts artifacts: "test-result/**"
                     }
+                }
             }
             stage("phpinfo difference") {
                 when {
