@@ -38,18 +38,8 @@ def call() {
                     script {
                         print("Invoking: nix-build test.nix --argstr ref ${params.OVERLAY_BRANCH_NAME} --out-link test-result --show-trace")
                         nixSh cmd: "nix-build test.nix --argstr ref ${params.OVERLAY_BRANCH_NAME} --out-link test-result --show-trace"
-                        reportDir = 'test-result/coverage-data/vm-state-dockerNode'
-                        publishHTML (target: [
-                                allowMissing: false,
-                                alwaysLinkToLastBuild: true,
-                                keepAll: true,
-                                reportDir: reportDir,
-                                reportFiles: dir(reportDir) {
-                                    findFiles(glob: '*.html').join(',')
-                                },
-                                reportName: 'coverage-data'
-                            ])}
-                }
+                        archiveArtifacts artifacts: "test-result/**"
+                    }
             }
             stage("phpinfo difference") {
                 when {
