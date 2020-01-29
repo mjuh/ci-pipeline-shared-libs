@@ -10,7 +10,19 @@ def call(Map args = [:]) {
 
     createSshDirWithGitKey()
 
-    nixSh cmd: "nix-build --tarball-ttl 10 --argstr ref $overlaybranch --show-trace"
+    def BUILD_CMD_TEMPLATE = ["nix-build", "--tarball-ttl", "10",
+                              "--argstr", "ref", overlaybranch,
+                              "--show-trace"]
+    def BUILD_CMD = BUILD_CMD_TEMPLATE.join(" ")
+    def BUILD_CMD_DEBUG = (BUILD_CMD_TEMPLATE + [
+            "--arg", "debug", "true", "--out-link", "debug"
+        ]).join(" ")
+
+    [BUILD_CMD, BUILD_CMD_DEBUG].each{
+        print("Invoking ${it}")
+        nixSh cmd: it
+    }
+
     def path = sh(returnStdout: true, script: 'readlink result').trim()
 
     def repoTag = nixRepoTag overlaybranch: overlaybranch,
