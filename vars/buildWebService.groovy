@@ -7,7 +7,7 @@ def call() {
         agent { label 'nixbld' }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['Build Docker image', 'Push Docker image'])
+            gitlabBuilds(builds: ['Build Docker image'])
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
         parameters {
@@ -98,9 +98,7 @@ def call() {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        pushDocker image: dockerImage, pushToBranchName: false
-                    }
+                    pushDocker image: dockerImage, pushToBranchName: false
                 }
                 post {
                     success {
