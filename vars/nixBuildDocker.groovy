@@ -15,7 +15,7 @@ def call(Map args = [:]) {
                               "--show-trace"]
     def BUILD_CMD = BUILD_CMD_TEMPLATE.join(" ")
     def BUILD_CMD_DEBUG = (BUILD_CMD_TEMPLATE + [
-            "--arg", "debug", "true", "--out-link", "debug"
+            "--arg", "debug", "true"
         ]).join(" ")
 
     [BUILD_CMD, BUILD_CMD_DEBUG].each{
