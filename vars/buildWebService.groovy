@@ -1,13 +1,13 @@
 import groovy.json.JsonOutput
 
 def call() {
-    def dockerImage = null
+    def dockerImages = null
 
     pipeline {
         agent { label 'nixbld' }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['Build Docker image', 'Push Docker image'])
+            gitlabBuilds(builds: ['Build Docker image'])
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
         parameters {
@@ -27,7 +27,7 @@ def call() {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
                             echo "Building image with ${params.OVERLAY_BRANCH_NAME} branch in https://gitlab.intr/_ci/nixpkgs/tree/${params.OVERLAY_BRANCH_NAME}/"
-                            dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
+                            dockerImages = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
                         }
                     }
                 }
@@ -98,8 +98,8 @@ def call() {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        pushDocker image: dockerImage, pushToBranchName: false
+                    script {
+                        dockerImages.each { pushDocker image: it, pushToBranchName: false }
                     }
                 }
                 post {
