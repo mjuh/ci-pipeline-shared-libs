@@ -15,7 +15,7 @@ def call(Map args = [:]) {
                               "--show-trace"]
     def BUILD_CMD = BUILD_CMD_TEMPLATE.join(" ")
     def BUILD_CMD_DEBUG = (BUILD_CMD_TEMPLATE + [
-            "--arg", "debug", "true"
+            "--arg", "debug", "true", "--out-link", "result-debug"
         ]).join(" ")
 
     [BUILD_CMD, BUILD_CMD_DEBUG].each{
@@ -23,11 +23,15 @@ def call(Map args = [:]) {
         nixSh cmd: it
     }
 
-    def path = sh(returnStdout: true, script: 'readlink result').trim()
-
     def repoTag = nixRepoTag overlaybranch: overlaybranch,
     currentProjectBranch: args.currentProjectBranch
 
+    def imageTar = sh(returnStdout: true, script: 'readlink result').trim()
     def fqImageName = "${Constants.dockerRegistryHost}/${imageName}:$repoTag"
-    new DockerImageTarball(imageName: fqImageName, path: path)
+
+    def imageDebugTar = sh(returnStdout: true, script: 'readlink result-debug').trim()
+    def fqImageDebugName = "${fqImageName}_debug"
+
+    [(new DockerImageTarball(imageName: fqImageDebugName, path: imageDebugTar)),
+     (new DockerImageTarball(imageName: fqImageName, path: imageTar))]
 }
