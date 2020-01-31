@@ -29,9 +29,12 @@ def call(Map args = [:]) {
     def imageTar = sh(returnStdout: true, script: 'readlink result').trim()
     def fqImageName = "${Constants.dockerRegistryHost}/${imageName}:$repoTag"
 
-    def imageDebugTar = sh(returnStdout: true, script: 'readlink result-debug').trim()
-    def fqImageDebugName = "${fqImageName}_debug"
-
-    [(new DockerImageTarball(imageName: fqImageDebugName, path: imageDebugTar)),
-     (new DockerImageTarball(imageName: fqImageName, path: imageTar))]
+    if (fileExists ("${WORKSPACE}/result-debug")) {
+        def imageDebugTar = sh(returnStdout: true, script: 'readlink result-debug').trim()
+        def fqImageDebugName = "${fqImageName}_debug"
+        return [(new DockerImageTarball(imageName: fqImageDebugName, path: imageDebugTar)),
+                (new DockerImageTarball(imageName: fqImageName, path: imageTar))]
+    } else {
+        return [(new DockerImageTarball(imageName: fqImageName, path: imageTar))]
+    }
 }
