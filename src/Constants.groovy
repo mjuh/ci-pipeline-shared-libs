@@ -7,7 +7,7 @@ public class Constants {
     public static final String dockerStacksGitRepoUrl = 'git@gitlab.intr:_ci/docker-stacks.git'
     public static final String dockerStacksDeployDir = 'docker-stacks'
 
-    public static final String gitCredId = 'd8f04931-9047-413a-80f3-eef23003522c'
+    public static final String gitCredId = 'gitlab-git'
     public static final String gitHost = 'gitlab.intr'
 
     public static final String gitLabConnection = 'gitlab.intr'
@@ -19,14 +19,10 @@ public class Constants {
 
     public static final String containerStructureTestImage = 'gcr.io/gcp-runtimes/container-structure-test'
 
-    public static final String slackChannel = '#git'
-    public static final String slackTeam = 'mjru'
-    public static final String slackToken = 'kyUUMqP0xTrsz2TmLUH0V8hV'
-
     public static final String gradleDefaultCommand = 'build'
 
     public static final String nexusUrl = 'http://nexus.intr'
-    public static final String nexusCredId = '38c03ef4-ea3c-43e4-98d8-addb213b5e16'
+    public static final String nexusCredId = 'jenkinsnexus'
     public static final String nexusDefaultRawRepo  = "plain-files"
 
     public static final String dockerRegistryBrowserUrl = 'http://docker-registry-browser.intr'
