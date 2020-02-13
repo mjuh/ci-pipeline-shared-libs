@@ -10,7 +10,7 @@ def call(Map args = [:]) {
 
     if(!upload){
     sh """
-        . /home/jenkins/.nix-profile/etc/profile.d/nix.sh ;
+        .  ${env.HOME}/.nix-profile/etc/profile.d/nix.sh || true ;
         packer build -force -var-file=vars/${vars}.json templates/${template}.json
         ls -alah */${output}
     """
@@ -19,7 +19,7 @@ def call(Map args = [:]) {
         if(env.BRANCH_NAME == "master"){
             sh """
                 rm -f */${output} || true
-                . /home/jenkins/.nix-profile/etc/profile.d/nix.sh ;
+                .  ${env.HOME}/.nix-profile/etc/profile.d/nix.sh || true ;
                 packer build -force -var-file=vars/${vars}.json templates/${template}.json
                 ls -alah */${output}
                 rsync -av */${output} rsync://archive.intr/images/jenkins-production/
@@ -28,7 +28,7 @@ def call(Map args = [:]) {
         } else {
             sh """
                 rm -f */${output} || true
-                . /home/jenkins/.nix-profile/etc/profile.d/nix.sh ;
+                .  ${env.HOME}/.nix-profile/etc/profile.d/nix.sh || true ;
                 packer build -force -var-file=vars/${vars}.json templates/${template}.json
                 ls -alah */${output}
                 rsync -av */${output} rsync://archive.intr/images/jenkins-development/

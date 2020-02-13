@@ -33,7 +33,7 @@ def call(Map args = [:]) {
                     chmod +x ${sshWrapperFilename}
                     test -f ssh_deploy_key && chmod +w ssh_deploy_key
                     cp $KEY_FILE ssh_deploy_key
-                    chmod 400 ssh_deploy_key
+                    chmod 600 ssh_deploy_key
                 """
         }
     }

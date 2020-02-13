@@ -4,13 +4,12 @@ def call(Map args = [:]) {
     def composerTag = args.composerTag ?: Constants.composerDockerTag
     def phpVersion = args.phpVersion ?: 'php56'
     def srcDir = args.srcDir ?: 'src'
-    def jenkinsContainer = new JenkinsContainer()
-    def passwdHostPath = jenkinsContainer.getHostPath(env.WORKSPACE + '/passwd')
-    def groupHostPath = jenkinsContainer.getHostPath(env.WORKSPACE + '/group')
-    def jenkinsHomeHostPath = jenkinsContainer.getHostPath(env.WORKSPACE + '/jenkins_home')
-    def composerHostPath = jenkinsContainer.getHostPath(env.HOME + '/composer')
-    def buildHostPath = jenkinsContainer.getHostPath(env.WORKSPACE + '/build')
-    def uid = jenkinsContainer.getUid()
+    def passwdHostPath = env.WORKSPACE + '/passwd'
+    def groupHostPath = env.WORKSPACE + '/group'
+    def jenkinsHomeHostPath = env.WORKSPACE + '/jenkins_home'
+    def composerHostPath = env.HOME + '/composer'
+    def buildHostPath = env.WORKSPACE + '/build'
+    def uid = 109
     def jenkinsHomeInComposerContainer = '/home/jenkins'
 
     echo 'Copying src/ to build/'
