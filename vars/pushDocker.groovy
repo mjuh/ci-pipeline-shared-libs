@@ -5,6 +5,14 @@ def call(Map args = [:]) {
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
     def extraTags = ['latest']
 
+    if(!args.imageName) {
+        assert args.overlaybranch : "No Nix overlay branch provided"
+        assert args.currentProjectBranch : "No current project branch provided"
+    }
+
+    def repoTag = nixRepoTag overlaybranch: args.overlaybranch,
+    currentProjectBranch: args.currentProjectBranch
+
     if (env.GIT_COMMIT) {
         extraTags += env.GIT_COMMIT[0..7]
     }
@@ -23,15 +31,10 @@ def call(Map args = [:]) {
         String baseName = args.image.imageName.split(':')[0..-2].join()
         List tags = [args.image.imageName.split(':')[-1]] + extraTags
         tags.unique()
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
-                          usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
-            tags.each { tag ->
-                println("Uploading ${args.image.path} to ${baseName}:${tag}")
-                nixSh cmd: "skopeo copy " +
-                           "--dest-creds=${env.REGISTRY_USERNAME}:${env.REGISTRY_PASSWORD} --dest-tls-verify=false " +
-                           "docker-archive:${args.image.path} docker://${baseName}:${tag}",
-                      pkgs: ['skopeo']
-            }
+        sh "skopeo copy docker-archive:${args.image.path} docker-daemon:${baseName}:${repoTag}"
+        tags.each { tag ->
+            sh "docker tag ${baseName}:${repoTag} ${baseName}:${tag}"
+            sh "docker push ${baseName}:${tag}"
         }
     }
 }
