@@ -7,6 +7,8 @@ def call(Map args = [:]) {
 
     if (env.GIT_COMMIT) {
         extraTags += env.GIT_COMMIT[0..7]
+    }
+    if (args.pushToBranchName && env.BRANCH_NAME) {
         extraTags += env.BRANCH_NAME
     }
 
