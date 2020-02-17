@@ -3,13 +3,11 @@ def call(Map args = [:]) {
         assert args.currentProjectBranch : "No current project branch provided"
     }
 
-    def overlaybranch = args.overlaybranch ?: "master"
+    String overlaybranch = args.overlaybranch ?: "master"
 
     if (overlaybranch == args.currentProjectBranch) {
-        repoTag = overlaybranch
+        return overlaybranch
     } else {
-        repoTag = overlaybranch + "_" + args.currentProjectBranch
+        return (overlaybranch + "_" + args.currentProjectBranch)
     }
-
-    repoTag
 }

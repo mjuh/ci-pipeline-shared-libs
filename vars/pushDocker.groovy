@@ -1,15 +1,16 @@
 def call(Map args = [:]) {
     assert args.image : "No image provided"
 
-    def registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost
-    def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
-    def extraTags = ['latest']
+    String registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost
+    String credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
+    List<String> extraTags = ['latest']
+    String pushDocker = args.tag ?: env.BRANCH_NAME
+
+    boolean pushToBranchName = args.pushToBranchName ?: false
 
     if (env.GIT_COMMIT) {
         extraTags += env.GIT_COMMIT[0..7]
-    }
-    if (args.pushToBranchName && env.BRANCH_NAME) {
-        extraTags += env.BRANCH_NAME
+        extraTags += pushDocker
     }
 
     if(args.image.metaClass.respondsTo(args.image, 'push')) {
@@ -20,14 +21,12 @@ def call(Map args = [:]) {
             }
         }
     } else {
-        String repoTag = nixRepoTag (overlaybranch: args.overlaybranch,
-                                     currentProjectBranch: args.currentProjectBranch)
         String baseName = args.image.imageName.split(':')[0..-2].join()
         List tags = [args.image.imageName.split(':')[-1]] + extraTags
         tags.unique()
-        sh "skopeo copy docker-archive:${args.image.path} docker-daemon:${baseName}:${repoTag}"
+        sh "skopeo copy docker-archive:${args.image.path} docker-daemon:${baseName}:${pushDocker}"
         tags.each { tag ->
-            sh "docker tag ${baseName}:${repoTag} ${baseName}:${tag}"
+            sh "docker tag ${baseName}:${pushDocker} ${baseName}:${tag}"
             sh "docker push ${baseName}:${tag}"
         }
     }
