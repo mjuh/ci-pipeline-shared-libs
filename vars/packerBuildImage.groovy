@@ -17,6 +17,7 @@ def call(Map args = [:]) {
     if(upload){
         if(env.BRANCH_NAME == "master"){
             sh """
+                echo ${output}
                 rm -f */${output} || true
                 .  ${env.HOME}/.nix-profile/etc/profile.d/nix.sh || true ;
                 packer build -force -var-file=vars/${vars}.json templates/${template}.json
@@ -26,6 +27,7 @@ def call(Map args = [:]) {
             """
         } else {
             sh """
+                echo ${output}
                 rm -f */${output} || true
                 .  ${env.HOME}/.nix-profile/etc/profile.d/nix.sh || true ;
                 packer build -force -var-file=vars/${vars}.json templates/${template}.json
