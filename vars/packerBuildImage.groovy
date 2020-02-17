@@ -5,9 +5,8 @@ def call(Map args = [:]) {
         def vars = args.vars
         def upload = args.upload ?: false
         def template = args.template
-        def output = args.output ?: { sh """
-                                       jq -r .vm_name vars/${vars}.json
-                                    """ }()
+        def output = args.output ?: sh(returnStdout: true, script: "jq -r .vm_name vars/${vars}.json").trim()
+
     if(!upload){
     sh """
         .  ${env.HOME}/.nix-profile/etc/profile.d/nix.sh || true ;
