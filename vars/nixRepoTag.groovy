@@ -1,6 +1,5 @@
 def call(Map args = [:]) {
     if(!args.imageName) {
-        assert args.overlaybranch : "No Nix overlay branch provided"
         assert args.currentProjectBranch : "No current project branch provided"
     }
 
