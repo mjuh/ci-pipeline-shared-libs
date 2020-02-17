@@ -55,6 +55,10 @@ ${params.OVERLAY_BRANCH_NAME} branch in $gitlab_url"
                 when { expression { fileExists 'test.nix' } }
                 steps {
                     testNix nixArgs: ["--argstr ref ${params.OVERLAY_BRANCH_NAME}"]
+                    script {
+                        closure = args.closure ?: { return true }
+                        closure()
+                    }
                 }
             }
             stage('Push Docker image') {
