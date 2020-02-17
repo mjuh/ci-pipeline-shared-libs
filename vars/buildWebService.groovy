@@ -27,7 +27,8 @@ def call() {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
                             echo "Building image with ${params.OVERLAY_BRANCH_NAME} branch in https://gitlab.intr/_ci/nixpkgs/tree/${params.OVERLAY_BRANCH_NAME}/"
-                            dockerImages = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
+                            dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
+                            dockerImageDebug = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
                         }
                     }
                 }
@@ -99,11 +100,14 @@ def call() {
                 }
                 steps {
                     script {
-                        dockerImages.each {
-                            pushDocker image: it,
-                            overlaybranch: params.OVERLAY_BRANCH_NAME,
-                            currentProjectBranch: GIT_BRANCH
-                        }
+                        pushDocker image: dockerImage,
+                        overlaybranch: params.OVERLAY_BRANCH_NAME,
+                        currentProjectBranch: GIT_BRANCH,
+                        pushToBranchName: true
+
+                        pushDocker image: dockerImageDebug,
+                        overlaybranch: params.OVERLAY_BRANCH_NAME,
+                        currentProjectBranch: GIT_BRANCH
                     }
                 }
                 post {
