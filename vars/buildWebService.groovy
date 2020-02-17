@@ -18,17 +18,33 @@ def call() {
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
-            IMAGE_TAG = nixRepoTag overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
-            DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${IMAGE_TAG}"
+            TAG = nixRepoTag (overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH)
+            DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${TAG}"
         }
         stages {
             stage('Build Docker image') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
-                            echo "Building image with ${params.OVERLAY_BRANCH_NAME} branch in https://gitlab.intr/_ci/nixpkgs/tree/${params.OVERLAY_BRANCH_NAME}/"
-                            dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
-                            dockerImageDebug = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH
+                            String gitlab_url = "https://${Constants.gitLabConnection}/$GROUP_NAME/$PROJECT_NAME/tree/$params.OVERLAY_BRANCH_NAME/"
+                            GitRepository majordomo_overlay =
+                                new GitRepository (name: "majordomo",
+                                                url: "https://gitlab.intr/_ci/nixpkgs",
+                                                branch: params.OVERLAY_BRANCH_NAME)
+
+                            echo "Building image with \
+${params.OVERLAY_BRANCH_NAME} branch in $gitlab_url"
+
+                            dockerImage = nixBuildDocker (namespace: GROUP_NAME,
+                                                          name: PROJECT_NAME,
+                                                          tag: TAG,
+                                                          overlay: majordomo_overlay)
+
+                            dockerImageDebug = nixBuildDocker (namespace: GROUP_NAME,
+                                                               name: PROJECT_NAME,
+                                                               tag: (TAG + "-debug"),
+                                                               overlay: majordomo_overlay,
+                                                               nixArgs: ["--arg debug true"])
                         }
                     }
                 }
@@ -36,57 +52,7 @@ def call() {
             stage('Test Docker image') {
                 when { expression { fileExists 'test.nix' } }
                 steps {
-                    script {
-                        def BUILD_CMD_TEMPLATE = [
-                            "nix-build", "test.nix",
-                            "--argstr", "ref", "${params.OVERLAY_BRANCH_NAME}",
-                            "--show-trace"
-                        ]
-
-                        def BUILD_CMD = (BUILD_CMD_TEMPLATE + [
-                                "--out-link", "test-result"]).join(" ")
-                        def BUILD_CMD_DEBUG = (BUILD_CMD_TEMPLATE + [
-                                "--arg", "debug", "true",
-                                "--out-link", "test-result-debug"
-                            ]).join(" ")
-
-                        [BUILD_CMD, BUILD_CMD_DEBUG].each{
-                            print("Invoking ${it}")
-                            nixSh cmd: it
-                        }
-
-                        archiveArtifacts artifacts: "test-result/**"
-                    }
-                }
-            }
-            stage("phpinfo difference") {
-                when {
-                    allOf {
-                        expression {
-                            fileExists 'test-result/coverage-data/vm-state-dockerNode/deepdiff.html'
-                        }
-                        expression {
-                            fileExists 'test-result/coverage-data/vm-state-dockerNode/deepdiff-with-excludes.html'
-                        }
-                    }
-                }
-                steps {
-                    script {
-                        def json = readJSON file: 'test-result/coverage-data/vm-state-dockerNode/deepdiff.html'
-                        def jsonFormat = JsonOutput.toJson(json)
-                        prettyJSON = JsonOutput.prettyPrint(jsonFormat)
-                        echo "${prettyJSON}"
-                    }
-                    script {
-                        def json = readJSON file: 'test-result/coverage-data/vm-state-dockerNode/deepdiff-with-excludes.html'
-                        if (! json.empty)
-                        {
-                            def jsonFormat = JsonOutput.toJson(json)
-                            prettyJSON = JsonOutput.prettyPrint(jsonFormat)
-                            echo "${prettyJSON}"
-                            // error "phpinfo sample differs phpinfo in container"
-                        }
-                    }
+                    testNix nixArgs: ["--argstr ref ${params.OVERLAY_BRANCH_NAME}"]
                 }
             }
             stage('Push Docker image') {
@@ -99,27 +65,22 @@ def call() {
                     }
                 }
                 steps {
-                    script {
-                        pushDocker image: dockerImage,
-                        overlaybranch: params.OVERLAY_BRANCH_NAME,
-                        currentProjectBranch: GIT_BRANCH,
-                        pushToBranchName: true
+                    pushDocker (tag: (TAG + "-debug"), image: dockerImageDebug)
+                    pushDocker (tag: TAG, image: dockerImage)
 
-                        pushDocker image: dockerImageDebug,
-                        overlaybranch: params.OVERLAY_BRANCH_NAME,
-                        currentProjectBranch: GIT_BRANCH
-                    }
                 }
                 post {
                     success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME}:${GIT_BRANCH} pushed to <${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
+                        notifySlack "${GROUP_NAME}/${PROJECT_NAME}:${GIT_BRANCH} \
+pushed to <${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
                     }
                 }
             }
         }
         post {
             success { cleanWs() }
-            failure { notifySlack "Build failled: ${JOB_NAME} [<${RUN_DISPLAY_URL}|${BUILD_NUMBER}>]", "red" }
+            failure { notifySlack "Build failled: ${JOB_NAME} \
+[<${RUN_DISPLAY_URL}|${BUILD_NUMBER}>]", "red" }
         }
     }
 }
