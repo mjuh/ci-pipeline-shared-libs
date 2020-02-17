@@ -1,8 +1,7 @@
 import groovy.json.JsonOutput
 
-def call() {
+def call(Map args = [:]) {
     def dockerImages = null
-
     pipeline {
         agent { label 'nixbld' }
         options {
@@ -14,6 +13,9 @@ def call() {
             string(name: 'OVERLAY_BRANCH_NAME',
                    defaultValue: 'master',
                    description: 'Git Branch at https://gitlab.intr/_ci/nixpkgs/ repository')
+            booleanParam(name: 'DEPLOY',
+                         defaultValue: true,
+                         description: 'Deploy to Docker image to registry')
         }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
@@ -57,10 +59,13 @@ ${params.OVERLAY_BRANCH_NAME} branch in $gitlab_url"
             }
             stage('Push Docker image') {
                 when {
-                    not {
-                        anyOf {
-                            expression { return GIT_BRANCH.startsWith("wip-") }
-                            expression { return params.OVERLAY_BRANCH_NAME.startsWith("wip-") }
+                    allOf {
+                        expression { params.DEPLOY }
+                        not {
+                            anyOf {
+                                expression { return GIT_BRANCH.startsWith("wip-") }
+                                expression { return params.OVERLAY_BRANCH_NAME.startsWith("wip-") }
+                            }
                         }
                     }
                 }
