@@ -5,9 +5,6 @@ def call(Map args = [:]) {
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
     def extraTags = ['latest']
 
-    def repoTag = nixRepoTag overlaybranch: args.overlaybranch,
-    currentProjectBranch: args.currentProjectBranch
-
     if (env.GIT_COMMIT) {
         extraTags += env.GIT_COMMIT[0..7]
     }
@@ -23,6 +20,8 @@ def call(Map args = [:]) {
             }
         }
     } else {
+        String repoTag = nixRepoTag (overlaybranch: args.overlaybranch,
+                                     currentProjectBranch: args.currentProjectBranch)
         String baseName = args.image.imageName.split(':')[0..-2].join()
         List tags = [args.image.imageName.split(':')[-1]] + extraTags
         tags.unique()
