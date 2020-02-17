@@ -26,8 +26,8 @@ def call(Map args = [:]) {
         tags.unique()
         sh "skopeo copy docker-archive:${args.image.path} docker-daemon:${baseName}:${pushDocker}"
         tags.each { tag ->
-            sh "docker tag ${baseName}:${pushDocker} ${baseName}:${tag}"
-            sh "docker push ${baseName}:${tag}"
+            sh (["docker tag ${baseName}:${pushDocker} ${baseName}:${tag}",
+                 "docker push ${baseName}:${tag}"].join("; "))
         }
     }
 }
