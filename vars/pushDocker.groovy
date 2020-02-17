@@ -5,11 +5,6 @@ def call(Map args = [:]) {
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
     def extraTags = ['latest']
 
-    if(!args.imageName) {
-        assert args.overlaybranch : "No Nix overlay branch provided"
-        assert args.currentProjectBranch : "No current project branch provided"
-    }
-
     def repoTag = nixRepoTag overlaybranch: args.overlaybranch,
     currentProjectBranch: args.currentProjectBranch
 
