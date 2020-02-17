@@ -75,7 +75,8 @@ ${params.OVERLAY_BRANCH_NAME} branch in $gitlab_url"
                     }
                 }
                 steps {
-                    pushDocker (tag: (TAG + "-debug"), image: dockerImageDebug)
+                    pushDocker (tag: (TAG + "-debug"), extraTags: ['debug'],
+                                image: dockerImageDebug)
                     pushDocker (tag: TAG, image: dockerImage)
 
                 }
