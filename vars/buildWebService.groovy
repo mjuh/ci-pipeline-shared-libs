@@ -13,6 +13,9 @@ def call(Map args = [:]) {
             string(name: 'OVERLAY_BRANCH_NAME',
                    defaultValue: 'master',
                    description: 'Git Branch at https://gitlab.intr/_ci/nixpkgs/ repository')
+            string(name: 'UPSTREAM_BRANCH_NAME',
+                   defaultValue: 'master',
+                   description: 'Git Branch at upstream repository')
             booleanParam(name: 'DEPLOY',
                          defaultValue: true,
                          description: 'Deploy to Docker image to registry')
@@ -54,11 +57,9 @@ ${params.OVERLAY_BRANCH_NAME} branch in $gitlab_url"
             stage('Test Docker image') {
                 when { expression { fileExists 'test.nix' } }
                 steps {
-                    testNix nixArgs: ["--argstr ref ${params.OVERLAY_BRANCH_NAME}"]
-                    script {
-                        closure = args.closure ?: { return true }
-                        closure()
-                    }
+                    testNix nixArgs: ["--argstr ref $params.OVERLAY_BRANCH_NAME",
+                                      "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"]
+                    script { (args.testHook ?: { return true })() }
                 }
             }
             stage('Push Docker image') {
