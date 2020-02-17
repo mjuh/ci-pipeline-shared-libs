@@ -1,8 +1,7 @@
 import groovy.json.JsonOutput
 
-def call() {
+def call(Map args = [:]) {
     def dockerImages = null
-
     pipeline {
         agent { label 'nixbld' }
         options {
@@ -14,6 +13,12 @@ def call() {
             string(name: 'OVERLAY_BRANCH_NAME',
                    defaultValue: 'master',
                    description: 'Git Branch at https://gitlab.intr/_ci/nixpkgs/ repository')
+            string(name: 'UPSTREAM_BRANCH_NAME',
+                   defaultValue: 'master',
+                   description: 'Git Branch at upstream repository')
+            booleanParam(name: 'DEPLOY',
+                         defaultValue: true,
+                         description: 'Deploy to Docker image to registry')
         }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
@@ -52,20 +57,26 @@ ${params.OVERLAY_BRANCH_NAME} branch in $gitlab_url"
             stage('Test Docker image') {
                 when { expression { fileExists 'test.nix' } }
                 steps {
-                    testNix nixArgs: ["--argstr ref ${params.OVERLAY_BRANCH_NAME}"]
+                    testNix nixArgs: ["--argstr ref $params.OVERLAY_BRANCH_NAME",
+                                      "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"]
+                    script { (args.testHook ?: { return true })() }
                 }
             }
             stage('Push Docker image') {
                 when {
-                    not {
-                        anyOf {
-                            expression { return GIT_BRANCH.startsWith("wip-") }
-                            expression { return params.OVERLAY_BRANCH_NAME.startsWith("wip-") }
+                    allOf {
+                        expression { params.DEPLOY }
+                        not {
+                            anyOf {
+                                expression { return GIT_BRANCH.startsWith("wip-") }
+                                expression { return params.OVERLAY_BRANCH_NAME.startsWith("wip-") }
+                            }
                         }
                     }
                 }
                 steps {
-                    pushDocker (tag: (TAG + "-debug"), image: dockerImageDebug)
+                    pushDocker (tag: (TAG + "-debug"), extraTags: ['debug'],
+                                image: dockerImageDebug)
                     pushDocker (tag: TAG, image: dockerImage)
 
                 }
