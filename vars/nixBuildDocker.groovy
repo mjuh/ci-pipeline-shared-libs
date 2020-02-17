@@ -32,9 +32,8 @@ def call(Map args = [:]) {
     if (fileExists ("${WORKSPACE}/result-debug")) {
         def imageDebugTar = sh(returnStdout: true, script: 'readlink result-debug').trim()
         def fqImageDebugName = "${fqImageName}_debug"
-        return [(new DockerImageTarball(imageName: fqImageDebugName, path: imageDebugTar)),
-                (new DockerImageTarball(imageName: fqImageName, path: imageTar))]
+        new DockerImageTarball(imageName: fqImageDebugName, path: imageDebugTar)
     } else {
-        return [(new DockerImageTarball(imageName: fqImageName, path: imageTar))]
+        new DockerImageTarball(imageName: fqImageName, path: imageTar)
     }
 }
