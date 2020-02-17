@@ -99,7 +99,12 @@ def call() {
                 }
                 steps {
                     script {
-                        dockerImages.each { pushDocker image: it, pushToBranchName: false }
+                        dockerImages.each {
+                            pushDocker image: it,
+                            pushToBranchName: false,
+                            overlaybranch: params.OVERLAY_BRANCH_NAME,
+                            currentProjectBranch: GIT_BRANCH
+                        }
                     }
                 }
                 post {
