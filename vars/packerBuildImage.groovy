@@ -3,7 +3,9 @@ def call(Map args = [:]) {
         assert args.vars : "No packervars provided"
 
         def template = args.template
-        def output = args.output ?: sh "jq -r .vm_name vars/${vars}.json"
+        def output = args.output ?: sh """
+                                       jq -r .vm_name vars/${vars}.json
+                                    """
         def vars = args.vars
         def upload = args.upload ?: false
 
