@@ -18,7 +18,7 @@ def call(Map args = [:]) {
     } else {
         String originTag = args.tag ?: env.BRANCH_NAME
         String baseName = args.image.imageName.split(':')[0..-2].join()
-        String tagload = sh (script: "docker load --input ${args.image.path} | awk '{print \$NF}'", returnStdout: true).trim()
+        String tagload = (sh (script: "docker load --input ${args.image.path} | awk '{print \$NF}'", returnStdout: true)).trim()
         List<String> commands = []
         commands += "docker tag $tagload ${baseName}:${originTag}"
         commands += "docker push ${baseName}:${originTag}"
