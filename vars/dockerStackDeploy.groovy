@@ -22,7 +22,7 @@ def call(Map args) {
     def imageName = null
     if(args.image) {
         imageName = args.image.imageName()
-        imageName = "${registry}/" + (imageName - "${registry}/")
+        imageName = "${registry}/" + (imageName - "${registry}/") + ":${env.GIT_COMMIT[0..7]}"
     }
     def dockerStacksRepoCommitId = args.dockerStacksRepoCommitId ?: 'master'
 
@@ -41,15 +41,15 @@ def call(Map args) {
             if(args.service && imageName) {
                 echo imageName
                 stackDeclaration.services."${args.service}".image = imageName
-                echo stackDeclaration.services."mail-checker".ports[0]
+                echo stackDeclaration.services."${args.service}".ports[0]
                 sh "rm -f ${stackConfigFile}"
                 if(stackDeclaration."x-${args.stack}-override" && stackDeclaration."x-${args.stack}-override".services) {
                     mergeMaps(stackDeclaration.services, stackDeclaration."x-${args.stack}-override".services)
-                    echo stackDeclaration.services."mail-checker".ports[0]
+                    echo stackDeclaration.services."${args.service}".ports[0]
                     mergeMaps(stackDeclaration.networks, stackDeclaration."x-${args.stack}-override".networks)
-                    echo stackDeclaration.services."mail-checker".ports[0]
+                    echo stackDeclaration.services."${args.service}".ports[0]
                 }
-                echo stackDeclaration.services."mail-checker".ports[0]
+                echo stackDeclaration.services."${args.service}".ports[0]
                 writeYaml(file: stackConfigFile, data: stackDeclaration)
                 imageUpdated = true
             }
