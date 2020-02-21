@@ -19,8 +19,8 @@ def call(Map args = [:]) {
         String originTag = args.tag ?: env.BRANCH_NAME
         String baseName = args.image.imageName.split(':')[0..-2].join()
         List<String> commands = []
-        commands += String.format("docker tag %s ${baseName}:${originTag}",
-                                  (sh (script: "docker load --input ${args.image.path}", returnStdout: true)).trim().split(" ").last())
+        // Don't use docker load, because it cannot load and tag at the same time.
+        commands += "skopeo copy docker-archive:${args.image.path} docker-daemon:${baseName}:${originTag}"
         commands += "docker push ${baseName}:${originTag}"
         (([args.image.imageName.split(':')[-1]] + extraTags).unique()).each { tag ->
             commands += "docker tag ${baseName}:${originTag} ${baseName}:${tag}"
