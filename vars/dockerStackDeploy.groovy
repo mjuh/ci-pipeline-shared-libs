@@ -36,6 +36,8 @@ def call(Map args) {
             def stackDeclaration = readYaml(file: stackConfigFile)
             def imageUpdated = false
 
+            sh "cat ${stackConfigFile}"
+
             if(args.service && imageName) {
                 stackDeclaration.services."${args.service}".image = imageName
                 sh "rm -f ${stackConfigFile}"
@@ -47,52 +49,54 @@ def call(Map args) {
                 imageUpdated = true
             }
 
-            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
-                              usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
-                sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
-                if (args.service && prodService && imageName && !stackDeclaration."x-${args.stack}-override") {
-                    def serviceDeclaration = stackDeclaration.services."${args.service}"
-                    if(!serviceDeclaration) { error "${args.service} is not declared in ${args.stack}.yml" }
-                    echo """
-                        Service ${args.service} exists,
-                        name: ${prodService.Spec.Name}
-                        image: ${prodService.Spec.TaskTemplate.ContainerSpec.Image}
-                        mode: ${prodService.Spec.Mode}
-                    """.stripMargin().stripIndent()
-                    def cmd = 'docker service update --detach=false --with-registry-auth --force '
-                    if(serviceDeclaration.deploy.replicas) {
-                        cmd += "--replicas ${serviceDeclaration.deploy.replicas} "
-                    }
-                    if(serviceDeclaration.ports) {
-                        cmd += serviceDeclaration.ports.collect {"--publish-add ${it} "}.join()
-                    }
-                    if(serviceDeclaration.environment) {
-                        cmd += serviceDeclaration.environment.collect {"--env-add ${it} "}.join()
-                    }
-                    cmd += "--image ${imageName} ${args.stack}_${args.service}"
-                    sh cmd
-                } 
-                else if(stackDeclaration."x-${args.stack}-override" && stackDeclaration."x-${args.stack}-override".services) {
-                    sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
-                }
-                else {
-                    sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
-                }
-            }
-            if(imageUpdated) {
-                createSshDirWithGitKey(dir: HOME + '/.ssh')
-                sh """
-                    git config --global user.name 'jenkins'
-                    git config --global user.email 'jenkins@majordomo.ru'
-                    git stash
-                    git checkout master
-                    git pull origin master
-                    git stash pop
-                    git add ${stackConfigFile}
-                    git commit -m '${args.stack}/${args.service} image updated: ${imageName}'
-                    git push origin master
-                """
-            }
+            sh "cat ${stackConfigFile}"
+
+            // withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
+            //                   usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
+            //     sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
+            //     if (args.service && prodService && imageName && !stackDeclaration."x-${args.stack}-override") {
+            //         def serviceDeclaration = stackDeclaration.services."${args.service}"
+            //         if(!serviceDeclaration) { error "${args.service} is not declared in ${args.stack}.yml" }
+            //         echo """
+            //             Service ${args.service} exists,
+            //             name: ${prodService.Spec.Name}
+            //             image: ${prodService.Spec.TaskTemplate.ContainerSpec.Image}
+            //             mode: ${prodService.Spec.Mode}
+            //         """.stripMargin().stripIndent()
+            //         def cmd = 'docker service update --detach=false --with-registry-auth --force '
+            //         if(serviceDeclaration.deploy.replicas) {
+            //             cmd += "--replicas ${serviceDeclaration.deploy.replicas} "
+            //         }
+            //         if(serviceDeclaration.ports) {
+            //             cmd += serviceDeclaration.ports.collect {"--publish-add ${it} "}.join()
+            //         }
+            //         if(serviceDeclaration.environment) {
+            //             cmd += serviceDeclaration.environment.collect {"--env-add ${it} "}.join()
+            //         }
+            //         cmd += "--image ${imageName} ${args.stack}_${args.service}"
+            //         sh cmd
+            //     } 
+            //     else if(stackDeclaration."x-${args.stack}-override" && stackDeclaration."x-${args.stack}-override".services) {
+            //         sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
+            //     }
+            //     else {
+            //         sh "docker stack deploy --with-registry-auth -c ${stackConfigFile} ${args.stack}"
+            //     }
+            // }
+            // if(imageUpdated) {
+            //     createSshDirWithGitKey(dir: HOME + '/.ssh')
+            //     sh """
+            //         git config --global user.name 'jenkins'
+            //         git config --global user.email 'jenkins@majordomo.ru'
+            //         git stash
+            //         git checkout master
+            //         git pull origin master
+            //         git stash pop
+            //         git add ${stackConfigFile}
+            //         git commit -m '${args.stack}/${args.service} image updated: ${imageName}'
+            //         git push origin master
+            //     """
+            // }
         }
     }
 }
