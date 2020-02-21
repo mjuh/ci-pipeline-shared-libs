@@ -20,7 +20,7 @@ def call(Map args = [:]) {
         String baseName = args.image.imageName.split(':')[0..-2].join()
         String tagload = (sh (script: "docker load --input ${args.image.path}", returnStdout: true)).trim().split(" ").last()
         List<String> commands = []
-        commands += "docker tag $tagload ${baseName}:${originTag}"
+        commands += String.format("docker tag %s ${baseName}:${originTag}", tagload)
         commands += "docker push ${baseName}:${originTag}"
         (([args.image.imageName.split(':')[-1]] + extraTags).unique()).each { tag ->
             commands += "docker tag ${baseName}:${originTag} ${baseName}:${tag}"
