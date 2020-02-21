@@ -32,14 +32,10 @@ def call(Map args = [:]) {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
-                            String gitlab_url = "https://${Constants.gitLabConnection}/$GROUP_NAME/$PROJECT_NAME/tree/$params.OVERLAY_BRANCH_NAME/"
                             GitRepository majordomo_overlay =
                                 new GitRepository (name: "majordomo",
-                                                url: "https://gitlab.intr/_ci/nixpkgs",
-                                                branch: params.OVERLAY_BRANCH_NAME)
-
-                            echo "Building image with \
-${params.OVERLAY_BRANCH_NAME} branch in $gitlab_url"
+                                                   url: "https://gitlab.intr/_ci/nixpkgs",
+                                                   branch: params.OVERLAY_BRANCH_NAME)
 
                             dockerImage = nixBuildDocker (namespace: GROUP_NAME,
                                                           name: PROJECT_NAME,
