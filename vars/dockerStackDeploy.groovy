@@ -39,6 +39,7 @@ def call(Map args) {
             sh "cat ${stackConfigFile}"
 
             if(args.service && imageName) {
+                echo imageName
                 stackDeclaration.services."${args.service}".image = imageName
                 sh "rm -f ${stackConfigFile}"
                 if(stackDeclaration."x-${args.stack}-override" && stackDeclaration."x-${args.stack}-override".services) {
