@@ -85,6 +85,7 @@ pushed to <${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
             }
         }
         post {
+            always { nixCleanWS() }
             failure { notifySlack "Build failled: ${JOB_NAME} \
 [<${RUN_DISPLAY_URL}|${BUILD_NUMBER}>]", "red" }
         }
