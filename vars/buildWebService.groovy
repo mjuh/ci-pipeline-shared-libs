@@ -90,7 +90,6 @@ pushed to <${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
             }
         }
         post {
-            success { cleanWs() }
             failure { notifySlack "Build failled: ${JOB_NAME} \
 [<${RUN_DISPLAY_URL}|${BUILD_NUMBER}>]", "red" }
         }
