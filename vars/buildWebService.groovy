@@ -8,6 +8,7 @@ def call(Map args = [:]) {
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['Build Docker image'])
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+            disableConcurrentBuilds()
         }
         parameters {
             string(name: 'OVERLAY_BRANCH_NAME',
