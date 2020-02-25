@@ -9,7 +9,6 @@ def call(Map args = [:]) {
 
     if(!upload){
     sh """
-        .  ${env.HOME}/.nix-profile/etc/profile.d/nix.sh || true ;
         packer build -force -var-file=vars/${vars}.json templates/${template}.json
         ls -alah */${output}
     """
@@ -19,7 +18,6 @@ def call(Map args = [:]) {
             sh """
                 echo ${output}
                 rm -f */${output} || true
-                .  ${env.HOME}/.nix-profile/etc/profile.d/nix.sh || true ;
                 packer build -force -var-file=vars/${vars}.json templates/${template}.json
                 ls -alah */${output}
                 rsync -av */${output} rsync://archive.intr/images/jenkins-production/
@@ -29,7 +27,6 @@ def call(Map args = [:]) {
             sh """
                 echo ${output}
                 rm -f */${output} || true
-                .  ${env.HOME}/.nix-profile/etc/profile.d/nix.sh || true ;
                 packer build -force -var-file=vars/${vars}.json templates/${template}.json
                 ls -alah */${output}
                 rsync -av */${output} rsync://archive.intr/images/jenkins-development/
