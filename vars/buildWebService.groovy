@@ -58,6 +58,15 @@ def call(Map args = [:]) {
                     script { (args.testHook ?: { return true })() }
                 }
             }
+            stage('Scan for CVE') {
+                when { expression { fileExists 'JenkinsfileVulnix.groovy' } }
+                steps {
+                    build (job: "../../security/$PROJECT_NAME/master",
+                           parameters: [[$class: "StringParameterValue",
+                                         name: "DOCKER_IMAGE",
+                                         value: dockerImage.path]])
+                }
+            }
             stage('Push Docker image') {
                 when {
                     allOf {
