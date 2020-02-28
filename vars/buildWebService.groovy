@@ -4,6 +4,9 @@ def call(Map args = [:]) {
     def dockerImages = null
     pipeline {
         agent { label 'nixbld' }
+        triggers {
+            cron("H 3 * * *")
+        }
         options {
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['Build Docker image'])
