@@ -4,8 +4,48 @@ def nixPath (n) {
     n ?: System.getenv("NIX_PATH")
 }
 
+/**
+ * Send notifications based on build status string.
+ * Thanks to https://jenkins.io/blog/2017/02/15/declarative-notifications/
+ */
+def sendNotifications(Map args = [:]) {
+    String buildStatus = args.buildStatus ?: 'STARTED'
+
+    // build status of null means successful
+    buildStatus = buildStatus ?: 'SUCCESS'
+
+    // Default values
+    def colorName = 'RED'
+    def colorCode = '#FF0000'
+    def subject = "${buildStatus}: Job '${JOB_NAME} [${BUILD_ID}]'"
+    def summary = "${subject} (${env.BUILD_URL})"
+
+    // Override default values based on build status
+    if (buildStatus == 'STARTED') {
+        color = 'YELLOW'
+        colorCode = '#FFFF00'
+    } else if (buildStatus == 'SUCCESS') {
+        color = 'GREEN'
+        colorCode = '#00FF00'
+    } else {
+        color = 'RED'
+        colorCode = '#FF0000'
+    }
+
+    // Send notifications
+    if (args.threadMessages) {
+        slackSend (color: colorCode,
+                   message: ([summary,
+                              args.threadMessages.join("\n\n")].join("\n\n")))
+    } else {
+        slackSend (color: colorCode, message: summary)
+    }
+}
+
 def call(Map args = [:]) {
     def dockerImages = null
+    def slackMessages = [];
+
     pipeline {
         agent { label 'nixbld' }
         triggers {
@@ -42,12 +82,21 @@ def call(Map args = [:]) {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
-                            sh "nix-instantiate --eval --expr '(import <nixpkgs> {}).lib.version'"
+                            String nixVersionCmd = "nix-instantiate --eval --expr '(import <nixpkgs> {}).lib.version'"
+                            slackMessages += String
+                                .format("$nixVersionCmd\n=> %s",
+                                        (sh (script: nixVersionCmd,
+                                             returnStdout: true)).trim())
 
                             GitRepository majordomo_overlay =
                                 new GitRepository (name: "majordomo",
                                                    url: "https://gitlab.intr/_ci/nixpkgs",
                                                    branch: params.OVERLAY_BRANCH_NAME)
+
+                            slackMessages += String
+                                .format("Overlay: %s",
+                                        (majordomo_overlay.url
+                                         + "/tree/" + majordomo_overlay.branch))
 
                             dockerImage = nixBuildDocker (namespace: GROUP_NAME,
                                                           name: PROJECT_NAME,
@@ -97,20 +146,19 @@ def call(Map args = [:]) {
                     pushDocker (tag: (TAG + "-debug"), extraTags: ['debug'],
                                 image: dockerImageDebug)
                     pushDocker (tag: TAG, image: dockerImage)
-
-                }
-                post {
-                    success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME}:${GIT_BRANCH} \
-pushed to <${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
+                    script {
+                        slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
+                        slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
                     }
                 }
             }
         }
         post {
-            always { nixCleanWS(directory: "${env.WORKSPACE}/result") }
-            failure { notifySlack "Build failled: ${JOB_NAME} \
-[<${RUN_DISPLAY_URL}|${BUILD_NUMBER}>]", "red" }
+            always {
+                nixCleanWS(directory: "${env.WORKSPACE}/result")
+                sendNotifications (buildStatus: currentBuild.result,
+                                   threadMessages: slackMessages)
+            }
         }
     }
 }
