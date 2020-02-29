@@ -34,6 +34,8 @@ def call(Map args = [:]) {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
+                            sh "nix-instantiate --eval --expr '(import <nixpkgs> {}).lib.version'"
+
                             GitRepository majordomo_overlay =
                                 new GitRepository (name: "majordomo",
                                                    url: "https://gitlab.intr/_ci/nixpkgs",
