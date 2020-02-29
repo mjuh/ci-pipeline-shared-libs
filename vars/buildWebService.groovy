@@ -9,7 +9,7 @@ def call(Map args = [:]) {
     pipeline {
         agent { label 'nixbld' }
         triggers {
-            cron("H 3 * * *")
+            cron("H 6 * * 1-5")
         }
         options {
             gitLabConnection(Constants.gitLabConnection)
