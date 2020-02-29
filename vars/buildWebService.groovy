@@ -1,5 +1,9 @@
 import groovy.json.JsonOutput
 
+def nixPath (n) {
+    n ?: System.getenv("NIX_PATH")
+}
+
 def call(Map args = [:]) {
     def dockerImages = null
     pipeline {
@@ -19,6 +23,9 @@ def call(Map args = [:]) {
             string(name: 'UPSTREAM_BRANCH_NAME',
                    defaultValue: 'master',
                    description: 'Git Branch at upstream repository')
+            string(name: 'NIX_PATH',
+                   defaultValue: '',
+                   description: 'Nix expressions ("System.getenv(\"NIX_PATH\")" if empty)')
             booleanParam(name: 'DEPLOY',
                          defaultValue: true,
                          description: 'Deploy to Docker image to registry')
@@ -28,6 +35,7 @@ def call(Map args = [:]) {
             GROUP_NAME = gitRemoteOrigin.getGroup()
             TAG = nixRepoTag (overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH)
             DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${TAG}"
+            NIX_PATH = nixPath params.NIX_PATH
         }
         stages {
             stage('Build Docker image') {
