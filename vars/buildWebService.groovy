@@ -76,7 +76,7 @@ def call(Map args = [:]) {
                         expression { params.DEPLOY }
                         not {
                             anyOf {
-                                expression { return triggeredBy 'TimerTrigger' }
+                                expression { triggeredBy 'TimerTrigger' }
                                 expression { return GIT_BRANCH.startsWith("wip-") }
                                 expression { return params.OVERLAY_BRANCH_NAME.startsWith("wip-") }
                             }
