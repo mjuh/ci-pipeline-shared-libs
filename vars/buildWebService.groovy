@@ -69,6 +69,9 @@ def call(Map args = [:]) {
             booleanParam(name: 'DEPLOY',
                          defaultValue: env.BRANCH_NAME == "master" ? true : false,
                          description: 'Deploy to Docker image to registry')
+            string(name: 'NIX_ARGS',
+                   defaultValue: "",
+                   description: 'Invoke Nix with additional arguments')
         }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
@@ -101,13 +104,15 @@ def call(Map args = [:]) {
                             dockerImage = nixBuildDocker (namespace: GROUP_NAME,
                                                           name: PROJECT_NAME,
                                                           tag: TAG,
-                                                          overlay: majordomo_overlay)
+                                                          overlay: majordomo_overlay,
+                                                          nixArgs: [params.NIX_ARGS])
 
                             dockerImageDebug = nixBuildDocker (namespace: GROUP_NAME,
                                                                name: PROJECT_NAME,
                                                                tag: (TAG + "-debug"),
                                                                overlay: majordomo_overlay,
-                                                               nixArgs: ["--arg debug true"])
+                                                               nixArgs: (["--arg debug true"] +
+                                                                         [params.NIX_ARGS]))
                         }
                     }
                 }
@@ -115,8 +120,9 @@ def call(Map args = [:]) {
             stage('Test Docker image') {
                 when { expression { fileExists 'test.nix' } }
                 steps {
-                    testNix nixArgs: ["--argstr ref $params.OVERLAY_BRANCH_NAME",
-                                      "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"]
+                    testNix nixArgs: (["--argstr ref $params.OVERLAY_BRANCH_NAME",
+                                       "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"]
+                                      + [params.NIX_ARGS])
                     script { (args.testHook ?: { return true })() }
                 }
             }
