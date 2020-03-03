@@ -85,6 +85,11 @@ def call(Map args = [:]) {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
+                            // Workaround for error: cannot lock ref
+                            // 'refs/heads/testbranch': is at 02cd73... but
+                            // expected ea35c7...
+                            sh "git gc --prune=now"
+
                             String nixVersionCmd = "nix-instantiate --eval --expr '(import <nixpkgs> {}).lib.version'"
                             slackMessages += String
                                 .format("$nixVersionCmd\n=> %s",
