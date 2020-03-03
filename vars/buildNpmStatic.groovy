@@ -10,6 +10,7 @@ def call(String dstpath) {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['npm install', 'stash'])
+            preserveStashes(buildCount: 9)
         }
         stages {
             stage('npm install') {
