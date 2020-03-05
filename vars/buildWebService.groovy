@@ -45,7 +45,8 @@ def sendNotifications(Map args = [:]) {
 def call(Map args = [:]) {
     def dockerImages = null
     def slackMessages = [];
-
+    def nixFile = args.nixFile ?: 'default.nix'
+    
     pipeline {
         agent { label 'nixbld' }
         triggers {
@@ -110,6 +111,7 @@ def call(Map args = [:]) {
                                                           name: PROJECT_NAME,
                                                           tag: TAG,
                                                           overlay: majordomo_overlay,
+                                                          nixFile: nixFile,
                                                           nixArgs: [params.NIX_ARGS])
 
                             dockerImageDebug = nixBuildDocker (namespace: GROUP_NAME,
