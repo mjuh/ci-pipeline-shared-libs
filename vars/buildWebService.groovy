@@ -70,6 +70,9 @@ def call(Map args = [:]) {
             booleanParam(name: 'DEPLOY',
                          defaultValue: env.BRANCH_NAME == "master" ? true : false,
                          description: 'Deploy to Docker image to registry')
+            booleanParam(name: "DEBUG",
+                         defaultValue: false,
+                         description: "Deploy DEBUG image Docker image to registry")
             string(name: 'NIX_ARGS',
                    defaultValue: "",
                    description: 'Invoke Nix with additional arguments')
@@ -156,10 +159,13 @@ def call(Map args = [:]) {
                     }
                 }
                 steps {
-                    pushDocker (tag: (TAG + "-debug"), extraTags: ['debug'],
-                                image: dockerImageDebug)
                     pushDocker (tag: TAG, image: dockerImage)
                     script {
+                        if (params.DEBUG) {
+                            pushDocker (tag: (TAG + "-debug"), extraTags: ['debug'],
+                                        image: dockerImageDebug)
+                        }
+
                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
                     }
