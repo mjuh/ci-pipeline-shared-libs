@@ -130,10 +130,22 @@ def call(Map args = [:]) {
             stage('Test Docker image') {
                 when { expression { fileExists 'test.nix' } }
                 steps {
-                    testNix nixArgs: (["--argstr ref $params.OVERLAY_BRANCH_NAME",
+                    testNix (nixArgs: (["--argstr ref $params.OVERLAY_BRANCH_NAME",
                                        "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"]
-                                      + [params.NIX_ARGS])
+                                       + [params.NIX_ARGS]),
+                             nixFile: "test")
                     script { (args.testHook ?: { return true })() }
+                }
+            }
+            stage('Test Docker image without sandbox') {
+                when { expression { fileExists 'test-no-sandbox.nix' } }
+                steps {
+                    testNix (nixArgs: (["--argstr ref $params.OVERLAY_BRANCH_NAME",
+                                        "--argstr phpRef $params.UPSTREAM_BRANCH_NAME",
+                                        "--option sandbox false"]
+                                       + [params.NIX_ARGS]),
+                             nixFile: "test-no-sandbox")
+                    script { (args.testNoSandboxHook ?: { return true })() }
                 }
             }
             stage('Scan for CVE') {
