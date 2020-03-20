@@ -8,7 +8,7 @@ def call(Map args = [:]) {
         def output = args.output ?: sh(returnStdout: true, script: "jq -r .vm_name vars/${vars}.json").trim()
 
     // TODO: Don't use “*”
-    imageSize = "[[ \$(stat --format=%s */$output) < ${args.imageSize.toString()} ]] && exit 1" ?: "true"
+    imageSize = "[[ \$(stat --format=%s */$output) < ${args.imageSize} ]] && exit 1" ?: "true"
 
     if(!upload){
     sh """
