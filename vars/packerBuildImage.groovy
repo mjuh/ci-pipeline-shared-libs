@@ -7,6 +7,9 @@ def call(Map args = [:]) {
         def template = args.template
         def output = args.output ?: sh(returnStdout: true, script: "jq -r .vm_name vars/${vars}.json").trim()
 
+    // TODO: Don't use “*”
+    imageSize = "[[ $(stat --format=%s */$output) < ${args.imageSize.toString()} ]] && exit 1" ?: "true"
+
     if(!upload){
     sh """
         packer build -force -var-file=vars/${vars}.json templates/${template}.json
@@ -15,18 +18,17 @@ def call(Map args = [:]) {
     }
     if(upload){
         if(env.BRANCH_NAME == "master"){
-            sh """
-                echo ${output}
-                rm -f */${output} || true
-                packer build -force -var-file=vars/${vars}.json templates/${template}.json
-                ls -alah */${output}
-                rsync -av */${output} rsync://archive.intr/images/jenkins-production/
-                rm -f */${output}
-            """
+            sh (["echo ${output}",
+                 "rm -f */${output}",
+                 "packer build -force -var-file=vars/${vars}.json templates/${template}.json",
+                 imageSize,
+                 "ls -alah */${output}",
+                 "rsync -av */${output} rsync://archive.intr/images/jenkins-production/",
+                 "rm -f */${output}"].join("; "))
         } else {
             sh """
                 echo ${output}
-                rm -f */${output} || true
+                rm -f */${output}
                 packer build -force -var-file=vars/${vars}.json templates/${template}.json
                 ls -alah */${output}
                 rsync -av */${output} rsync://archive.intr/images/jenkins-development/
