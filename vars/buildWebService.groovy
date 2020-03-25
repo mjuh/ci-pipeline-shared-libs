@@ -56,6 +56,7 @@ def call(Map args = [:]) {
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['Build Docker image'])
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+            timeout(time: 1, unit: 'HOURS')
         }
         parameters {
             string(name: 'OVERLAY_BRANCH_NAME',
