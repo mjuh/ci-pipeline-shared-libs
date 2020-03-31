@@ -1,7 +1,6 @@
 def call(Map args = [:]) {
     assert args.template : "No template provided"
     assert args.vars : "No packervars provided"
-    assert args.imageSize : "No imageSize provided"
 
     def vars = args.vars
     def upload = args.upload ?: false
@@ -9,7 +8,7 @@ def call(Map args = [:]) {
     def output = args.output ?: sh(returnStdout: true, script: "jq -r .vm_name vars/${vars}.json").trim()
 
     // TODO: Don't use “*”
-    String imageSize = "[[ \$(stat --format=%s */$output) < ${args.imageSize} ]] && exit 1" ?: "true"
+    String imageSize = args.imageSize ? "[[ \$(stat --format=%s */$output) < ${args.imageSize} ]] && exit 1" : "true"
 
     if(!upload){
         sh """
