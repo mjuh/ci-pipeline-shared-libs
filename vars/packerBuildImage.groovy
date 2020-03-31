@@ -1,6 +1,7 @@
 def call(Map args = [:]) {
     assert args.template : "No template provided"
     assert args.vars : "No packervars provided"
+    assert args.imageSize : "No imageSize provided"
 
     def vars = args.vars
     def upload = args.upload ?: false
