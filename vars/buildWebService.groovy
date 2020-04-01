@@ -90,6 +90,8 @@ def call(Map args = [:]) {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
+                            (args.preBuild ?: { return true })()
+
                             // Workaround for error: cannot lock ref
                             // 'refs/heads/testbranch': is at 02cd73... but
                             // expected ea35c7...
@@ -124,6 +126,8 @@ def call(Map args = [:]) {
                                                                overlay: majordomo_overlay,
                                                                nixArgs: (["--arg debug true"] +
                                                                          [params.NIX_ARGS]))
+
+                            (args.postBuild ?: { return true })()
                         }
                     }
                 }
