@@ -70,7 +70,7 @@ def call(Map args = [:]) {
                    description: 'Nix expressions ("System.getenv(\"NIX_PATH\")" if empty)')
             booleanParam(name: 'DEPLOY',
                          defaultValue: env.BRANCH_NAME == "master" ? true : false,
-                         description: 'Deploy to Docker image to registry')
+                         description: 'Deploy Docker image to registry')
             booleanParam(name: "DEBUG",
                          defaultValue: false,
                          description: "Deploy DEBUG image Docker image to registry")
