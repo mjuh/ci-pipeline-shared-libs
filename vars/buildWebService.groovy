@@ -74,6 +74,9 @@ def call(Map args = [:]) {
             booleanParam(name: "DEBUG",
                          defaultValue: false,
                          description: "Deploy DEBUG image Docker image to registry")
+            booleanParam(name: "STACK_DEPLOY",
+                         defaultValue: args.stackDeploy ?: false,
+                         description: "Deploy Docker image to swarm")
             string(name: 'NIX_ARGS',
                    defaultValue: "",
                    description: 'Invoke Nix with additional arguments')
@@ -90,6 +93,8 @@ def call(Map args = [:]) {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
+                            (args.preBuild ?: { return true })()
+
                             // Workaround for error: cannot lock ref
                             // 'refs/heads/testbranch': is at 02cd73... but
                             // expected ea35c7...
@@ -124,6 +129,8 @@ def call(Map args = [:]) {
                                                                overlay: majordomo_overlay,
                                                                nixArgs: (["--arg debug true"] +
                                                                          [params.NIX_ARGS]))
+
+                            (args.postBuild ?: { return true })()
                         }
                     }
                 }
@@ -181,6 +188,30 @@ def call(Map args = [:]) {
 
                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
+                    }
+                }
+            }
+            stage("Deploy service to swarm") {
+                when {
+                    allOf {
+                        branch "master"
+                        expression { params.STACK_DEPLOY }
+                        not { triggeredBy("TimerTrigger") }
+                    }
+                }
+                agent { label Constants.productionNodeLabel }
+                steps {
+                    dockerStackDeploy (
+                        stack: GROUP_NAME,
+                        service: PROJECT_NAME,
+                        image: dockerImage
+                    )
+                }
+                post {
+                    success {
+                        script {
+                            slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                        }
                     }
                 }
             }
