@@ -49,9 +49,6 @@ def call(Map args = [:]) {
     
     pipeline {
         agent { label 'nixbld' }
-        triggers {
-            cron(env.BRANCH_NAME == "master" ? "H 12 * * 1-5" : "")
-        }
         options {
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ['Build Docker image'])
