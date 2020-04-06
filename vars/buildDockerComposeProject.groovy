@@ -1,4 +1,4 @@
-def call(String composeProject) {
+def call(Map args = [:]) {
     def dockerImage = null
 
     pipeline {
@@ -24,7 +24,21 @@ def call(String composeProject) {
                 when { not { expression { return params.skipToDeploy } } }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
+                        script {
+                            if (args.nix) {
+                                dockerImage = nixBuildDocker (
+                                    namespace: GROUP_NAME,
+                                    name: PROJECT_NAME,
+                                    tag: GIT_COMMIT[0..7]
+                                )
+                            } else {
+                                dockerImage = buildDocker (
+                                    namespace: GROUP_NAME,
+                                    name: PROJECT_NAME,
+                                    tag: GIT_COMMIT[0..7]
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -53,16 +67,24 @@ def call(String composeProject) {
                 when { branch 'master' }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerPull image: dockerImage, nodeLabel: composeProject
+                        dockerPull (
+                            image: dockerImage,
+                            nodeLabel: args.composeProject
+                        )
                     }
                 }
             }
             stage('Deploy service') {
                 when { branch 'master' }
-                agent { label composeProject }
+                agent { label args.composeProject }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerComposeDeploy project: composeProject, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                        dockerComposeDeploy (
+                            project: args.composeProject,
+                            service: PROJECT_NAME,
+                            image: dockerImage,
+                            dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                        )
                     }
                 }
                 post {
