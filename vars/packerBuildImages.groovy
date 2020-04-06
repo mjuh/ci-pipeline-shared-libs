@@ -35,6 +35,11 @@ def packer(Map args = [:]) {
     sh (shellCommands.join("; "))
 }
 
+@NonCPS
+def random(list) {
+    list.sort { Math.random() }
+}
+
 def call(Map args = [:]) {
     assert args.deploy instanceof Boolean
     assert args.distribution instanceof String
@@ -55,7 +60,7 @@ def call(Map args = [:]) {
     Map tarifs = args.administration ? tarifsAdministration : tarifsPersonal
     List<String> names = getNodeNames(args.nodeLabels)
     Number concurrent = (currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause') ? tarifs.keySet().size() : 1) + names.size()
-    List<String> nodeParameter = names // will become an empty array
+    List<String> nodeParameter = random(names) // will become an empty array
     Map stepsForParallel = [:]
 
     [[args.distribution], tarifs.keySet()]
