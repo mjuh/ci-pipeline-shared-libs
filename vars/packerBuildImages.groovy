@@ -13,7 +13,7 @@ def packer(Map args = [:]) {
         sh(returnStdout: true,
            script: "jq --raw-output .vm_name $WORKSPACE/vars/${args.vars}.json").trim()
     String checkImageSizeCommand = args.imageSize ? // TODO: Don't use “*”
-    "[[ \$(stat --format=%s */$image) < ${args.imageSize} ]]; exit 1" :
+    "[[ \$(stat --format=%s $WORKSPACE/*/$image) < ${args.imageSize} ]]; exit 1" :
         "true"
 
     def shellCommands = []
