@@ -84,7 +84,6 @@ def call(Map args = [:]) {
                 [(fullName): {
                     node(nodeName) {
                         checkout scm
-                        properties([timeout(time: 30, unit: "MINUTES")])
                         packer (
                             template: distribution,
                             vars: distribution + args.release.split("\\.").head() + "-" + tarif,
