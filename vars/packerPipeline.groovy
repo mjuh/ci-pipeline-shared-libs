@@ -1,7 +1,7 @@
 def call(Map args = [:]) {
     Boolean administration = args.administration ? args.administration : false
     pipeline {
-        agent { label "kvm-template-builder" }
+        agent { label "master" }
         environment {
             PACKER_LOG = "1"
             PACKER_CACHE_DIR = "/tmp/packer"
@@ -25,7 +25,8 @@ def call(Map args = [:]) {
                             release: args.release,
                             id: args.id,
                             administration: administration,
-                            deploy: params.DEPLOY
+                            deploy: params.DEPLOY,
+                            nodeLabels: ["kvm-template-builder"]
                         )
                     }
                 }
