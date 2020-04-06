@@ -55,7 +55,7 @@ def call(Map args = [:]) {
     Map tarifs = args.administration ? tarifsAdministration : tarifsPersonal
     List<String> names = getNodeNames(args.nodeLabels)
     Number concurrent = (currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause') ? tarifs.keySet().size() : 1) + names.size()
-    List<String> nodeParameter = names // will become an empty array
+    List<String> nodeParameter = names.sort { Math.random() }
     Map stepsForParallel = [:]
 
     [[args.distribution], tarifs.keySet()]
