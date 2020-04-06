@@ -80,7 +80,7 @@ def call(Map args = [:]) {
                 String distribution = it[0]
                 String tarif = it[1]
                 String nodeName = it[2]
-                String fullName = distribution + "-" + args.release + "-" + tarif + "@" + nodeName
+                String fullName = distribution + "-" + args.release + "-" + tarif
                 [(fullName): {
                     node(nodeName) {
                         checkout scm
