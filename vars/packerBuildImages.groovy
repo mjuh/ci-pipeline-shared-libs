@@ -32,7 +32,7 @@ def packer(Map args = [:]) {
         shellCommands += "packer build -force -var-file=$WORKSPACE/vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
     }
 
-    echo (shellCommands.join("; "))
+    sh (shellCommands.join("; "))
 }
 
 def call(Map args = [:]) {
