@@ -8,16 +8,16 @@ def packer(Map args = [:]) {
     assert args.vars instanceof String
 
     String buildCommand =
-        "packer build -force -var-file=vars/${args.vars}.json templates/${args.template}.json"
+        "packer build -force -var-file=vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
     String image = args.output ?:
         sh(returnStdout: true,
-           script: "jq --raw-output .vm_name vars/${args.vars}.json").trim()
+           script: "jq --raw-output .vm_name $WORKSPACE/vars/${args.vars}.json").trim()
     String checkImageSizeCommand = args.imageSize ? // TODO: Don't use “*”
-        "[[ \$(stat --format=%s */$image) < ${args.imageSize} ]]; exit 1" :
+    "[[ \$(stat --format=%s */$image) < ${args.imageSize} ]]; exit 1" :
         "true"
 
     def shellCommands = []
-    shellCommands += "packer validate -var-file=vars/${args.vars}.json templates/${args.template}.json"
+    shellCommands += "packer validate -var-file=$WORKSPACE/vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
     if (args.deploy) {
         if (env.BRANCH_NAME == "master") {
             [buildCommand,
@@ -25,14 +25,14 @@ def packer(Map args = [:]) {
              deployCommand ('*/' + image, "jenkins-production")]
                 .each{shellCommands += it}
         } else {
-            [buildCommand, deployCommand ("*/$image", "jenkins-development")]
+            [buildCommand, deployCommand ("$WORKSPACE/*/$image", "jenkins-development")]
                 .each{shellCommands += it}
         }
     } else {
-        shellCommands += "packer build -force -var-file=vars/${args.vars}.json templates/${args.template}.json"
+        shellCommands += "packer build -force -var-file=$WORKSPACE/vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
     }
 
-    sh (shellCommands.join("; "))
+    echo (shellCommands.join("; "))
 }
 
 def call(Map args = [:]) {
@@ -46,23 +46,39 @@ def call(Map args = [:]) {
         a2: 40960,
         a3: 61440
     ]
-
     Map tarifsPersonal = [
         lite: 30720,
         optima: 40960,
         bussines: 61440,
         lightNew: 10240 // deprecated
     ]
+    Map tarifs = args.administration ? tarifsAdministration : tarifsPersonal
+    List<String> names = getNodeNames(args.nodeLabels)
+    Number concurrent = (currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause') ? tarifs.keySet().size() : 1) + names.size()
+    List<String> nodeParameter = names // will become an empty array
+    Map stepsForParallel = [:]
 
-    tarifs = args.administration ? tarifsAdministration : tarifsPersonal
-    concurrent = currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause') ? tarifs.keySet().size() : 1
-
-    [[args.distribution], tarifs.keySet()].combinations().collate(args.parallel ?: concurrent).each { jobs ->
-        parallel (jobs.collectEntries {
+    [[args.distribution], tarifs.keySet()]
+        .combinations()
+        .collate(args.nodeLabels.size() ?: concurrent)
+        .collect{ jobs ->
+            if (nodeParameter != null && nodeParameter != []) {
+                firstNodeName = nodeParameter.head()
+                nodeParameter = nodeParameter - firstNodeName
+            }
+            jobs.collect { job ->
+                job + firstNodeName
+            }
+        }
+        .collect { jobs ->
+            jobs.collectEntries {
                 String distribution = it[0]
                 String tarif = it[1]
-                String fullName = distribution + "-" + args.release + "-" + tarif
+                String nodeName = it[2]
+                String fullName = distribution + "-" + args.release + "-" + tarif + "@" + nodeName
                 [(fullName): {
+                    node(nodeName) {
+                        checkout scm
                         packer (
                             template: distribution,
                             vars: distribution + args.release.split("\\.").head() + "-" + tarif,
@@ -70,8 +86,11 @@ def call(Map args = [:]) {
                             deploy: args.deploy
                         )
                     }
-                ]
+                }]
             }
-        )
-    }
+        }.each {
+            stepsForParallel << it
+        }
+
+    parallel stepsForParallel
 }
