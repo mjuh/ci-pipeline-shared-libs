@@ -1,10 +1,3 @@
-@NonCPS
-def getNodeNames(String label) {
-    jenkins.model.Jenkins.instance.nodes
-            .findAll { node -> node.labelString == label }
-            .collect { node -> node.name }
-}
-
 def call(Map args = [:]) {
     assert args.image : "No Image provided"
     def imageName = args.image.imageName()
