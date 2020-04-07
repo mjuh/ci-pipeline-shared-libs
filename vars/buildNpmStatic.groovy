@@ -1,5 +1,5 @@
-def call(String dstpath) {
-
+def call(Map args = [:]) {
+    String unstashHosts = args.unstashHosts ? args.unstashHosts : "dhost-production"
     pipeline {
         agent { label 'master' }
         environment {
@@ -50,11 +50,17 @@ def call(String dstpath) {
               when { branch 'master' }
               steps {
                  gitlabCommitStatus(STAGE_NAME) {
-                    node('dhost-production') {
-                        dir(dstpath) {
-                            unstash "my-stash"
-                        }
-                    }
+                   script {
+                       parallel (args.unstashHosts.collectEntries{ host ->
+                                  [(host): {
+                                          node(host) {
+                                              dir(args.dstpath) {
+                                                  unstash "my-stash"
+                                              }
+                                          }
+                                  }]
+                                })
+                   }
                  }
               }
               post {
@@ -68,7 +74,7 @@ def call(String dstpath) {
               steps {
                  gitlabCommitStatus(STAGE_NAME) {
                     node('ci') {
-                        dir(dstpath) {
+                        dir(args.dstpath) {
                             unstash "my-stash"
                         }
                     }
