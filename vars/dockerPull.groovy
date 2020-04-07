@@ -3,7 +3,7 @@ def call(Map args = [:]) {
     def imageName = args.image.imageName()
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
     def registry = args.registry ?: Constants.dockerRegistryHost
-    def nodeLabel = args.nodeLabel ?: Constants.productionNodeLabel
+    def nodeLabel = args.nodeLabel ?: [Constants.productionNodeLabel]
     imageName = "${registry}/" + (imageName - "${registry}/")
 
     def nodes = [:]
