@@ -53,7 +53,7 @@ def call(String composeProject) {
                 when { branch 'master' }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerPull image: dockerImage, nodeLabel: composeProject
+                        dockerPull image: dockerImage, nodeLabel: [composeProject]
                     }
                 }
             }
