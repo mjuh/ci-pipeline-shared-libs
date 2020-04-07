@@ -64,7 +64,7 @@ def call(Map args = [:]) {
     Map stepsForParallel = [:]
 
     def imagesVariations = [[args.distribution], tarifs.keySet()].combinations()
-    imagesVariations.collate((imagesVariations.size() >= args.nodeLabels.size() ? imagesVariations.size - args.nodeLabels.size() : 1) ?: concurrent)
+    imagesVariations.collate((imagesVariations.size() >= args.nodeLabels.size() ? imagesVariations.size() - args.nodeLabels.size() : 1) ?: concurrent)
         .collect{ jobs ->
             if (nodeParameter != null && nodeParameter != []) {
                 firstNodeName = nodeParameter.head()
