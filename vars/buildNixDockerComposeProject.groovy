@@ -34,6 +34,7 @@ def call(String composeProject) {
             }
             stage('Pull Docker image') {
                 when { branch 'master' }
+                agent { label composeProject }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         dockerPull image: dockerImage, nodeLabel: composeProject
