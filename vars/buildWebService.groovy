@@ -162,7 +162,7 @@ def call(Map args = [:]) {
                                          value: dockerImage.path]])
                 }
             }
-            stage('Push Docker image') {
+            stage("Deploy") {
                 when {
                     allOf {
                         expression { params.DEPLOY }
@@ -185,29 +185,18 @@ def call(Map args = [:]) {
 
                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
-                    }
-                }
-            }
-            stage("Deploy service to swarm") {
-                when {
-                    allOf {
-                        branch "master"
-                        expression { params.STACK_DEPLOY }
-                        not { triggeredBy("TimerTrigger") }
-                    }
-                }
-                agent { label Constants.productionNodeLabel }
-                steps {
-                    dockerStackDeploy (
-                        stack: GROUP_NAME,
-                        service: PROJECT_NAME,
-                        image: dockerImage
-                    )
-                }
-                post {
-                    success {
-                        script {
-                            slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+
+                        // Deploy to Docker Swarm
+                        if (args.stackDeploy && GIT_BRANCH == "master" && params.STACK_DEPLOY &&
+                            !(currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause'))) {
+                            node(Constants.productionNodeLabel) {
+                                dockerStackDeploy (
+                                    stack: GROUP_NAME,
+                                    service: PROJECT_NAME,
+                                    image: dockerImage
+                                )
+                                slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                            }
                         }
                     }
                 }
