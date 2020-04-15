@@ -162,6 +162,18 @@ def call(Map args = [:]) {
                                          value: dockerImage.path]])
                 }
             }
+            stage("Scan for passwords in Git history") {
+                steps {
+                    build (
+                        job: "../../ci/bfg/master",
+                        parameters: [string(
+                                name: "GIT_REPOSITORY_TARGET_URL",
+                                value: gitRemoteOrigin.getRemote().url
+                            )
+                        ]
+                    )
+                }
+            }
             stage("Deploy") {
                 when {
                     allOf {
