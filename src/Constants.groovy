@@ -32,4 +32,6 @@ public class Constants {
     public static final String nginxAuthUser = 'jenkins'
     public static final String nginxAuthPass = 'jenkins4nginx'
 
+    public static final String githubOrganization = 'mjuh'
+
 }

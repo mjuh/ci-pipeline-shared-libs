@@ -74,6 +74,9 @@ def call(Map args = [:]) {
             booleanParam(name: "STACK_DEPLOY",
                          defaultValue: args.stackDeploy ?: false,
                          description: "Deploy Docker image to swarm")
+            booleanParam(name: "PUBLISH_ON_INTERNET",
+                         defaultValue: args.publishOnInternet ?: false,
+                         description: "Publish on GitHub.com")
             string(name: 'NIX_ARGS',
                    defaultValue: "",
                    description: 'Invoke Nix with additional arguments')
@@ -210,6 +213,22 @@ def call(Map args = [:]) {
                                 slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
                             }
                         }
+                    }
+                }
+            }
+            stage("Publish on the Internet") {
+                when {
+                    allOf {
+                        expression { params.PUBLISH_ON_INTERNET }
+                        not { triggeredBy("TimerTrigger") }
+                        expression { params.OVERLAY_BRANCH_NAME == "master" }
+                        branch "master"
+                    }
+                }
+                steps {
+                    script {
+                        comGithub.push group: GROUP_NAME, name: PROJECT_NAME
+                        slackMessages += "${GROUP_NAME}/${PROJECT_NAME} pushed to github.com"
                     }
                 }
             }
