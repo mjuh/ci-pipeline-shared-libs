@@ -12,7 +12,7 @@ def push(Map args = [:]) {
     if (gitRemote.getRemote("github").url != remote) {
         sh "git remote set-url github $remote"
     }
-    if ((gitRev "origin/master") == (gitRev "HEAD")) {
+    if (gitRev("origin/master") == gitRev("HEAD")) {
         sh "git push github HEAD:refs/heads/master"
     } else {
         throw "Git origin/master hash doesn't match HEAD hash."
