@@ -6,8 +6,22 @@ def call(Map args = [:]) {
     Boolean debug = args.debug ?: false
     List<String> nixArgs = args.nixArgs ?: [""]
     def nixFile = args.nixFile ?: 'default.nix'
-    String overlaybranch = args?.overlay?.branch ?: "master"
-    String buildCmd = "nix-build --out-link result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER} --tarball-ttl 10 --argstr ref $overlaybranch --show-trace $nixFile"
+    String buildCmd = ""
+    if (args.overlay) {
+        buildCmd = [
+            "nix-build",
+            "--out-link result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}",
+            "--tarball-ttl 10",
+            "--argstr overlayUrl $args.overlay.url",
+            "--argstr overlayRef $args.overlay.branch",
+            "--show-trace", "$nixFile"].join(" ")
+    } else {
+        buildCmd = [
+            "nix-build",
+            "--out-link result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}",
+            "--tarball-ttl 10",
+            "--show-trace", "$nixFile"].join(" ")
+    }
     String imageName = args.imageName ?: "${args.namespace}/${args.name}"
     String tag = args.tag ?: GIT_BRANCH
 

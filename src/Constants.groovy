@@ -34,4 +34,5 @@ public class Constants {
 
     public static final String githubOrganization = 'mjuh'
 
+    public static final String nixOverlay = 'git@gitlab.intr:_ci/nixpkgs.git'
 }

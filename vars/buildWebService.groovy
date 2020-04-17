@@ -58,7 +58,7 @@ def call(Map args = [:]) {
         parameters {
             string(name: 'OVERLAY_BRANCH_NAME',
                    defaultValue: 'master',
-                   description: 'Git Branch at https://gitlab.intr/_ci/nixpkgs/ repository')
+                   description: "Git Branch at $Constants.nixOverlay repository")
             string(name: 'UPSTREAM_BRANCH_NAME',
                    defaultValue: 'master',
                    description: 'Git Branch at upstream repository')
@@ -106,9 +106,9 @@ def call(Map args = [:]) {
                                         (sh (script: nixVersionCmd,
                                              returnStdout: true)).trim())
 
-                            GitRepository majordomo_overlay =
+                            majordomo_overlay =
                                 new GitRepository (name: "majordomo",
-                                                   url: "https://gitlab.intr/_ci/nixpkgs",
+                                                   url: Constants.nixOverlay,
                                                    branch: params.OVERLAY_BRANCH_NAME)
 
                             slackMessages += String
@@ -138,8 +138,9 @@ def call(Map args = [:]) {
             stage('Test Docker image') {
                 when { expression { fileExists 'test.nix' } }
                 steps {
-                    testNix (nixArgs: (["--argstr ref $params.OVERLAY_BRANCH_NAME",
-                                       "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"]
+                    testNix (nixArgs: (["--argstr overlayUrl $majordomo_overlay.url",
+                                        "--argstr overlayRef $majordomo_overlay.branch",
+                                        "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"]
                                        + [params.NIX_ARGS]),
                              nixFile: "test")
                     script { (args.testHook ?: { return true })() }
@@ -148,7 +149,8 @@ def call(Map args = [:]) {
             stage('Test Docker image without sandbox') {
                 when { expression { fileExists 'test-no-sandbox.nix' } }
                 steps {
-                    testNix (nixArgs: (["--argstr ref $params.OVERLAY_BRANCH_NAME",
+                    testNix (nixArgs: (["--argstr overlayUrl $majordomo_overlay.url",
+                                        "--argstr overlayRef $majordomo_overlay.branch",
                                         "--argstr phpRef $params.UPSTREAM_BRANCH_NAME",
                                         "--option sandbox false"]
                                        + [params.NIX_ARGS]),
@@ -190,7 +192,7 @@ def call(Map args = [:]) {
                             anyOf {
                                 triggeredBy('TimerTrigger')
                                 expression { return GIT_BRANCH.startsWith("wip-") }
-                                expression { return params.OVERLAY_BRANCH_NAME.startsWith("wip-") }
+                                expression { return majordomo_overlay.branch.startsWith("wip-") }
                             }
                         }
                     }
@@ -227,7 +229,7 @@ def call(Map args = [:]) {
                     allOf {
                         expression { params.PUBLISH_ON_INTERNET }
                         not { triggeredBy("TimerTrigger") }
-                        expression { params.OVERLAY_BRANCH_NAME == "master" }
+                        expression { majordomo_overlay.branch == "master" }
                         branch "master"
                     }
                 }
