@@ -202,7 +202,7 @@ def call(Map args = [:]) {
                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
 
                         // Deploy to Docker Swarm
-                        if (args.stackDeploy && GIT_BRANCH == "master" && params.STACK_DEPLOY &&
+                        if (args.stackDeploy && TAG == "master" && params.STACK_DEPLOY &&
                             !(currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause'))) {
                             node(Constants.productionNodeLabel) {
                                 dockerStackDeploy (
