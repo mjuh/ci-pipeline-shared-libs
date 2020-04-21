@@ -36,9 +36,6 @@ def call(Map args = [:]) {
             booleanParam(name: "STACK_DEPLOY",
                          defaultValue: args.stackDeploy ?: false,
                          description: "Deploy Docker image to swarm")
-            booleanParam(name: "PUBLISH_ON_INTERNET",
-                         defaultValue: args.publishOnInternet ?: false,
-                         description: "Publish on GitHub.com")
             string(name: 'NIX_ARGS',
                    defaultValue: "",
                    description: 'Invoke Nix with additional arguments')
@@ -194,7 +191,7 @@ def call(Map args = [:]) {
             stage("Publish on the Internet") {
                 when {
                     allOf {
-                        expression { params.PUBLISH_ON_INTERNET }
+                        expression { args.publishOnInternet }
                         not { triggeredBy("TimerTrigger") }
                         expression { majordomo_overlay.branch == "master" }
                         branch "master"
