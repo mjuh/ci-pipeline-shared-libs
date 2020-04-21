@@ -213,7 +213,7 @@ def call(Map args = [:]) {
                                 slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
                             }
                         }
-                        (args.postPush ?: { return true })()
+                        ({ value -> value in String ? slackMessages += value : value })((args.postPush ?: { return true })())
                     }
                 }
             }
