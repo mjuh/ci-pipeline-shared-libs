@@ -63,10 +63,15 @@ def call(Map args = [:]) {
                             sh "git gc --prune=now"
 
                             String nixVersionCmd = "nix-instantiate --eval --expr '(import <nixpkgs> {}).lib.version'"
+                            nixVersion = (sh (script: nixVersionCmd, returnStdout: true)).trim()
                             slackMessages += String
-                                .format("$nixVersionCmd\n=> %s",
-                                        (sh (script: nixVersionCmd,
-                                             returnStdout: true)).trim())
+                                .format("$nixVersionCmd\n=> %s", nixVersion)
+
+                            buildBadge = addEmbeddableBadgeConfiguration(
+                                id: (GROUP_NAME + "-" + PROJECT_NAME),
+                                subject: "<nixpkgs>: $nixVersion"
+                            )
+                            buildBadge.setStatus('running')
 
                             majordomo_overlay =
                                 new GitRepository (name: "majordomo",
@@ -204,6 +209,21 @@ def call(Map args = [:]) {
             }
         }
         post {
+            success {
+                script {
+                    if (TAG == "master") {
+                        buildBadge.setStatus("passing")
+                    }
+                }
+            }
+            failure {
+                script {
+                    if (TAG == "master") {
+                        buildBadge.setStatus("failing")
+                        buildBadge.setColor('pink')
+                    }
+                }
+            }
             always {
                 nixCleanWS(directory: "${env.WORKSPACE}/result")
                 sendSlackNotifications (buildStatus: currentBuild.result,
