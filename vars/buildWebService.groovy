@@ -157,7 +157,12 @@ def call(Map args = [:]) {
                 }
             }
             stage('Scan for CVE') {
-                when { expression { fileExists 'JenkinsfileVulnix.groovy' } }
+                when { allOf {
+                        expression { fileExists 'JenkinsfileVulnix.groovy' }
+                        expression { majordomo_overlay.branch == "master" }
+                        branch "master"
+                    }
+                }
                 steps {
                     build (job: "../../security/$PROJECT_NAME/master",
                            parameters: [[$class: "StringParameterValue",
