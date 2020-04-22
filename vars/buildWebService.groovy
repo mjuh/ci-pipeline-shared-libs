@@ -8,6 +8,7 @@ def call(Map args = [:]) {
     def dockerImages = null
     def slackMessages = [];
     def nixFile = args.nixFile ?: 'default.nix'
+    Boolean scanPasswords = args.scanPasswords == null ? true : args.scanPasswords
     
     pipeline {
         agent { label 'nixbld' }
@@ -139,6 +140,7 @@ def call(Map args = [:]) {
                 }
             }
             stage("Scan for passwords in Git history") {
+                when { expression { scanPasswords } }
                 steps {
                     build (
                         job: "../../ci/bfg/master",
