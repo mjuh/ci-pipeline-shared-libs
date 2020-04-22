@@ -64,11 +64,11 @@ def call(Map args = [:]) {
                             slackMessages += String
                                 .format("$nixVersionCmd\n=> %s", nixVersion)
 
-                            buildBadge = addEmbeddableBadgeConfiguration(
-                                id: (GROUP_NAME + "-" + PROJECT_NAME),
-                                subject: "<nixpkgs>: $nixVersion"
-                            )
                             if (TAG == "master") {
+                                buildBadge = addEmbeddableBadgeConfiguration(
+                                    id: (GROUP_NAME + "-" + PROJECT_NAME),
+                                    subject: "<nixpkgs>: $nixVersion"
+                                )
                                 buildBadge.setStatus('running')
                             }
 
