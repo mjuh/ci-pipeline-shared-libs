@@ -68,7 +68,9 @@ def call(Map args = [:]) {
                                 id: (GROUP_NAME + "-" + PROJECT_NAME),
                                 subject: "<nixpkgs>: $nixVersion"
                             )
-                            buildBadge.setStatus('running')
+                            if (TAG == "master") {
+                                buildBadge.setStatus('running')
+                            }
 
                             majordomo_overlay =
                                 new GitRepository (name: "majordomo",
