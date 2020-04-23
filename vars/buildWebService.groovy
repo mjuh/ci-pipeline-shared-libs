@@ -31,9 +31,6 @@ def call(Map args = [:]) {
             booleanParam(name: 'DEPLOY',
                          defaultValue: true,
                          description: 'Deploy Docker image to registry')
-            booleanParam(name: "DEBUG",
-                         defaultValue: false,
-                         description: "Deploy DEBUG image Docker image to registry")
             booleanParam(name: "STACK_DEPLOY",
                          defaultValue: args.stackDeploy ?: false,
                          description: "Deploy Docker image to swarm")
@@ -90,12 +87,14 @@ def call(Map args = [:]) {
                                                           nixFile: nixFile,
                                                           nixArgs: [params.NIX_ARGS])
 
-                            dockerImageDebug = nixBuildDocker (namespace: GROUP_NAME,
-                                                               name: PROJECT_NAME,
-                                                               tag: (TAG + "-debug"),
-                                                               overlay: majordomo_overlay,
-                                                               nixArgs: (["--arg debug true"] +
-                                                                         [params.NIX_ARGS]))
+                            if (args.debug) {
+                                dockerImageDebug = nixBuildDocker (namespace: GROUP_NAME,
+                                                                   name: PROJECT_NAME,
+                                                                   tag: (TAG + "-debug"),
+                                                                   overlay: majordomo_overlay,
+                                                                   nixArgs: (["--arg debug true"] +
+                                                                             [params.NIX_ARGS]))
+                            }
 
                             (args.postBuild ?: { return true })()
                         }
@@ -168,13 +167,13 @@ def call(Map args = [:]) {
                 steps {
                     pushDocker (tag: TAG, image: dockerImage)
                     script {
-                        if (params.DEBUG) {
+                        slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
+
+                        if (args.debug) {
                             pushDocker (tag: (TAG + "-debug"), extraTags: ['debug'],
                                         image: dockerImageDebug)
+                            slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
                         }
-
-                        slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
-                        slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
 
                         // Deploy to Docker Swarm
                         if (args.stackDeploy && TAG == "master" && params.STACK_DEPLOY &&
