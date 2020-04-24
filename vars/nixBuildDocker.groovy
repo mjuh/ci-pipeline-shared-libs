@@ -6,7 +6,7 @@ def call(Map args = [:]) {
     Boolean debug = args.debug ?: false
     List<String> nixArgs = args.nixArgs ?: [""]
     def nixFile = args.nixFile ?: 'default.nix'
-    String saveResult = args.saveResult == null ? "" : "--out-link result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}"
+    String saveResult = args.saveResult in [null, false] ? "" : "--out-link result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}"
     String buildCmd = ""
     if (args.overlay) {
         buildCmd = (
