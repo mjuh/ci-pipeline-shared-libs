@@ -6,15 +6,16 @@ def call(Map args = [:]) {
     Boolean debug = args.debug ?: false
     List<String> nixArgs = args.nixArgs ?: [""]
     def nixFile = args.nixFile ?: 'default.nix'
+    String saveResult = args.saveResult == null ? "" : "--out-link result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}"
     String buildCmd = ""
     if (args.overlay) {
-        buildCmd = [
-            "nix-build",
-            "--out-link result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}",
-            "--tarball-ttl 10",
-            "--argstr overlayUrl $args.overlay.url",
-            "--argstr overlayRef $args.overlay.branch",
-            "--show-trace", "$nixFile"].join(" ")
+        buildCmd = (
+            ["nix-build",
+             "--tarball-ttl 10",
+             "--argstr overlayUrl $args.overlay.url",
+             "--argstr overlayRef $args.overlay.branch",
+             "--show-trace"] + saveResult + nixFile
+        ).join(" ")
     } else {
         buildCmd = [
             "nix-build",
