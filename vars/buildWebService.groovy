@@ -7,46 +7,51 @@ def nixPath (n) {
 def call(Map args = [:]) {
     def dockerImages = null
     def slackMessages = [];
-    def nixFile = args.nixFile ?: 'default.nix'
+    def nixFile = args.nixFile ?: "default.nix"
     Boolean scanPasswords = args.scanPasswords == null ? true : args.scanPasswords
     
     pipeline {
-        agent { label 'nixbld' }
+        agent { label "nixbld" }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['Build Docker image'])
-            buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
-            timeout(time: 6, unit: 'HOURS')
+            gitlabBuilds(builds: ["Build Docker image"])
+            timeout(time: 6, unit: "HOURS")
+            buildDiscarder(
+                logRotator(numToKeepStr: "10", artifactNumToKeepStr: "10")
+            )
         }
         parameters {
-            string(name: 'OVERLAY_BRANCH_NAME',
-                   defaultValue: 'master',
+            string(name: "OVERLAY_BRANCH_NAME",
+                   defaultValue: "master",
                    description: "Git Branch at $Constants.nixOverlay repository")
-            string(name: 'UPSTREAM_BRANCH_NAME',
-                   defaultValue: 'master',
-                   description: 'Git Branch at upstream repository')
-            string(name: 'NIX_PATH',
-                   defaultValue: '',
+            string(name: "UPSTREAM_BRANCH_NAME",
+                   defaultValue: "master",
+                   description: "Git Branch at upstream repository")
+            string(name: "NIX_PATH",
+                   defaultValue: "",
                    description: 'Nix expressions ("System.getenv(\"NIX_PATH\")" if empty)')
-            booleanParam(name: 'DEPLOY',
+            booleanParam(name: "DEPLOY",
                          defaultValue: true,
-                         description: 'Deploy Docker image to registry')
+                         description: "Deploy Docker image to registry")
             booleanParam(name: "STACK_DEPLOY",
                          defaultValue: args.stackDeploy ?: false,
                          description: "Deploy Docker image to swarm")
-            string(name: 'NIX_ARGS',
+            string(name: "NIX_ARGS",
                    defaultValue: "",
-                   description: 'Invoke Nix with additional arguments')
+                   description: "Invoke Nix with additional arguments")
         }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
-            TAG = nixRepoTag (overlaybranch: params.OVERLAY_BRANCH_NAME, currentProjectBranch: GIT_BRANCH)
             DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${TAG}"
             NIX_PATH = nixPath params.NIX_PATH
+            TAG = nixRepoTag (
+                overlaybranch: params.OVERLAY_BRANCH_NAME,
+                currentProjectBranch: GIT_BRANCH
+            )
         }
         stages {
-            stage('Build Docker image') {
+            stage("Build Docker image") {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
@@ -65,35 +70,40 @@ def call(Map args = [:]) {
                                     id: (GROUP_NAME + "-" + PROJECT_NAME),
                                     subject: "<nixpkgs>: $nixVersion"
                                 )
-                                buildBadge.setStatus('running')
+                                buildBadge.setStatus("running")
                             }
 
                             (args.preBuild ?: { return true })()
 
-                            majordomo_overlay =
-                                new GitRepository (name: "majordomo",
-                                                   url: Constants.nixOverlay,
-                                                   branch: params.OVERLAY_BRANCH_NAME)
+                            majordomo_overlay = new GitRepository(
+                                name: "majordomo",
+                                url: Constants.nixOverlay,
+                                branch: params.OVERLAY_BRANCH_NAME
+                            )
 
                             slackMessages += String
                                 .format("Overlay: %s",
                                         (majordomo_overlay.url
                                          + "/tree/" + majordomo_overlay.branch))
 
-                            dockerImage = nixBuildDocker (namespace: GROUP_NAME,
-                                                          name: PROJECT_NAME,
-                                                          tag: TAG,
-                                                          overlay: majordomo_overlay,
-                                                          nixFile: nixFile,
-                                                          nixArgs: [params.NIX_ARGS])
+                            dockerImage = nixBuildDocker(
+                                namespace: GROUP_NAME,
+                                name: PROJECT_NAME,
+                                tag: TAG,
+                                overlay: majordomo_overlay,
+                                nixFile: nixFile,
+                                nixArgs: [params.NIX_ARGS]
+                            )
 
                             if (args.debug) {
-                                dockerImageDebug = nixBuildDocker (namespace: GROUP_NAME,
-                                                                   name: PROJECT_NAME,
-                                                                   tag: (TAG + "-debug"),
-                                                                   overlay: majordomo_overlay,
-                                                                   nixArgs: (["--arg debug true"] +
-                                                                             [params.NIX_ARGS]))
+                                dockerImageDebug = nixBuildDocker(
+                                    namespace: GROUP_NAME,
+                                    name: PROJECT_NAME,
+                                    tag: (TAG + "-debug"),
+                                    overlay: majordomo_overlay,
+                                    nixArgs: (["--arg debug true"] +
+                                              [params.NIX_ARGS])
+                                )
                             }
 
                             (args.postBuild ?: { return true })()
@@ -130,9 +140,9 @@ def call(Map args = [:]) {
                     }
                 }
             }
-            stage('Scan for CVE') {
+            stage("Scan for CVE") {
                 when { allOf {
-                        expression { fileExists 'JenkinsfileVulnix.groovy' }
+                        expression { fileExists "JenkinsfileVulnix.groovy" }
                         expression { majordomo_overlay.branch == "master" }
                         branch "master"
                     }
@@ -163,9 +173,9 @@ def call(Map args = [:]) {
                         expression { params.DEPLOY }
                         not {
                             anyOf {
-                                triggeredBy('TimerTrigger')
-                                expression { return GIT_BRANCH.startsWith("wip-") }
-                                expression { return majordomo_overlay.branch.startsWith("wip-") }
+                                triggeredBy("TimerTrigger")
+                                expression { GIT_BRANCH.startsWith("wip-") }
+                                expression { majordomo_overlay.branch.startsWith("wip-") }
                             }
                         }
                     }
@@ -176,14 +186,16 @@ def call(Map args = [:]) {
                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
 
                         if (args.debug) {
-                            pushDocker (tag: (TAG + "-debug"), extraTags: ['debug'],
-                                        image: dockerImageDebug)
+                            pushDocker (
+                                tag: (TAG + "-debug"), extraTags: ["debug"],
+                                image: dockerImageDebug
+                            )
                             slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
                         }
 
                         // Deploy to Docker Swarm
                         if (args.stackDeploy && TAG == "master" && params.STACK_DEPLOY &&
-                            !(currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause'))) {
+                            !(currentBuild.getBuildCauses("hudson.triggers.TimerTrigger$TimerTriggerCause"))) {
                             node(Constants.productionNodeLabel) {
                                 slackMessages += dockerStackDeploy (
                                     stack: GROUP_NAME,
@@ -193,7 +205,9 @@ def call(Map args = [:]) {
                                 slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
                             }
                         }
-                        ({ value -> value in String ? slackMessages += value : value })((args.postPush ?: { return true })())
+
+                        ({ value -> value in String ? slackMessages += value : value })
+                        ((args.postPush ?: { return true })())
                     }
                 }
             }
@@ -226,7 +240,7 @@ def call(Map args = [:]) {
                 script {
                     if (TAG == "master") {
                         buildBadge.setStatus("failing")
-                        buildBadge.setColor('pink')
+                        buildBadge.setColor("pink")
                     }
                 }
             }
