@@ -1,3 +1,4 @@
+import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 import groovy.json.JsonOutput
 
 def nixPath (n) {
@@ -33,12 +34,6 @@ def call(Map args = [:]) {
             booleanParam(name: "DEPLOY",
                          defaultValue: true,
                          description: "Deploy Docker image to registry")
-            booleanParam(name: "STACK_DEPLOY",
-                         defaultValue: args.stackDeploy ?: false,
-                         description: "Deploy Docker image to swarm")
-            string(name: "NIX_ARGS",
-                   defaultValue: "",
-                   description: "Invoke Nix with additional arguments")
         }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
@@ -51,179 +46,178 @@ def call(Map args = [:]) {
             )
         }
         stages {
-            stage("Build Docker image") {
+            stage("Build") {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
-                            // Workaround for error: cannot lock ref
-                            // 'refs/heads/testbranch': is at 02cd73... but
-                            // expected ea35c7...
-                            sh "git gc --prune=now"
+                            parallel (
+                                ["Build container": {
+                                        String nixVersionCmd = "nix-instantiate --eval --expr '(import <nixpkgs> {}).lib.version'"
+                                        nixVersion = (sh (script: nixVersionCmd, returnStdout: true)).trim()
+                                        slackMessages += String
+                                            .format("$nixVersionCmd\n=> %s", nixVersion)
 
-                            String nixVersionCmd = "nix-instantiate --eval --expr '(import <nixpkgs> {}).lib.version'"
-                            nixVersion = (sh (script: nixVersionCmd, returnStdout: true)).trim()
-                            slackMessages += String
-                                .format("$nixVersionCmd\n=> %s", nixVersion)
+                                        if (TAG == "master") {
+                                            buildBadge = addEmbeddableBadgeConfiguration(
+                                                id: (GROUP_NAME + "-" + PROJECT_NAME),
+                                                subject: "<nixpkgs>: $nixVersion"
+                                            )
+                                            buildBadge.setStatus("running")
+                                        }
 
-                            if (TAG == "master") {
-                                buildBadge = addEmbeddableBadgeConfiguration(
-                                    id: (GROUP_NAME + "-" + PROJECT_NAME),
-                                    subject: "<nixpkgs>: $nixVersion"
-                                )
-                                buildBadge.setStatus("running")
-                            }
+                                        (args.preBuild ?: { return true })()
 
-                            (args.preBuild ?: { return true })()
+                                        majordomo_overlay = new GitRepository(
+                                            name: "majordomo",
+                                            url: Constants.nixOverlay,
+                                            branch: params.OVERLAY_BRANCH_NAME
+                                        )
 
-                            majordomo_overlay = new GitRepository(
-                                name: "majordomo",
-                                url: Constants.nixOverlay,
-                                branch: params.OVERLAY_BRANCH_NAME
+                                        slackMessages += String
+                                            .format("Overlay: %s",
+                                                    (majordomo_overlay.url
+                                                     + "/tree/" + majordomo_overlay.branch))
+
+                                        dockerImage = nixBuildDocker(
+                                            namespace: GROUP_NAME,
+                                            name: PROJECT_NAME,
+                                            tag: TAG,
+                                            overlay: majordomo_overlay,
+                                            nixFile: nixFile
+                                        )
+
+                                        if (args.debug) {
+                                            dockerImageDebug = nixBuildDocker(
+                                                namespace: GROUP_NAME,
+                                                name: PROJECT_NAME,
+                                                tag: (TAG + "-debug"),
+                                                overlay: majordomo_overlay,
+                                                nixArgs: ["--arg debug true"]
+                                            )
+                                        }
+
+                                        (args.postBuild ?: { return true })()
+                                    },
+
+                                 "Scan passwords in Git history": {
+                                        if (scanPasswords) {
+                                            build (
+                                                job: "../../ci/bfg/master",
+                                                parameters: [string(
+                                                        name: "GIT_REPOSITORY_TARGET_URL",
+                                                        value: gitRemoteOrigin.getRemote().url
+                                                    )
+                                                ]
+                                            )
+                                        } else {
+                                            Utils.markStageSkippedForConditional("Scan passwords in Git history")
+                                        }
+                                    }
+                                ]
                             )
-
-                            slackMessages += String
-                                .format("Overlay: %s",
-                                        (majordomo_overlay.url
-                                         + "/tree/" + majordomo_overlay.branch))
-
-                            dockerImage = nixBuildDocker(
-                                namespace: GROUP_NAME,
-                                name: PROJECT_NAME,
-                                tag: TAG,
-                                overlay: majordomo_overlay,
-                                nixFile: nixFile,
-                                nixArgs: [params.NIX_ARGS]
-                            )
-
-                            if (args.debug) {
-                                dockerImageDebug = nixBuildDocker(
-                                    namespace: GROUP_NAME,
-                                    name: PROJECT_NAME,
-                                    tag: (TAG + "-debug"),
-                                    overlay: majordomo_overlay,
-                                    nixArgs: (["--arg debug true"] +
-                                              [params.NIX_ARGS])
-                                )
-                            }
-
-                            (args.postBuild ?: { return true })()
                         }
                     }
                 }
             }
-            stage("Test Docker image") {
+            stage("Test") {
                 steps {
                     script {
-                        if (fileExists("test.nix")) {
-                            testNix (
-                                nixArgs: (
-                                    ["--argstr overlayUrl $majordomo_overlay.url",
-                                     "--argstr overlayRef $majordomo_overlay.branch",
-                                     "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"
-                                    ] + [params.NIX_ARGS]
-                                ),
-                                nixFile: "test"
-                            )
-                        }
-                        if (fileExists("test-no-sandbox.nix")) {
-                            testNix (
-                                nixArgs: (
-                                    ["--argstr overlayUrl $majordomo_overlay.url",
-                                     "--argstr overlayRef $majordomo_overlay.branch",
-                                     "--argstr phpRef $params.UPSTREAM_BRANCH_NAME",
-                                     "--option sandbox false"] + [params.NIX_ARGS]
-                                ),
-                                nixFile: "test-no-sandbox"
-                            )
-                        }
-                        (args.testHook ?: { return true })()
+                        parallel (
+                            ["Check": {
+                                    Boolean runTest = fileExists("test.nix")
+                                    Boolean runTestWithoutSandbox =
+                                        fileExists("test-no-sandbox.nix")
+                                    if (runTest) {
+                                        testNix (
+                                            nixArgs: (
+                                                ["--argstr overlayUrl $majordomo_overlay.url",
+                                                 "--argstr overlayRef $majordomo_overlay.branch",
+                                                 "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"
+                                                ]
+                                            ),
+                                            nixFile: "test"
+                                        )
+                                    }
+                                    if (runTestWithoutSandbox) {
+                                        testNix (
+                                            nixArgs: (
+                                                ["--argstr overlayUrl $majordomo_overlay.url",
+                                                 "--argstr overlayRef $majordomo_overlay.branch",
+                                                 "--argstr phpRef $params.UPSTREAM_BRANCH_NAME",
+                                                 "--option sandbox false"]
+                                            ),
+                                            nixFile: "test-no-sandbox"
+                                        )
+                                    }
+                                    Boolean testHook = (args.testHook ?: { return true })()
+                                    runTest || runTestWithoutSandbox || testHook || Utils.markStageSkippedForConditional("Check")
+                                },
+                             "Check CVE": {
+                                    if ((fileExists("JenkinsfileVulnix.groovy") &&
+                                         TAG == "master")) {
+                                        build (job: "../../security/$PROJECT_NAME/master",
+                                               parameters: [[$class: "StringParameterValue",
+                                                             name: "DOCKER_IMAGE",
+                                                             value: dockerImage.path]])
+                                    } else {
+                                        Utils.markStageSkippedForConditional("Check CVE")
+                                    }
+                                }
+                            ]
+                        )
                     }
-                }
-            }
-            stage("Scan for CVE") {
-                when { allOf {
-                        expression { fileExists "JenkinsfileVulnix.groovy" }
-                        expression { majordomo_overlay.branch == "master" }
-                        branch "master"
-                    }
-                }
-                steps {
-                    build (job: "../../security/$PROJECT_NAME/master",
-                           parameters: [[$class: "StringParameterValue",
-                                         name: "DOCKER_IMAGE",
-                                         value: dockerImage.path]])
-                }
-            }
-            stage("Scan for passwords in Git history") {
-                when { expression { scanPasswords } }
-                steps {
-                    build (
-                        job: "../../ci/bfg/master",
-                        parameters: [string(
-                                name: "GIT_REPOSITORY_TARGET_URL",
-                                value: gitRemoteOrigin.getRemote().url
-                            )
-                        ]
-                    )
                 }
             }
             stage("Deploy") {
                 when {
                     allOf {
                         expression { params.DEPLOY }
-                        not {
-                            anyOf {
-                                triggeredBy("TimerTrigger")
-                                expression { GIT_BRANCH.startsWith("wip-") }
-                                expression { majordomo_overlay.branch.startsWith("wip-") }
-                            }
-                        }
-                    }
-                }
-                steps {
-                    pushDocker (tag: TAG, image: dockerImage)
-                    script {
-                        slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
-
-                        if (args.debug) {
-                            pushDocker (
-                                tag: (TAG + "-debug"), extraTags: ["debug"],
-                                image: dockerImageDebug
-                            )
-                            slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
-                        }
-
-                        // Deploy to Docker Swarm
-                        if (args.stackDeploy && TAG == "master" && params.STACK_DEPLOY &&
-                            !(currentBuild.getBuildCauses("hudson.triggers.TimerTrigger$TimerTriggerCause"))) {
-                            node(Constants.productionNodeLabel) {
-                                slackMessages += dockerStackDeploy (
-                                    stack: GROUP_NAME,
-                                    service: PROJECT_NAME,
-                                    image: dockerImage
-                                )
-                                slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
-                            }
-                        }
-
-                        ({ value -> value in String ? slackMessages += value : value })
-                        ((args.postPush ?: { return true })())
-                    }
-                }
-            }
-            stage("Publish on the Internet") {
-                when {
-                    allOf {
-                        expression { args.publishOnInternet }
                         not { triggeredBy("TimerTrigger") }
-                        expression { majordomo_overlay.branch == "master" }
-                        branch "master"
                     }
                 }
                 steps {
                     script {
-                        comGithub.push group: GROUP_NAME, name: PROJECT_NAME
-                        slackMessages += "Pushed to https://github.com/${Constants.githubOrganization}/${GROUP_NAME}-${PROJECT_NAME}"
+                        parallel (
+                            ["Deploy container": {
+                                    pushDocker (tag: TAG, image: dockerImage)
+                                    slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
+
+                                    if (args.debug) {
+                                        pushDocker (
+                                            tag: (TAG + "-debug"), extraTags: ["debug"],
+                                            image: dockerImageDebug
+                                        )
+                                        slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
+                                    }
+
+                                    // Deploy to Docker Swarm
+                                    if (args.stackDeploy && TAG == "master") {
+                                        node(Constants.productionNodeLabel) {
+                                            slackMessages += dockerStackDeploy (
+                                                stack: GROUP_NAME,
+                                                service: PROJECT_NAME,
+                                                image: dockerImage
+                                            )
+                                            slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                                        }
+                                    }
+
+                                    ({ value -> value in String ? slackMessages += value : value })
+                                    ((args.postPush ?: { return true })())
+                                },
+                             "Push to GitHub": {
+                                    if (args.publishOnInternet) {
+                                        comGithub.push(
+                                            group: GROUP_NAME,
+                                            name: PROJECT_NAME
+                                        )
+                                        slackMessages += "Pushed to https://github.com/${Constants.githubOrganization}/${GROUP_NAME}-${PROJECT_NAME}"
+                                    } else {
+                                        Utils.markStageSkippedForConditional("Push to GitHub")
+                                    }
+                                }
+                            ]
+                        )
                     }
                 }
             }
