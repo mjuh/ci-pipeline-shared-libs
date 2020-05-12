@@ -179,7 +179,7 @@ def call(Map args = [:]) {
                         if (args.stackDeploy && TAG == "master" && params.STACK_DEPLOY &&
                             !(currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause'))) {
                             node(Constants.productionNodeLabel) {
-                                dockerStackDeploy (
+                                slackMessages += dockerStackDeploy (
                                     stack: GROUP_NAME,
                                     service: PROJECT_NAME,
                                     image: dockerImage
