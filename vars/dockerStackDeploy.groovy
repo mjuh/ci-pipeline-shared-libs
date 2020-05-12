@@ -95,6 +95,10 @@ def call(Map args) {
                           git commit -m '${args.stack}/${args.service} image updated: ${imageName}'
                           git push origin master
                        """
+                    String.format("Jenkins pushed %s to $Constants.dockerStacksGitRepoUrl master",
+                                  (sh (script: "git rev-parse HEAD", returnStdout: true)).trim())
+                } else {
+                    "Jenkins skipped push to $Constants.dockerStacksGitRepoUrl master"
                 }
             }
         }
