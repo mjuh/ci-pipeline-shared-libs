@@ -85,13 +85,17 @@ def call(Map args) {
                     git config --global user.name 'jenkins'
                     git config --global user.email 'jenkins@majordomo.ru'
                     git stash
-                    git checkout master
-                    git pull origin master
-                    git stash pop
-                    git add ${stackConfigFile}
-                    git commit -m '${args.stack}/${args.service} image updated: ${imageName}'
-                    git push origin master
-                """
+                   """
+                if (((sh (script: "git stash list", returnStdout: true)).trim()) != "") {
+                    sh """
+                          git checkout master
+                          git pull origin master
+                          git stash pop
+                          git add ${stackConfigFile}
+                          git commit -m '${args.stack}/${args.service} image updated: ${imageName}'
+                          git push origin master
+                       """
+                }
             }
         }
     }
