@@ -28,6 +28,11 @@ def call(Map args = [:]) {
 
     createSshDirWithGitKey()
 
-    new DockerImageTarball(imageName: "${Constants.dockerRegistryHost}/${imageName}:$tag",
-                           path: (sh (script: "$buildCmd ${nixArgs.join(' ')}", returnStdout: true).trim()))
+    new DockerImageTarball(
+        imageName: "${Constants.dockerRegistryHost}/${imageName}:$tag",
+        path: (
+            sh (script: "$buildCmd ${nixArgs.join(' ')}",
+                returnStdout: true).trim()
+        )
+    )
 }
