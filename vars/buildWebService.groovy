@@ -52,10 +52,10 @@ def call(Map args = [:]) {
                         script {
                             parallel (
                                 ["Build container": {
-                                        String nixVersionCmd = "nix-instantiate --eval --expr '(import <nixpkgs> {}).lib.version'"
-                                        nixVersion = (sh (script: nixVersionCmd, returnStdout: true)).trim()
+                                        String nixVersion = nix.version()
                                         slackMessages += String
-                                            .format("$nixVersionCmd\n=> %s", nixVersion)
+                                            .format("nixpkgs version: %s",
+                                                    nixVersion)
 
                                         if (TAG == "master") {
                                             buildBadge = addEmbeddableBadgeConfiguration(
