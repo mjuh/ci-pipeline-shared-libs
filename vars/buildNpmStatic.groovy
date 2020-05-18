@@ -9,7 +9,7 @@ def call(Map args = [:]) {
         options {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['npm install', 'stash'])
+            gitlabBuilds(builds: ['npm install', 'artifacts'])
             preserveStashes(buildCount: 9)
         }
         stages {
@@ -37,11 +37,12 @@ def call(Map args = [:]) {
                     }
                 }
             }
-            stage('stash') {
+            stage('artifacts') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         dir('public') {
                             stash name: "my-stash", includes: "**"
+                            archiveArtifacts artifacts: "**"
                         }
                     }
                 }
