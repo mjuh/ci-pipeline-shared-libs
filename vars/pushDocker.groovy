@@ -23,8 +23,10 @@ def call(Map args = [:]) {
         commands += "skopeo copy docker-archive:${args.image.path} docker-daemon:${baseName}:${originTag}"
         commands += "docker push ${baseName}:${originTag}"
         (([args.image.imageName.split(':')[-1]] + extraTags).unique()).each { tag ->
-            commands += "docker tag ${baseName}:${originTag} ${baseName}:${tag}"
-            commands += "docker push ${baseName}:${tag}"
+            if (originTag != tag) {
+                commands += "docker tag ${baseName}:${originTag} ${baseName}:${tag}"
+                commands += "docker push ${baseName}:${tag}"
+            }
         }
         sh (commands.join("; "))
     }
