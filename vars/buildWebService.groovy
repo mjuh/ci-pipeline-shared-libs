@@ -184,7 +184,8 @@ def call(Map args = [:]) {
 
                                     if (args.debug) {
                                         pushDocker (
-                                            tag: (TAG + "-debug"), extraTags: ["debug"],
+                                            tag: (TAG + "-debug"),
+                                            extraTags: ["debug"],
                                             image: dockerImageDebug
                                         )
                                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}-debug|${DOCKER_REGISTRY_BROWSER_URL}-debug>"
