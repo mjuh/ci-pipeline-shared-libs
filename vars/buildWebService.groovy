@@ -149,7 +149,7 @@ def call(Map args = [:]) {
                                             nixFile: "test-no-sandbox"
                                         )
                                     }
-                                    Boolean testHook = (args.testHook ?: { return true })()
+                                    Boolean testHook = (args.testHook ?: { return true })([input: [image: dockerImage]])
                                     runTest || runTestWithoutSandbox || testHook || Utils.markStageSkippedForConditional("Check")
                                 },
                              "Check CVE": {
