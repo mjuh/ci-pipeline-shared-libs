@@ -83,7 +83,8 @@ def call(Map args = [:]) {
                                             name: PROJECT_NAME,
                                             tag: TAG,
                                             overlay: majordomo_overlay,
-                                            nixFile: nixFile
+                                            nixFile: nixFile,
+                                            saveResult: args.saveResult
                                         )
 
                                         if (args.debug) {
@@ -92,7 +93,8 @@ def call(Map args = [:]) {
                                                 name: PROJECT_NAME,
                                                 tag: (TAG + "-debug"),
                                                 overlay: majordomo_overlay,
-                                                nixArgs: ["--arg debug true"]
+                                                nixArgs: ["--arg debug true"],
+                                                saveResult: args.saveResult
                                             )
                                         }
 
