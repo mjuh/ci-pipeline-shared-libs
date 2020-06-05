@@ -98,7 +98,8 @@ def call(Map args = [:]) {
                                             )
                                         }
 
-                                        (args.postBuild ?: { return true })()
+                                        (args.postBuild ?: { return true })([input: [image: dockerImage,
+                                                                                     overlay: majordomo_overlay]])
                                     },
 
                                  "Scan passwords in Git history": {
