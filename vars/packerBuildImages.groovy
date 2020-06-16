@@ -8,7 +8,7 @@ def packer(Map args = [:]) {
     assert args.vars instanceof String
 
     String buildCommand =
-        "packer build -force -var-file=vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
+        "packer build -force -var-file=vars/iso.json -var-file=vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
     String image = args.output ?:
         sh(returnStdout: true,
            script: "jq --raw-output .vm_name $WORKSPACE/vars/${args.vars}.json").trim()
@@ -17,7 +17,7 @@ def packer(Map args = [:]) {
         "true"
 
     def shellCommands = []
-    shellCommands += "packer validate -var-file=$WORKSPACE/vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
+    shellCommands += "packer validate -var-file=vars/iso.json -var-file=$WORKSPACE/vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
     if (args.deploy) {
         if (env.BRANCH_NAME == "master") {
             [buildCommand,
@@ -29,7 +29,7 @@ def packer(Map args = [:]) {
                 .each{shellCommands += it}
         }
     } else {
-        shellCommands += "packer build -force -var-file=$WORKSPACE/vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
+        shellCommands += "packer build -var-file=vars/iso.json -force -var-file=$WORKSPACE/vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
     }
 
     sh (shellCommands.join("; "))
