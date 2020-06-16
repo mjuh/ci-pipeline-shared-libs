@@ -87,7 +87,8 @@ def call(Map args = [:]) {
                             template: distribution,
                             vars: distribution + args.release.split("\\.").head() + "-" + tarif,
                             image: args.id.toString() + "-" + tarifs.tarif,
-                            deploy: args.deploy
+                            deploy: args.deploy,
+                            imageSize: args.imageSize
                         )
                     }
                 }]
