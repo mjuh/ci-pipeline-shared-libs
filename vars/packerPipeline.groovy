@@ -6,11 +6,6 @@ def call(Map args = [:]) {
             PACKER_LOG = "1"
             PACKER_CACHE_DIR = "/tmp/packer"
         }
-        parameters {
-            booleanParam(name: "DEPLOY",
-                         defaultValue: env.BRANCH_NAME == "master" ? true : false,
-                         description: "If checked deploy to production otherwise to staging.")
-        }
         options {
             buildDiscarder(logRotator(numToKeepStr: "10", artifactNumToKeepStr: "10"))
             disableConcurrentBuilds()
@@ -24,7 +19,6 @@ def call(Map args = [:]) {
                             release: args.release,
                             id: args.id,
                             administration: administration,
-                            deploy: params.DEPLOY,
                             nodeLabels: ["kvm-template-builder"]
                         )
                     }
