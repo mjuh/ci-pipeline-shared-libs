@@ -3,7 +3,6 @@ def deployCommand(input, output) {
 }
 
 def packer(Map args = [:]) {
-    assert args.deploy instanceof Boolean
     assert args.template instanceof String
     assert args.vars instanceof String
 
@@ -18,18 +17,14 @@ def packer(Map args = [:]) {
 
     def shellCommands = []
     shellCommands += "packer validate -var-file=vars/iso.json -var-file=$WORKSPACE/vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
-    if (args.deploy) {
-        if (env.BRANCH_NAME == "master") {
-            [buildCommand,
-             checkImageSizeCommand,
-             deployCommand ('*/' + image, "jenkins-production")]
-                .each{shellCommands += it}
-        } else {
-            [buildCommand, deployCommand ("$WORKSPACE/*/$image", "jenkins-development")]
-                .each{shellCommands += it}
-        }
+    if (env.BRANCH_NAME == "master") {
+        [buildCommand,
+         checkImageSizeCommand,
+         deployCommand ('*/' + image, "jenkins-production")]
+            .each{shellCommands += it}
     } else {
-        shellCommands += "packer build -var-file=vars/iso.json -force -var-file=$WORKSPACE/vars/${args.vars}.json $WORKSPACE/templates/${args.template}.json"
+        [buildCommand, deployCommand ("$WORKSPACE/*/$image", "jenkins-development")]
+            .each{shellCommands += it}
     }
 
     sh (shellCommands.join("; "))
@@ -41,7 +36,6 @@ def random(list) {
 }
 
 def call(Map args = [:]) {
-    assert args.deploy instanceof Boolean
     assert args.distribution instanceof String
     assert args.id instanceof Number
     assert args.release instanceof String
@@ -87,7 +81,6 @@ def call(Map args = [:]) {
                             template: distribution,
                             vars: distribution + args.release.split("\\.").head() + "-" + tarif,
                             image: args.id.toString() + "-" + tarifs.tarif,
-                            deploy: args.deploy,
                             imageSize: args.imageSize
                         )
                     }
