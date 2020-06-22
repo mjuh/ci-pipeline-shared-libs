@@ -22,12 +22,15 @@ def packer(Map args = [:]) {
          checkImageSizeCommand,
          deployCommand ('*/' + image, "jenkins-production")]
             .each{shellCommands += it}
+        downloadUrl = "http://archive.intr/jenkins-production/$image"
     } else {
         [buildCommand, deployCommand ("$WORKSPACE/*/$image", "jenkins-development")]
             .each{shellCommands += it}
+        downloadUrl = "http://archive.intr/jenkins-development/$image"
     }
 
     sh (shellCommands.join("; "))
+    echo downloadUrl
 }
 
 @NonCPS
