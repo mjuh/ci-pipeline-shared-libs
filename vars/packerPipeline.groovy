@@ -26,9 +26,9 @@ def call(Map args = [:]) {
             }
         }
         post {
-            success { cleanWs() }
             always {
                 sendNotifications currentBuild.result
+                cleanWs()
             }
         }
     }
