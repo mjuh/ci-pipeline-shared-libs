@@ -20,17 +20,17 @@ def packer(Map args = [:]) {
     if (env.BRANCH_NAME == "master") {
         [buildCommand,
          checkImageSizeCommand,
-         deployCommand ('*/' + image, "jenkins-production")]
+         deployCommand ('*/' + image, "jenkins-production"),
+         "echo 'http://archive.intr/jenkins-production/$image'"]
             .each{shellCommands += it}
-        downloadUrl = "http://archive.intr/jenkins-production/$image"
     } else {
-        [buildCommand, deployCommand ("$WORKSPACE/*/$image", "jenkins-development")]
+        [buildCommand,
+         deployCommand ("$WORKSPACE/*/$image", "jenkins-development"),
+         "echo 'http://archive.intr/jenkins-development/$image'"]
             .each{shellCommands += it}
-        downloadUrl = "http://archive.intr/jenkins-development/$image"
     }
 
     sh (shellCommands.join("; "))
-    echo downloadUrl
 }
 
 @NonCPS
