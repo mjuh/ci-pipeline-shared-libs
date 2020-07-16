@@ -5,6 +5,10 @@ def nixPath (n) {
     n ?: System.getenv("NIX_PATH")
 }
 
+def projectName (Map args = [:]) {
+    args.projectName ?: gitRemoteOrigin.getProject()
+}
+
 def call(Map args = [:]) {
     def dockerImages = null
     def slackMessages = [];
@@ -36,7 +40,7 @@ def call(Map args = [:]) {
                          description: "Deploy Docker image to registry")
         }
         environment {
-            PROJECT_NAME = gitRemoteOrigin.getProject()
+            PROJECT_NAME = projectName(projectName: args.projectName)
             GROUP_NAME = gitRemoteOrigin.getGroup()
             DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${TAG}"
             NIX_PATH = nixPath params.NIX_PATH
