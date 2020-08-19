@@ -12,6 +12,7 @@ public class Constants {
 
     public static final String gitLabConnection = 'gitlab.intr'
 
+    public static final String developmentNodeLabel = 'dhost-development'
     public static final String productionNodeLabel = 'dhost-production'
 
     public static final String composerDockerImage = "${dockerRegistryHost}/base/mj-composer"
