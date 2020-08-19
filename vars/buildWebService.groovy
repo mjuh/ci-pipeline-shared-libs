@@ -214,7 +214,7 @@ def call(Map args = [:]) {
                                     ((args.postPush ?: { return true })())
                                 },
                              "Push to GitHub": {
-                                    if (args.publishOnInternet) {
+                                    if (args.publishOnInternet && TAG == "master") {
                                         comGithub.push(
                                             group: GROUP_NAME,
                                             name: PROJECT_NAME
