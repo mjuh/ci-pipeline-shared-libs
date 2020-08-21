@@ -1,4 +1,4 @@
-def call() {
+def call(Map args = [:]) {
     def dockerImage = null
     def slackMessages = []
 
@@ -47,6 +47,9 @@ def call() {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage
+                        script {
+                            ((args.postPush ?: { return true })())
+                        }
                     }
                 }
             }
