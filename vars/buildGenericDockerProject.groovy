@@ -48,7 +48,7 @@ def call(Map args = [:]) {
                     gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage
                         script {
-                            ((args.postPush ?: { return true })())
+                            (args.postPush ?: { return true })([input: [image: dockerImage]])
                         }
                     }
                 }
