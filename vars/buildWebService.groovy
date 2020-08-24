@@ -211,7 +211,7 @@ def call(Map args = [:]) {
                                     }
 
                                     ({ value -> value in String ? slackMessages += value : value })
-                                    ((args.postPush ?: { return true })())
+                                    ((args.postPush ?: { return true })([input: [image: dockerImage]]))
                                 },
                              "Push to GitHub": {
                                     if (args.publishOnInternet && TAG == "master") {
