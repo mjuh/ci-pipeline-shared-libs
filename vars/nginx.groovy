@@ -3,6 +3,13 @@ import groovyx.net.http.RESTClient
 import groovy.json.JsonOutput
 import static groovyx.net.http.ContentType.URLENC
 
+def getActive(String apipath) {
+    def nginx = new RESTClient(Constants.nginx1ApiUrl)
+    nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
+    def hms = nginx.get(path: apipath).data
+    (hms.available - hms.inactive)[0]
+}
+
 def getInactive(String apipath) {
     check(apipath)
     def nginx = new RESTClient(Constants.nginx1ApiUrl)
