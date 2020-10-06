@@ -19,7 +19,7 @@ def call(String stack, def Map args = [:]) {
             gitlabBuilds(builds: [ 'Build Gradle','Build Docker image', 'Push Docker image'])
         }
         tools {
-            gradle "latest"
+            gradle (args.gradle ?: "latest")
         }
         stages {
             stage('Build Gradle') {
