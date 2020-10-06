@@ -1,4 +1,4 @@
-def call(String stack) {
+def call(String stack, def Map args = [:]) {
     def dockerImage = null
 
     pipeline {
@@ -19,7 +19,7 @@ def call(String stack) {
             gitlabBuilds(builds: [ 'Build Gradle','Build Docker image', 'Push Docker image'])
         }
         tools {
-            gradle "latest"
+            gradle (args.gradle ?: "latest")
         }
         stages {
             stage('Build Gradle') {
