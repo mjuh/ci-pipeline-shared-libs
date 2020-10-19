@@ -69,6 +69,9 @@ def call(Map args) {
                     if(serviceDeclaration.environment) {
                         cmd += serviceDeclaration.environment.collect {"--env-add ${it} "}.join()
                     }
+                    if(serviceDeclaration.command) {
+                        cmd += serviceDeclaration.command.collect {"--args ${it} "}.join()
+                    }
                     cmd += "--image ${imageName} ${args.stack}_${args.service}"
                     sh cmd
                 } 
