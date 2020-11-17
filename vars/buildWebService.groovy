@@ -19,7 +19,7 @@ def call(Map args = [:]) {
         agent { label "nixbld" }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ["Build Docker image"])
+            gitlabBuilds(builds: ["Build"])
             timeout(time: 6, unit: "HOURS")
             buildDiscarder(
                 logRotator(numToKeepStr: "10", artifactNumToKeepStr: "10")
