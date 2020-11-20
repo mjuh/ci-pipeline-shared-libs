@@ -19,7 +19,7 @@ def call(Map args = [:]) {
         agent { label "nixbld" }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ["Build"])
+            gitlabBuilds(builds: ["Build", "Test"])
             timeout(time: 6, unit: "HOURS")
             buildDiscarder(
                 logRotator(numToKeepStr: "10", artifactNumToKeepStr: "10")
@@ -128,50 +128,52 @@ def call(Map args = [:]) {
             }
             stage("Test") {
                 steps {
-                    script {
-                        parallel (
-                            ["Check": {
-                                    Boolean runTest = fileExists("test.nix")
-                                    Boolean runTestWithoutSandbox =
-                                        fileExists("test-no-sandbox.nix")
-                                    if (runTest) {
-                                        testNix (
-                                            nixArgs: (
-                                                ["--argstr overlayUrl $majordomo_overlay.url",
-                                                 "--argstr overlayRef $majordomo_overlay.branch",
-                                                 "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"
-                                                ]
-                                            ),
-                                            nixFile: "test"
-                                        )
+                    gitlabCommitStatus(STAGE_NAME) {
+                        script {
+                            parallel (
+                                ["Check": {
+                                        Boolean runTest = fileExists("test.nix")
+                                        Boolean runTestWithoutSandbox =
+                                            fileExists("test-no-sandbox.nix")
+                                        if (runTest) {
+                                            testNix (
+                                                nixArgs: (
+                                                    ["--argstr overlayUrl $majordomo_overlay.url",
+                                                     "--argstr overlayRef $majordomo_overlay.branch",
+                                                     "--argstr phpRef $params.UPSTREAM_BRANCH_NAME"
+                                                    ]
+                                                ),
+                                                nixFile: "test"
+                                            )
+                                        }
+                                        if (runTestWithoutSandbox) {
+                                            testNix (
+                                                nixArgs: (
+                                                    ["--argstr overlayUrl $majordomo_overlay.url",
+                                                     "--argstr overlayRef $majordomo_overlay.branch",
+                                                     "--argstr phpRef $params.UPSTREAM_BRANCH_NAME",
+                                                     "--option sandbox false"]
+                                                ),
+                                                nixFile: "test-no-sandbox"
+                                            )
+                                        }
+                                        Boolean testHook = (args.testHook ?: { return true })([input: [image: dockerImage]])
+                                        runTest || runTestWithoutSandbox || testHook || Utils.markStageSkippedForConditional("Check")
+                                    },
+                                 "Check CVE": {
+                                        if ((fileExists("JenkinsfileVulnix.groovy") &&
+                                             TAG == "master")) {
+                                            build (job: "../../security/$PROJECT_NAME/master",
+                                                   parameters: [[$class: "StringParameterValue",
+                                                                 name: "DOCKER_IMAGE",
+                                                                 value: dockerImage.path]])
+                                        } else {
+                                            Utils.markStageSkippedForConditional("Check CVE")
+                                        }
                                     }
-                                    if (runTestWithoutSandbox) {
-                                        testNix (
-                                            nixArgs: (
-                                                ["--argstr overlayUrl $majordomo_overlay.url",
-                                                 "--argstr overlayRef $majordomo_overlay.branch",
-                                                 "--argstr phpRef $params.UPSTREAM_BRANCH_NAME",
-                                                 "--option sandbox false"]
-                                            ),
-                                            nixFile: "test-no-sandbox"
-                                        )
-                                    }
-                                    Boolean testHook = (args.testHook ?: { return true })([input: [image: dockerImage]])
-                                    runTest || runTestWithoutSandbox || testHook || Utils.markStageSkippedForConditional("Check")
-                                },
-                             "Check CVE": {
-                                    if ((fileExists("JenkinsfileVulnix.groovy") &&
-                                         TAG == "master")) {
-                                        build (job: "../../security/$PROJECT_NAME/master",
-                                               parameters: [[$class: "StringParameterValue",
-                                                             name: "DOCKER_IMAGE",
-                                                             value: dockerImage.path]])
-                                    } else {
-                                        Utils.markStageSkippedForConditional("Check CVE")
-                                    }
-                                }
-                            ]
-                        )
+                                ]
+                            )
+                        }
                     }
                 }
             }
