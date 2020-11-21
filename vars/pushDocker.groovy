@@ -20,7 +20,7 @@ def call(Map args = [:]) {
         String baseName = args.image.imageName.split(':')[0..-2].join()
         List<String> commands = []
         // Don't use docker load, because it cannot load and tag at the same time.
-        commands += "skopeo copy docker-archive:${args.image.path} docker-daemon:${baseName}:${originTag}"
+        commands += "skopeo copy docker-archive:${args.image.path} docker-daemon:${baseName}:${originTag} --insecure-policy"
         commands += "docker push ${baseName}:${originTag}"
         (([args.image.imageName.split(':')[-1]] + extraTags).unique()).each { tag ->
             if (originTag != tag) {
