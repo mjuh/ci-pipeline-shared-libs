@@ -1,4 +1,4 @@
-def call() {
+def call(def Map args = [:]) {
     def dockerImage = null
     def slackMessages = [];
 
@@ -41,7 +41,9 @@ def call() {
                 ]
             )
         }
-        tools { gradle "latest" }
+        tools {
+            gradle (args.gradle ?: "latest")
+        }
         stages {
             stage("Build Gradle") {
                 when {
@@ -52,7 +54,7 @@ def call() {
                 }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        sh "gradle build"
+                        runGradle(java: args.java)
                     }
                 }
             }
