@@ -33,6 +33,7 @@ def call(Map args = [:]) {
                     chmod +x ${sshWrapperFilename}
                     test -f ssh_deploy_key && chmod +w ssh_deploy_key
                     cp $KEY_FILE ssh_deploy_key
+                    /usr/bin/env ssh-keygen -y -f ssh_deploy_key > ssh_deploy_key.pub
                     chmod 600 ssh_deploy_key
                 """
         }
