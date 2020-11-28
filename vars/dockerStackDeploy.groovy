@@ -66,6 +66,9 @@ def call(Map args) {
                     if(serviceDeclaration.deploy.placement.constraints) {
                         cmd += serviceDeclaration.deploy.placement.constraints.collect {"--constraint-add \"${it}\" "}.join()
                     }
+                    if(serviceDeclaration.labels) {
+                        cmd += serviceDeclaration.labels.collect {"--container-label-add \"${it}\" "}.join()
+                    }
                     if(serviceDeclaration.ports) {
                         cmd += serviceDeclaration.ports.collect {"--publish-add ${it} "}.join()
                     }
