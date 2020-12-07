@@ -3,9 +3,11 @@ def call(Map args = [:]) {
 
     List<String> nixArgs = args.nixArgs ?: [""]
 
-    sh ([ "nix-build",
-          "--out-link",
-          "result/${env.JOB_NAME}/$args.nixFile-${env.BUILD_NUMBER}", "${args.nixFile}.nix",
+
+    sh (['PATH=bin:$PATH',
+         "nix-build",
+         "--out-link",
+         "result/${env.JOB_NAME}/$args.nixFile-${env.BUILD_NUMBER}", "${args.nixFile}.nix",
          nixArgs.join(' '), "--show-trace"].join(" "))
 
     archiveArtifacts (artifacts: "result/${env.JOB_NAME}/$args.nixFile-${env.BUILD_NUMBER}/**")
