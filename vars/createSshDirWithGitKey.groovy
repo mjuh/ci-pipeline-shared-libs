@@ -17,6 +17,10 @@ def call(Map args = [:]) {
                             User $USERNAME
                             HostName ${gitHost}
                             IdentityFile ${inConfigDir}/ssh_deploy_key
+
+                            Host github.com
+                            User git
+                            IdentityFile ${inConfigDir}/ssh_deploy_key
                     """.stripMargin().stripIndent()
                 );
 
