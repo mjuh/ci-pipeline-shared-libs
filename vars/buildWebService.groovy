@@ -24,13 +24,28 @@ def call(Map args = [:]) {
                 gitlabBuilds(builds: ["Build", "Deploy"])
                 timeout(time: 6, unit: "HOURS")
             }
+            environment {
+                NIX_PATH="nixpkgs=https://github.com/NixOS/nixpkgs/archive/d5291756487d70bc336e33512a9baf9fa1788faf.tar.gz"
+            }
             stages {
                 stage("Build") {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
-                                sh (withNixShell (["nix", "build", ".#container"].join(" ")))
+                                sh (withNixShell ((["nix", "build", ".#container"] + args.nixArgs).join(" ")))
                             }
+                        }
+                    }
+                }
+                stage("Test") {
+                    steps {
+                        script {
+                            Boolean runTest = fileExists("test.nix")
+                            if (runTest) {
+                                sh (withNixShell ((["nix", "flake", "check"] + args.nixArgs).join(" ")))
+                            }
+                            Boolean testHook = (args.testHook ?: { return true })()
+                            runTest || testHook || Utils.markStageSkippedForConditional("Test")
                         }
                     }
                 }
@@ -38,7 +53,7 @@ def call(Map args = [:]) {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
-                                sh (withNixShell (["nix", "run", ".#deploy"].join(" ")))
+                                sh (withNixShell ((["nix", "run", ".#deploy"] + args.nixArgs).join(" ")))
                             }
                         }
                     }
