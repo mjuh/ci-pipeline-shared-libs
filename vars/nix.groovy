@@ -45,3 +45,7 @@ def version() {
         returnStdout: true
     ).trim()
 }
+
+def shell(Map args = [:]) {
+    String.format("nix-shell --run '%s'", args.run)
+}
