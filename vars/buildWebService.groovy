@@ -9,10 +9,6 @@ def projectName (Map args = [:]) {
     args.projectName ?: gitRemoteOrigin.getProject()
 }
 
-def withNixShell(String command) {
-    String.format("nix-shell --run '%s'", command)
-}
-
 def call(Map args = [:]) {
     if (args.flake == true) {
         def slackMessages = [];
@@ -32,7 +28,7 @@ def call(Map args = [:]) {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
-                                sh (withNixShell ((["nix", "build", ".#container"] + args.nixArgs).join(" ")))
+                                sh (nix.shell run: ((["nix", "build", ".#container"] + args.nixArgs).join(" ")))
                             }
                         }
                     }
@@ -53,7 +49,7 @@ def call(Map args = [:]) {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
-                                sh (withNixShell ((["nix", "run", ".#deploy"] + args.nixArgs).join(" ")))
+                                sh (nix.shell run: ((["nix", "run", ".#deploy"] + args.nixArgs).join(" ")))
                             }
                         }
                     }
