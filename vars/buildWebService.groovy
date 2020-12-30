@@ -28,7 +28,7 @@ def call(Map args = [:]) {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
-                                sh (nix.shell run: ((["nix", "build", ".#container"] + args.nixArgs).join(" ")))
+                                sh (nix.shell (run: ((["nix", "build", ".#container"] + args.nixArgs).join(" "))))
                             }
                         }
                     }
@@ -49,7 +49,7 @@ def call(Map args = [:]) {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
-                                sh (nix.shell run: ((["nix", "run", ".#deploy"] + args.nixArgs).join(" ")))
+                                sh (nix.shell (run: ((["nix", "run", ".#deploy"] + args.nixArgs).join(" "))))
                             }
                         }
                     }
