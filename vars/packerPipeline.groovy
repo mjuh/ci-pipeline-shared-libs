@@ -9,6 +9,7 @@ def call(Map args = [:]) {
         options {
             buildDiscarder(logRotator(numToKeepStr: "10", artifactNumToKeepStr: "10"))
             disableConcurrentBuilds()
+            timeout(time: 6, unit: "HOURS")
         }
         stages {
             stage("Build virtual machine") {
