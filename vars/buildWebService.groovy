@@ -38,7 +38,7 @@ def call(Map args = [:]) {
                         script {
                             Boolean runTest = fileExists("test.nix")
                             if (runTest) {
-                                sh (withNixShell ((["nix", "flake", "check"] + args.nixArgs).join(" ")))
+                                sh (nix.shell (run: ((["nix", "flake", "check"] + args.nixArgs).join(" "))))
                             }
                             Boolean testHook = (args.testHook ?: { return true })()
                             runTest || testHook || Utils.markStageSkippedForConditional("Test")
