@@ -30,7 +30,7 @@ def packer(Map args = [:]) {
             .each{shellCommands += it}
     }
 
-    sh (shellCommands.join("; "))
+    ansiColor("xterm") { sh (shellCommands.join("; ")) }
 }
 
 @NonCPS
