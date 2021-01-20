@@ -5,7 +5,7 @@ def call(Map args = [:]) {
         parallel (jobs.collectEntries { job -> [(job): {
                         warnError("Failed to build $job") {
                             build(
-                                job: "../${job}/" + args.branch == null ? "master" : args.branch,
+                                job: ("../" + job + "/" + (args.branch == null ? "master" : args.branch)),
                                 parameters: args.parameters
                             )
                         }
