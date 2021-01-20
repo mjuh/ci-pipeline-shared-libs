@@ -37,6 +37,6 @@ public class Constants {
 
     public static final String nixOverlay = 'git@gitlab.intr:_ci/nixpkgs.git'
     public static final ArrayList<String> nixDeployments = ["ns", "router", "swarm", "web", "nginx", "webmail", "jenkins", "xyz"]
-    public static final ArrayList<String> developmentNixMachines = ["nginx3", "jenkins2", "web98"]
+    public static final ArrayList<String> developmentNixMachines = ["nginx3", "jenkins2", "web98", "xyz"]
     public static final ArrayList<String> nixReleases = ["20.09", "unstable"]
 }
