@@ -66,7 +66,12 @@ def call(Map args = [:]) {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                        dockerStackDeploy(
+                            stack: (args.stack == null ? GROUP_NAME : args.stack),
+                            service: PROJECT_NAME,
+                            image: dockerImage,
+                            dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                        )
                     }
                 }
                 post {
