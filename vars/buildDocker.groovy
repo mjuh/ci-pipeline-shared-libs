@@ -11,7 +11,9 @@ def call(Map args = [:]) {
     def registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
 
-    docker.withRegistry(registryUrl, credentialsId) {
-        docker.build("${imageName}:${tag}", "-f ${dockerfile} ${dockerfileDir}")
+    ansiColor("xterm") {
+        docker.withRegistry(registryUrl, credentialsId) {
+            docker.build("${imageName}:${tag}", "-f ${dockerfile} ${dockerfileDir}")
+        }
     }
 }
