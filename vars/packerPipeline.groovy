@@ -11,8 +11,13 @@ def call(Map args = [:]) {
                 steps {
                     script {
                         flake = "show-packer-build" + "-" + args.distribution + "-" + args.release + (args.administration == null ? "" : "-administration")
-                        (sh(returnStdout: true, script: nix.shell(run: String.format("nix run .#%s --impure", flake))).trim().split("\n")).each { command ->
-                            ansiColor("xterm") { sh(["PACKER_LOG=1", "PACKER_CACHE_DIR=/tmp/packer", command].join(" ")) } 
+                        (sh(returnStdout: true,
+                            script: """
+                                    nix-shell --run 'nix run \".#\\\"${flake}\\\"\" --impure'
+                                    """).trim().split("\n")).each { command ->
+                                                                    ansiColor("xterm") {
+                                                                         sh(["PACKER_LOG=1", "PACKER_CACHE_DIR=/tmp/packer", command].join(" "))
+                                                                    }
                         }
                     }
                 }
