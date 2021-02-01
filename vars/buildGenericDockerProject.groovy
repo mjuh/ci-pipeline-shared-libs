@@ -54,7 +54,13 @@ def call(Map args = [:]) {
                 }
             }
             stage('Pull Docker image') {
-                when { branch 'master' }
+                when {
+                    allOf {
+                        branch 'master'
+                        not { expression { return args.skipDeploy }
+                        }
+                    }
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         dockerPull image: dockerImage
@@ -62,7 +68,13 @@ def call(Map args = [:]) {
                 }
             }
             stage('Deploy service to swarm') {
-                when { branch 'master' }
+                when {
+                    allOf {
+                        branch 'master'
+                        not { expression { return args.skipDeploy }
+                        }
+                    }
+                }
                 agent { label Constants.productionNodeLabel }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
