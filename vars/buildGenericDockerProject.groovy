@@ -22,7 +22,10 @@ def call(Map args = [:]) {
         }
         stages {
             stage('Build Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
+                when {
+                    not { expression { return params.skipToDeploy } }
+                    beforeAgent true
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
@@ -43,7 +46,10 @@ def call(Map args = [:]) {
                 }
             }
             stage('Push Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
+                when {
+                    not { expression { return params.skipToDeploy } }
+                    beforeAgent true
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage
@@ -60,6 +66,7 @@ def call(Map args = [:]) {
                         not { expression { return args.skipDeploy }
                         }
                     }
+                    beforeAgent true
                 }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
@@ -74,6 +81,7 @@ def call(Map args = [:]) {
                         not { expression { return args.skipDeploy }
                         }
                     }
+                    beforeAgent true
                 }
                 agent { label Constants.productionNodeLabel }
                 steps {
