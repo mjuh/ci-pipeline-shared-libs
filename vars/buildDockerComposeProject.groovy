@@ -21,7 +21,10 @@ def call(String composeProject) {
         }
         stages {
             stage('Build Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
+                when {
+                    not { expression { return params.skipToDeploy } }
+                    beforeAgent true
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
@@ -42,7 +45,10 @@ def call(String composeProject) {
                 }
             }
             stage('Push Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
+                when {
+                    not { expression { return params.skipToDeploy } }
+                    beforeAgent true
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         pushDocker image: dockerImage
@@ -50,7 +56,10 @@ def call(String composeProject) {
                 }
             }
             stage('Pull Docker image') {
-                when { branch 'master' }
+                when {
+                    branch 'master'
+                    beforeAgent true
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         dockerPull image: dockerImage, nodeLabel: [composeProject]
@@ -58,11 +67,26 @@ def call(String composeProject) {
                 }
             }
             stage('Deploy service') {
-                when { branch 'master' }
-                agent { label composeProject }
+                when {
+                    branch 'master'
+                    beforeAgent true
+                }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerComposeDeploy project: composeProject, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                        sequentialCall (
+                            nodeLabels: [composeProject],
+                            procedure: { nodeLabels ->
+                                ansiColor("xterm") {
+                                    dockerComposeDeploy (
+                                        project: composeProject,
+                                        service: PROJECT_NAME,
+                                        image: dockerImage,
+                                        dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
+                                        projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
+                                    )
+                                }
+                            }
+                        )
                     }
                 }
                 post {

@@ -18,7 +18,7 @@ def call(Map args) {
                       branches: [[name: dockerStacksRepoCommitId]],
                       userRemoteConfigs: [[url: Constants.dockerStacksGitRepoUrl, credentialsId: Constants.gitCredId]]])
 
-            def projectConfigFile = "${args.project}.yml"
+            def projectConfigFile = args.projectConfigFile == null ? "${args.project}.yml" : args.projectConfigFile
             def stackDeclaration = readYaml(file: projectConfigFile)
             def containerNameBase = "${args.project}_service_"
             def serviceExists = sh(returnStdout: true,
