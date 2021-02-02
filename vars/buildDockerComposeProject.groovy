@@ -67,14 +67,26 @@ def call(String composeProject) {
                 }
             }
             stage('Deploy service') {
-                agent { label composeProject }
                 when {
                     branch 'master'
                     beforeAgent true
                 }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dockerComposeDeploy project: composeProject, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                        sequentialCall (
+                            nodeLabels: [composeProject],
+                            procedure: { nodeLabels ->
+                                ansiColor("xterm") {
+                                    dockerComposeDeploy (
+                                        project: composeProject,
+                                        service: PROJECT_NAME,
+                                        image: dockerImage,
+                                        dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
+                                        projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
+                                    )
+                                }
+                            }
+                        )
                     }
                 }
                 post {
