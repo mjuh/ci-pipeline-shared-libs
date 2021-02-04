@@ -30,7 +30,7 @@ def call(Map args = [:]) {
                             script {
                                 sh (nix.shell (run: ((["nix", "build",
                                                        "--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}",
-                                                       ".#container"] + args.nixArgs).join(" "))))
+                                                       ".#container"] + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                             }
                         }
                     }
@@ -51,7 +51,7 @@ def call(Map args = [:]) {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
-                                sh (nix.shell (run: ((["nix", "run", ".#deploy"] + args.nixArgs).join(" "))))
+                                sh (nix.shell (run: ((["nix", "run", ".#deploy"] + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                             }
                         }
                     }
