@@ -72,21 +72,20 @@ def call(String composeProject) {
                     beforeAgent true
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        sequentialCall (
-                            nodeLabels: [composeProject],
-                            procedure: { nodeLabels ->
-                                ansiColor("xterm") {
-                                    dockerComposeDeploy (
-                                        project: composeProject,
-                                        service: PROJECT_NAME,
-                                        image: dockerImage,
-                                        dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
-                                        projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
-                                    )
-                                }
+                    script {
+                        defaultDeployPhase = {
+                            node(composeProject) {
+                                dockerComposeDeploy (
+                                    project: composeProject,
+                                    service: PROJECT_NAME,
+                                    image: dockerImage,
+                                    dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                                )
                             }
-                        )
+                        }
+                        gitlabCommitStatus(STAGE_NAME) {
+                            args.deployPhase == null ? defaultDeployPhase() : args.deployPhase()
+                        }
                     }
                 }
                 post {
