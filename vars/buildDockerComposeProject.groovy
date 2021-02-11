@@ -79,7 +79,8 @@ def call(String composeProject, Map args = [:]) {
                                     project: composeProject,
                                     service: PROJECT_NAME,
                                     image: dockerImage,
-                                    dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                                    dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
+                                    projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
                                 )
                             }
                         }
