@@ -28,9 +28,10 @@ def call(Map args = [:]) {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
-                                sh (nix.shell (run: ((["nix", "build",
-                                                       "--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}",
-                                                       ".#container"] + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                                sh (nix.shell (run: ((["nix", "build"]
+                                                      + Constants.nixFlags
+                                                      + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#container"]
+                                                      + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                             }
                         }
                     }
@@ -40,7 +41,9 @@ def call(Map args = [:]) {
                         script {
                             Boolean runTest = fileExists("test.nix")
                             if (runTest) {
-                                sh (nix.shell (run: ((["nix", "flake", "check"] + args.nixArgs).join(" "))))
+                                sh (nix.shell (run: ((["nix", "flake", "check"]
+                                                      + Constants.nixFlags
+                                                      + args.nixArgs).join(" "))))
                             }
                             Boolean testHook = (args.testHook ?: { return true })()
                             runTest || testHook || Utils.markStageSkippedForConditional("Test")
@@ -51,7 +54,10 @@ def call(Map args = [:]) {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
-                                sh (nix.shell (run: ((["nix", "run", ".#deploy"] + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                                sh (nix.shell (run: ((["nix", "run"]
+                                                      + Constants.nixFlags
+                                                      + [".#deploy"]
+                                                      + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                             }
                         }
                     }

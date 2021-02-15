@@ -39,4 +39,5 @@ public class Constants {
     public static final ArrayList<String> nixDeployments = ["ns", "router", "swarm", "web", "nginx", "webmail", "jenkins", "xyz"]
     public static final ArrayList<String> developmentNixMachines = ["nginx3", "jenkins2", "web98", "mx1", "mx2"]
     public static final ArrayList<String> nixReleases = ["20.09", "unstable"]
+    public static final ArrayList<String> nixFlags = ["--print-build-logs"]
 }
