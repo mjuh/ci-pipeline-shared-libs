@@ -63,7 +63,7 @@ def call(Map args) {
                     if(serviceDeclaration.deploy.replicas) {
                         cmd += "--replicas ${serviceDeclaration.deploy.replicas} "
                     }
-                    if(serviceDeclaration.deploy.placement.constraints) {
+                    if(serviceDeclaration.deploy?.placement?.constraints) {
                         cmd += serviceDeclaration.deploy.placement.constraints.collect {"--constraint-add \"${it}\" "}.join()
                     }
                     if(serviceDeclaration.labels) {
