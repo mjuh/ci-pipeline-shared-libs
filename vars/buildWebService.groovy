@@ -28,6 +28,8 @@ def call(Map args = [:]) {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
+                                (args.preBuild ?: { return true })()
+
                                 sh (nix.shell (run: ((["nix", "build"]
                                                       + Constants.nixFlags
                                                       + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#container"]
