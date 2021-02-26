@@ -27,6 +27,7 @@ def call(Map args = [:]) {
                     script {
                         sh String.format("rsync --archive --verbose --backup output/ %s",
                                          ("rsync://archive.intr/images/" + (env.BRANCH_NAME == "master" ? "jenkins-production" : "jenkins-development") + "/"))
+                        (args.postDeploy ?: { return true })()
                     }
                 }
             }
