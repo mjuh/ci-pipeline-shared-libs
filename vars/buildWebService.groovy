@@ -45,7 +45,7 @@ def call(Map args = [:]) {
                             if (runTest) {
                                 sh (nix.shell (run: ((["nix", "flake", "check"]
                                                       + Constants.nixFlags
-                                                      + args.nixArgs).join(" "))))
+                                                      + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                             }
                             Boolean testHook = (args.testHook ?: { return true })()
                             runTest || testHook || Utils.markStageSkippedForConditional("Test")
