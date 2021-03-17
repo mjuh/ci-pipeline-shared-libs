@@ -22,7 +22,8 @@ def call(Map args = [:]) {
                 }
             }
             stage('npm build') {
-                when { branch 'master' }
+                when { branch 'master'
+                       beforeAgent true }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         sh 'npm run-script build'
@@ -30,7 +31,8 @@ def call(Map args = [:]) {
                 }
             }
             stage('npm build ci') {
-                when { not { branch 'master' }}
+                when { not { branch 'master' }
+                       beforeAgent true }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         sh 'npm run-script build-test'
@@ -48,7 +50,8 @@ def call(Map args = [:]) {
                 }
             }
             stage('unstash') {
-              when { branch 'master' }
+              when { branch 'master'
+                     beforeAgent true }
               steps {
                  gitlabCommitStatus(STAGE_NAME) {
                    script {
