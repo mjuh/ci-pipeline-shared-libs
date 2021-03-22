@@ -23,6 +23,20 @@ def call(Map args = [:]) {
                     }
                 }
             }
+            stage("Deploy") {
+                when {
+                    allOf {
+                        branch "master"
+                        expression { return args.deploy }
+                    }
+                    beforeAgent true
+                }
+                steps {
+                    sh (nix.shell (run: ((["deploy", "--"]
+                                          + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                          + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                }
+            }
         }
         post {
             always {
