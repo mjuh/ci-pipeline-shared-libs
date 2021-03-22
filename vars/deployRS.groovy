@@ -26,6 +26,8 @@ def call(Map args = [:]) {
                             }
                         }
                     }
+
+                    // Similar to "nix flake check" will be run on "deploy" command.
                     stage("nix flake check") {
                         when {
                             anyOf {
