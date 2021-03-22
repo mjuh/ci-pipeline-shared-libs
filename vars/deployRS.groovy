@@ -26,6 +26,8 @@ def call(Map args = [:]) {
                             }
                         }
                     }
+
+                    // Similar to "nix flake check" will be run on "deploy" command.
                     stage("nix flake check") {
                         when {
                             anyOf {
@@ -37,6 +39,7 @@ def call(Map args = [:]) {
                             gitlabCommitStatus(STAGE_NAME) {
                                 ansiColor("xterm") {
                                     sh (nix.shell (run: ((["nix flake check"]
+                                                          + Constants.nixFlags
                                                           + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                           + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
                                 }
@@ -57,7 +60,8 @@ def call(Map args = [:]) {
                     gitlabCommitStatus(STAGE_NAME) {
                         ansiColor("xterm") {
                             sh ((["nix-shell --run",
-                                  quoteString ((["deploy", "--"]
+                                  quoteString ((["deploy", ".", "--"]
+                                                + Constants.nixFlags
                                                 + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                 + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                         }
