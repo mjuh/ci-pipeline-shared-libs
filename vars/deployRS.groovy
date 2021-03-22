@@ -52,9 +52,10 @@ def call(Map args = [:]) {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         ansiColor("xterm") {
-                            sh (nix.shell (run: ((["deploy", "--"]
-                                                  + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                  + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                            sh (String.format("nix-shell --run '%s'",
+                                              ((["deploy", "--"]
+                                                + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
                         }
                     }
                 }
