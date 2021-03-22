@@ -3,23 +3,39 @@ def call(Map args = [:]) {
         agent { label "master" }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ["Tests"])
+            gitlabBuilds(builds: ["No credentials", "nix flake check"])
         }
         stages {
             stage("Tests") {
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        build (
-                            job: "../../ci/bfg/master",
-                            parameters: [string(
-                                    name: "GIT_REPOSITORY_TARGET_URL",
-                                    value: gitRemoteOrigin.getRemote().url
+                parallel {
+                    stage("No credentials") {
+                        steps {
+                            gitlabCommitStatus(STAGE_NAME) {
+                                build (
+                                    job: "../../ci/bfg/master",
+                                    parameters: [string(
+                                            name: "GIT_REPOSITORY_TARGET_URL",
+                                            value: gitRemoteOrigin.getRemote().url
+                                        )
+                                    ]
                                 )
-                            ]
-                        )
-                        sh (nix.shell (run: ((["nix flake check"]
-                                              + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                              + (args.showTrace == true) ? ["--show-trace"] : []).join(" "))))
+                            }
+                        }
+                    }
+                    stage("nix flake check") {
+                        when {
+                            anyOf {
+                                expression { args.deploy != true }
+                                not { branch "master" }
+                            }
+                        }
+                        steps {
+                            gitlabCommitStatus(STAGE_NAME) {
+                                sh (nix.shell (run: ((["nix flake check"]
+                                                      + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                            }
+                        }
                     }
                 }
             }
@@ -27,14 +43,16 @@ def call(Map args = [:]) {
                 when {
                     allOf {
                         branch "master"
-                        expression { return args.deploy }
+                        expression { args.deploy == true }
                     }
                     beforeAgent true
                 }
                 steps {
-                    sh (nix.shell (run: ((["deploy", "--"]
-                                          + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                          + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                    gitlabCommitStatus(STAGE_NAME) {
+                        sh (nix.shell (run: ((["deploy", "--"]
+                                              + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                              + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                    }
                 }
             }
         }
