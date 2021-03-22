@@ -17,7 +17,9 @@ def call(Map args = [:]) {
                                 )
                             ]
                         )
-                        sh (nix.shell (run: "nix flake check --print-build-logs --show-trace"))
+                        sh (nix.shell (run: ((["nix flake check"]
+                                              + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                              + (args.showTrace == true) ? ["--show-trace"] : []).join(" "))))
                     }
                 }
             }
