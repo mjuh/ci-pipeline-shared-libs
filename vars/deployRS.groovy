@@ -1,3 +1,7 @@
+def quoteString(String string) {
+    "'" + string + "'"
+}
+
 def call(Map args = [:]) {
     pipeline {
         agent { label "master" }
@@ -52,10 +56,10 @@ def call(Map args = [:]) {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         ansiColor("xterm") {
-                            sh (String.format("nix-shell --run '%s'",
-                                              ((["deploy", "--"]
+                            sh ((["nix-shell --run",
+                                  quoteString ((["deploy", "--"]
                                                 + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                         }
                     }
                 }
