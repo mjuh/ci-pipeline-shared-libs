@@ -5,7 +5,15 @@ def call(Map args = [:]) {
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ["Tests"])
         }
-        stages {
+    	parameters {
+            booleanParam(
+                name: "deploy",
+                defaultValue: false,
+                description: "Задеплоить?"
+            )
+	}
+
+	stages {
             stage("Tests") {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
@@ -27,7 +35,7 @@ def call(Map args = [:]) {
                 when {
                     allOf {
                         branch "master"
-                        expression { return args.deploy }
+                        expression { return (args.deploy || params.deploy) }
                     }
                     beforeAgent true
                 }
