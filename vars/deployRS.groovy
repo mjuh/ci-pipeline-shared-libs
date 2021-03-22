@@ -31,9 +31,11 @@ def call(Map args = [:]) {
                         }
                         steps {
                             gitlabCommitStatus(STAGE_NAME) {
-                                sh (nix.shell (run: ((["nix flake check"]
-                                                      + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                                ansiColor("xterm") {
+                                    sh (nix.shell (run: ((["nix flake check"]
+                                                          + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                          + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                                }
                             }
                         }
                     }
@@ -49,9 +51,12 @@ def call(Map args = [:]) {
                 }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        sh (nix.shell (run: ((["deploy", "--"]
-                                              + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                              + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                        ansiColor("xterm") {
+                            sh (String.format("nix-shell --run '%s'",
+                                              ((["deploy", "--"]
+                                                + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                        }
                     }
                 }
             }
