@@ -1,4 +1,6 @@
 def call(Map args = [:]) {
+    def slackMessages = []
+
     pipeline {
         agent { label "master" }
         options {
@@ -21,11 +23,20 @@ def call(Map args = [:]) {
                     }
                 }
             }
+	    stage("Deploy") {
+		steps {
+		    gitlabCommitStatus(STAGE_NAME) {
+			sh(nix.shell(run: "deploy . -- --print-build-logs --show-trace"))
+			slackMessages += "Deploy-rs: deployed ${deployment} to production"
+		    }
+		}
+	    }
         }
         post {
-            always {
-                sendNotifications currentBuild.result
-            }
+            sendSlackNotifications (
+                buildStatus: currentBuild.result,
+                threadMessages: slackMessages
+            )
         }
     }
 }
