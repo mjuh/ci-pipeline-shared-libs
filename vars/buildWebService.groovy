@@ -17,14 +17,14 @@ def call(Map args = [:]) {
             agent { label "master" }
             options {
                 gitLabConnection(Constants.gitLabConnection)
-                gitlabBuilds(builds: ["Build", "Deploy"])
+                gitlabBuilds(builds: ["build", "tests", "deploy"])
                 timeout(time: 6, unit: "HOURS")
             }
             environment {
                 NIX_PATH="nixpkgs=https://github.com/NixOS/nixpkgs/archive/d5291756487d70bc336e33512a9baf9fa1788faf.tar.gz"
             }
             stages {
-                stage("Build") {
+                stage("build") {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
@@ -38,21 +38,30 @@ def call(Map args = [:]) {
                         }
                     }
                 }
-                stage("Test") {
+                stage("tests") {
                     steps {
                         script {
-                            Boolean runTest = fileExists("test.nix")
-                            if (runTest) {
-                                sh (nix.shell (run: ((["nix", "flake", "check"]
-                                                      + Constants.nixFlags
-                                                      + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                            gitlabCommitStatus(STAGE_NAME) {
+                                parallel (["nix flake check": {
+                                            ansiColor("xterm") {
+                                                sh (nix.shell (run: ((["nix flake check"]
+                                                                      + Constants.nixFlags
+                                                                      + (args.nixArgs == null ? [] : args.nixArgs)
+                                                                      + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
+                                          + (args.scanPasswords == true ?
+                                             ["bfg": {
+                                                build (job: "../../ci/bfg/master",
+                                                       parameters: [string(name: "GIT_REPOSITORY_TARGET_URL",
+                                                                           value: gitRemoteOrigin.getRemote().url)])}]
+                                             : [:]))
+                                Boolean testHook = (args.testHook ?: { return true })()
+                                testHook || Utils.markStageSkippedForConditional("tests")
                             }
-                            Boolean testHook = (args.testHook ?: { return true })()
-                            runTest || testHook || Utils.markStageSkippedForConditional("Test")
                         }
                     }
                 }
-                stage("Deploy") {
+                stage("deploy") {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
