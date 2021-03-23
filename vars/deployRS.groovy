@@ -11,48 +11,33 @@ def call(Map args = [:]) {
         agent { label "master" }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ["No credentials"])
+            gitlabBuilds(builds: ["tests"])
         }
         stages {
-            stage("Tests") {
-                parallel {
-                    stage("No credentials") {
-                        steps {
-                            gitlabCommitStatus(STAGE_NAME) {
-                                build (
-                                    job: "../../ci/bfg/master",
-                                    parameters: [string(
-                                            name: "GIT_REPOSITORY_TARGET_URL",
-                                            value: gitRemoteOrigin.getRemote().url
-                                        )
-                                    ]
-                                )
-                            }
-                        }
-                    }
-
-                    // Similar to "nix flake check" will be run on "deploy" command.
-                    stage("nix flake check") {
-                        when {
-                            anyOf {
-                                expression { args.deploy != true }
-                                not { branch "master" }
-                            }
-                        }
-                        steps {
-                            gitlabCommitStatus(STAGE_NAME) {
-                                ansiColor("xterm") {
-                                    sh (nix.shell (run: ((["nix flake check"]
-                                                          + Constants.nixFlags
-                                                          + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                          + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
-                                }
-                            }
+            stage("tests") {
+                steps {
+                    script {
+                        gitlabCommitStatus(STAGE_NAME) {
+                            parallel ([:]
+                                      + (args.scanPasswords == true ?
+                                         ["bfg": {
+                                            build (job: "../../ci/bfg/master",
+                                                   parameters: [string(name: "GIT_REPOSITORY_TARGET_URL",
+                                                                       value: gitRemoteOrigin.getRemote().url)])}]
+                                         : [:])
+                                      + (args.deploy != true || GIT_BRANCH != "master" ?
+                                         ["nix flake check": {
+                                            ansiColor("xterm") {
+                                                sh (nix.shell (run: ((["nix flake check"]
+                                                                      + Constants.nixFlags
+                                                                      + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
+                                         : [:]))
                         }
                     }
                 }
             }
-            stage("Deploy") {
+            stage("deploy") {
                 when {
                     allOf {
                         branch "master"
