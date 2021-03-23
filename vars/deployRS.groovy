@@ -1,3 +1,7 @@
+// XXX: We cannot wait for "nix flake check" stage, because it could be
+// skipped depending on when condition, so don't relly on "merge when
+// succeeded" button in GitLab.
+
 def quoteString(String string) {
     "'" + string + "'"
 }
@@ -7,7 +11,7 @@ def call(Map args = [:]) {
         agent { label "master" }
         options {
             gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ["No credentials", "nix flake check"])
+            gitlabBuilds(builds: ["No credentials"])
         }
         stages {
             stage("Tests") {
