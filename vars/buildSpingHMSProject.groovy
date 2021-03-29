@@ -26,6 +26,7 @@ def call(def Map args = [:]) {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
             INACTIVE_STACK = nginx.getInactive("/hms")
+            GRADLE_OPTS = "${args.GRADLE_OPTS.join(' ')}"
         }
         options {
             buildDiscarder(
