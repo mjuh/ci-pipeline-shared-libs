@@ -1,6 +1,7 @@
 def call(def Map args = [:]) {
     def dockerImage = null
     def slackMessages = [];
+    String GRADLE_OPTS = args.GRADLE_OPTS == null ? "" : args.GRADLE_OPTS.join(' ')
 
     pipeline {
         agent { label "master" }
@@ -26,7 +27,7 @@ def call(def Map args = [:]) {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
             INACTIVE_STACK = nginx.getInactive("/hms")
-            GRADLE_OPTS = "${args.GRADLE_OPTS.join(' ')}"
+            GRADLE_OPTS = "${GRADLE_OPTS}"
         }
         options {
             buildDiscarder(
