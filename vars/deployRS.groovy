@@ -48,7 +48,7 @@ def call(Map args = [:]) {
                     gitlabCommitStatus(STAGE_NAME) {
                         ansiColor("xterm") {
                             sh ((["nix-shell --run",
-                                  quoteString ((["deploy", "--dry-activate", "true", ".", "--"]
+                                  quoteString ((["deploy", "-s", "--dry-activate", "true", ".", "--"]
                                                 + Constants.nixFlags
                                                 + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                 + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
