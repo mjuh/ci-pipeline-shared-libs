@@ -12,7 +12,8 @@ def call(Map args = [:]) {
         options {
             gitLabConnection(Constants.gitLabConnection)
             gitlabBuilds(builds: ["tests"])
-        }
+            disableConcurrentBuilds()
+	}
         stages {
             stage("tests") {
                 steps {
@@ -37,6 +38,24 @@ def call(Map args = [:]) {
                     }
                 }
             }
+            stage("dry-activate") {
+                when {
+		    not {
+                        branch "master"
+		    }
+		}
+		steps {
+                    gitlabCommitStatus(STAGE_NAME) {
+                        ansiColor("xterm") {
+                            sh ((["nix-shell --run",
+                                  quoteString ((["deploy", "--dry-activate", "true", ".", "--"]
+                                                + Constants.nixFlags
+                                                + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                        }
+		    }
+		}
+	    }
             stage("deploy") {
                 when {
                     allOf {
