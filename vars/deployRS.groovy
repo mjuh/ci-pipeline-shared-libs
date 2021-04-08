@@ -34,28 +34,19 @@ def call(Map args = [:]) {
                                                                       + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                                       + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
                                          : [:]))
+                            // WARNING: Try to dry activate only after BFG
+                            // succeeded to check no credentials are leaked.
+                            ansiColor("xterm") {
+                                sh ((["nix-shell --run",
+                                      quoteString ((["deploy", "--skip-checks", "--dry-activate", "true", ".", "--"]
+                                                    + Constants.nixFlags
+                                                    + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                    + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                            }
                         }
                     }
                 }
             }
-            stage("dry-activate") {
-                when {
-		    not {
-                        branch "master"
-		    }
-		}
-		steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        ansiColor("xterm") {
-                            sh ((["nix-shell --run",
-                                  quoteString ((["deploy", "-s", "--dry-activate", "true", ".", "--"]
-                                                + Constants.nixFlags
-                                                + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
-                        }
-		    }
-		}
-	    }
             stage("deploy") {
                 when {
                     allOf {
