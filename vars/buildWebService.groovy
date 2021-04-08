@@ -75,7 +75,7 @@ def call(Map args = [:]) {
                                 slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
 
                                 // Deploy to Docker Swarm
-                                if (args.stackDeploy && TAG == "master") {
+                                if (args.stackDeploy && GIT_BRANCH == "master") {
                                     node(Constants.productionNodeLabel) {
                                         slackMessages += dockerStackDeploy (
                                             stack: GROUP_NAME,
