@@ -74,6 +74,11 @@ def call(Map args = [:]) {
                                                       + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                                 slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
 
+                                dockerImage = new DockerImageTarball(
+                                    imageName: (Constants.dockerRegistryHost + "/" + GROUP_NAME + "/" + PROJECT_NAME ":" + gitTag()),
+                                    path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
+                                )
+
                                 // Deploy to Docker Swarm
                                 if (args.stackDeploy && GIT_BRANCH == "master") {
                                     node(Constants.productionNodeLabel) {
