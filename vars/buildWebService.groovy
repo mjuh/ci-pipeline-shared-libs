@@ -75,7 +75,7 @@ def call(Map args = [:]) {
                                 slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
 
                                 dockerImage = new DockerImageTarball(
-                                    imageName: (Constants.dockerRegistryHost + "/" + GROUP_NAME + "/" + PROJECT_NAME ":" + gitTag()),
+                                    imageName: (Constants.dockerRegistryHost + "/" + GROUP_NAME + "/" + PROJECT_NAME + ":" + gitTag()),
                                     path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
                                 )
 
