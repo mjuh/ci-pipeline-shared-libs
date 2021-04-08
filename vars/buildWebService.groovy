@@ -21,6 +21,9 @@ def call(Map args = [:]) {
                 timeout(time: 6, unit: "HOURS")
             }
             environment {
+                PROJECT_NAME = projectName(projectName: args.projectName)
+                GROUP_NAME = gitRemoteOrigin.getGroup()
+                DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${TAG}"
                 NIX_PATH="nixpkgs=https://github.com/NixOS/nixpkgs/archive/d5291756487d70bc336e33512a9baf9fa1788faf.tar.gz"
             }
             stages {
