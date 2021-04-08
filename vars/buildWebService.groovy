@@ -69,6 +69,20 @@ def call(Map args = [:]) {
                                                       + Constants.nixFlags
                                                       + [".#deploy"]
                                                       + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                                slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
+
+                                // Deploy to Docker Swarm
+                                if (args.stackDeploy && TAG == "master") {
+                                    node(Constants.productionNodeLabel) {
+                                        slackMessages += dockerStackDeploy (
+                                            stack: GROUP_NAME,
+                                            service: PROJECT_NAME,
+                                            image: dockerImage
+                                        )
+                                        slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                                    }
+                                }
+
                             }
                         }
                     }
@@ -76,7 +90,8 @@ def call(Map args = [:]) {
             }
             post {
                 always {
-                    sendNotifications currentBuild.result
+                    sendSlackNotifications (buildStatus: currentBuild.result,
+                                            threadMessages: slackMessages)
                 }
             }
         }
