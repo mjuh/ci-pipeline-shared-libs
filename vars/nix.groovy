@@ -49,3 +49,20 @@ def version() {
 def shell(Map args = [:]) {
     String.format("nix-shell --run '%s'", args.run)
 }
+
+def check(Map args = [:]) {
+    ([:]
+     + (args.scanPasswords == true ?
+        ["bfg": { build (job: "../../ci/bfg/master",
+                         parameters: [string(name: "GIT_REPOSITORY_TARGET_URL",
+                                             value: gitRemoteOrigin.getRemote().url)])}]
+        : [:])
+     + (args.deploy != true || GIT_BRANCH != "master" ?
+        ["nix flake check": {
+                    ansiColor("xterm") {
+                        sh (shell (run: ((["nix flake check"]
+                                          + Constants.nixFlags
+                                          + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                          + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
+        : [:]))
+}
