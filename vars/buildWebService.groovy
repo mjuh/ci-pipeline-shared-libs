@@ -28,6 +28,9 @@ def call(Map args = [:]) {
                 timeout(time: 6, unit: "HOURS")
             }
             environment {
+                PROJECT_NAME = projectName(projectName: args.projectName)
+                GROUP_NAME = gitRemoteOrigin.getGroup()
+                DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${TAG}"
                 NIX_PATH="nixpkgs=https://github.com/NixOS/nixpkgs/archive/d5291756487d70bc336e33512a9baf9fa1788faf.tar.gz"
             }
             stages {
@@ -79,7 +82,25 @@ def call(Map args = [:]) {
                                                 + Constants.nixFlags
                                                 + [".#${it}"]
                                                 + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
-				}
+				                }
+                                slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
+
+                                dockerImage = new DockerImageTarball(
+                                    imageName: (Constants.dockerRegistryHost + "/" + GROUP_NAME + "/" + PROJECT_NAME + ":" + gitTag()),
+                                    path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
+                                )
+
+                                // Deploy to Docker Swarm
+                                if (args.stackDeploy && GIT_BRANCH == "master") {
+                                    node(Constants.productionNodeLabel) {
+                                        slackMessages += dockerStackDeploy (
+                                            stack: GROUP_NAME,
+                                            service: PROJECT_NAME,
+                                            image: dockerImage
+                                        )
+                                        slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                                    }
+                                }
                             }
                         }
                     }
@@ -87,7 +108,8 @@ def call(Map args = [:]) {
             }
             post {
                 always {
-                    sendNotifications currentBuild.result
+                    sendSlackNotifications (buildStatus: currentBuild.result,
+                                            threadMessages: slackMessages)
                 }
             }
         }

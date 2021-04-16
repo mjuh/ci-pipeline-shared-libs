@@ -18,21 +18,7 @@ def call(Map args = [:]) {
                 steps {
                     script {
                         gitlabCommitStatus(STAGE_NAME) {
-                            parallel ([:]
-                                      + (args.scanPasswords == true ?
-                                         ["bfg": {
-                                            build (job: "../../ci/bfg/master",
-                                                   parameters: [string(name: "GIT_REPOSITORY_TARGET_URL",
-                                                                       value: gitRemoteOrigin.getRemote().url)])}]
-                                         : [:])
-                                      + (args.deploy != true || GIT_BRANCH != "master" ?
-                                         ["nix flake check": {
-                                            ansiColor("xterm") {
-                                                sh (nix.shell (run: ((["nix flake check"]
-                                                                      + Constants.nixFlags
-                                                                      + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
-                                         : [:]))
+                            parallel (nix.check(args))
                         }
                     }
                 }
