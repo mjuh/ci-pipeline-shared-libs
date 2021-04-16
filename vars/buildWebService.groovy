@@ -12,6 +12,13 @@ def projectName (Map args = [:]) {
 def call(Map args = [:]) {
     if (args.flake == true) {
         def slackMessages = [];
+        def build_list = [ "container" ];
+        def deploy_list = [ "deploy" ];
+
+        if (args.with_xdebug == true) {
+            build_list.add("container_xdebug")    
+            deploy_list.add("deploy_xdebug")
+        }
 
         pipeline {
             agent { label "master" }
@@ -30,10 +37,12 @@ def call(Map args = [:]) {
                             script {
                                 (args.preBuild ?: { return true })()
 
-                                sh (nix.shell (run: ((["nix", "build"]
-                                                      + Constants.nixFlags
-                                                      + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#container"]
-                                                      + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+				build_list.each {
+                                    sh (nix.shell (run: ((["nix", "build"]
+                                                + Constants.nixFlags
+                                                + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#${it}"]
+                                                + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+				}
                             }
                         }
                     }
@@ -65,10 +74,12 @@ def call(Map args = [:]) {
                     steps {
                         gitlabCommitStatus(STAGE_NAME) {
                             script {
-                                sh (nix.shell (run: ((["nix", "run"]
-                                                      + Constants.nixFlags
-                                                      + [".#deploy"]
-                                                      + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                                deploy_list.each {
+                                        sh (nix.shell (run: ((["nix", "run"]
+                                                + Constants.nixFlags
+                                                + [".#${it}"]
+                                                + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+				}
                             }
                         }
                     }
