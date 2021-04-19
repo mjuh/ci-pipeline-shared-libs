@@ -10,7 +10,7 @@ def call(Map args = [:]) {
             sh 'nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/4214f76b.tar.gz -p openjdk14 --run "gradle build"' // nixos-unstable
             break;
         default:
-            sh 'gradle build'
+            sh 'nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/48723f48.tar.gz -p openjdk8 --run "gradle build"' // nixos-20.03
             break;
     }
 }
