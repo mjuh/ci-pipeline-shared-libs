@@ -6,6 +6,10 @@ def quoteString(String string) {
     "'" + string + "'"
 }
 
+def gc(Boolean enable) {
+    enable == false ? "1" : "0"
+}
+
 def call(Map args = [:]) {
     pipeline {
         agent { label "master" }
@@ -14,6 +18,9 @@ def call(Map args = [:]) {
             gitlabBuilds(builds: ["tests"])
             disableConcurrentBuilds()
 	}
+        environment {
+            GC_DONT_GC = gc(args.gc)
+        }
         stages {
             stage("tests") {
                 steps {
