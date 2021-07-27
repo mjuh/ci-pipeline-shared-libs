@@ -98,7 +98,7 @@ def call(Map args = [:]) {
                             if (args.sequential) {
                                 hosts().each{ host ->
                                     sh ((["nix-shell --run",
-                                          quoteString ((["deploy", ".#${host}", "--"]
+                                          quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
                                                         + Constants.nixFlags
                                                         + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                         + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" ")) 
