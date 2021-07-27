@@ -25,30 +25,34 @@ def call(Map args = [:]) {
             stage("tests") {
                 steps {
                     script {
-                        gitlabCommitStatus(STAGE_NAME) {
-                            parallel ([:]
-                                      + (args.scanPasswords == true ?
-                                         ["bfg": {
-                                            build (job: "../../ci/bfg/master",
-                                                   parameters: [string(name: "GIT_REPOSITORY_TARGET_URL",
-                                                                       value: gitRemoteOrigin.getRemote().url)])}]
-                                         : [:])
-                                      + (args.deploy != true || GIT_BRANCH != "master" ?
-                                         ["nix flake check": {
-                                            ansiColor("xterm") {
-                                                sh (nix.shell (run: ((["nix flake check"]
-                                                                      + Constants.nixFlags
-                                                                      + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
-                                         : [:]))
-                            // WARNING: Try to dry activate only after BFG
-                            // succeeded to check no credentials are leaked.
-                            ansiColor("xterm") {
-                                sh ((["nix-shell --run",
-                                      quoteString ((["deploy", "--skip-checks", "--dry-activate", ".", "--"]
-                                                    + Constants.nixFlags
-                                                    + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                    + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                        if (args.checkPhase) {
+                            args.checkPhase(args)
+                        } else {
+                            gitlabCommitStatus(STAGE_NAME) {
+                                parallel ([:]
+                                          + (args.scanPasswords == true ?
+                                             ["bfg": {
+                                                build (job: "../../ci/bfg/master",
+                                                       parameters: [string(name: "GIT_REPOSITORY_TARGET_URL",
+                                                                           value: gitRemoteOrigin.getRemote().url)])}]
+                                             : [:])
+                                          + (args.deploy != true || GIT_BRANCH != "master" ?
+                                             ["nix flake check": {
+                                                ansiColor("xterm") {
+                                                    sh (nix.shell (run: ((["nix flake check"]
+                                                                          + Constants.nixFlags
+                                                                          + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                                          + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
+                                             : [:]))
+                                // WARNING: Try to dry activate only after BFG
+                                // succeeded to check no credentials are leaked.
+                                ansiColor("xterm") {
+                                    sh ((["nix-shell --run",
+                                          quoteString ((["deploy", "--skip-checks", "--dry-activate", ".", "--"]
+                                                        + Constants.nixFlags
+                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                }
                             }
                         }
                     }
