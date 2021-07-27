@@ -10,6 +10,22 @@ def gc(Boolean enable) {
     enable == false ? "1" : "0"
 }
 
+@NonCPS
+def hosts() {
+    output = []
+    currentBuild.changeSets.each {
+        changeSet -> changeSet.items.each {
+            entry -> (new ArrayList(entry.affectedFiles)).each {
+                file ->
+                if (file.path.startsWith("hosts")) {
+                    output = output + (file.path.split("/").last() - ".nix")
+                }
+            }
+        }
+    }
+    output
+}
+
 def call(Map args = [:]) {
     pipeline {
         agent { label "master" }
@@ -79,11 +95,21 @@ def call(Map args = [:]) {
                                 }
                             }
                         } else {
-                            sh ((["nix-shell --run",
-                                  quoteString ((["deploy", ".", "--"]
-                                                + Constants.nixFlags
-                                                + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                            if (args.sequential) {
+                                hosts().each{ host ->
+                                    sh ((["nix-shell --run",
+                                          quoteString ((["deploy", ".#${host}", "--"]
+                                                        + Constants.nixFlags
+                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" ")) 
+                                }
+                            } else {
+                                sh ((["nix-shell --run",
+                                      quoteString ((["deploy", ".", "--"]
+                                                    + Constants.nixFlags
+                                                    + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                    + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                            }
                         }
                     }
                 }
