@@ -88,27 +88,27 @@ def call(Map args = [:]) {
                 }
                 steps {
                     script {
-                        if (args.deployPhase) {
-                            gitlabCommitStatus(STAGE_NAME) {
-                                ansiColor("xterm") {
+                        gitlabCommitStatus(STAGE_NAME) {
+                            ansiColor("xterm") {
+                                if (args.deployPhase) {
                                     args.deployPhase(args)
-                                }
-                            }
-                        } else {
-                            if (args.sequential) {
-                                hosts().each{ host ->
-                                    sh ((["nix-shell --run",
-                                          quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
-                                                        + Constants.nixFlags
-                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" ")) 
-                                }
-                            } else {
-                                sh ((["nix-shell --run",
-                                      quoteString ((["deploy", ".", "--"]
-                                                    + Constants.nixFlags
-                                                    + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                    + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                } else {
+                                    if (args.sequential) {
+                                        hosts().each{ host ->
+                                            sh ((["nix-shell --run",
+                                                  quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
+                                                                + Constants.nixFlags
+                                                                + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" ")) 
+                                        }
+                                    } else {
+                                        sh ((["nix-shell --run",
+                                              quoteString ((["deploy", ".", "--"]
+                                                            + Constants.nixFlags
+                                                            + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                            + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                    }
+                                }                                
                             }
                         }
                     }
