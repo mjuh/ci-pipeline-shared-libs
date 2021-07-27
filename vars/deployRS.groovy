@@ -26,7 +26,11 @@ def call(Map args = [:]) {
                 steps {
                     script {
                         if (args.checkPhase) {
-                            args.checkPhase(args)
+                            gitlabCommitStatus(STAGE_NAME) {
+                                ansiColor("xterm") {
+                                    args.checkPhase(args)
+                                }
+                            }
                         } else {
                             gitlabCommitStatus(STAGE_NAME) {
                                 parallel ([:]
