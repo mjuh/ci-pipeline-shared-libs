@@ -63,8 +63,14 @@ def call(Map args = [:]) {
                     beforeAgent true
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        ansiColor("xterm") {
+                    script {
+                        if (args.deployPhase) {
+                            gitlabCommitStatus(STAGE_NAME) {
+                                ansiColor("xterm") {
+                                    args.deployPhase(args)
+                                }
+                            }
+                        } else {
                             sh ((["nix-shell --run",
                                   quoteString ((["deploy", ".", "--"]
                                                 + Constants.nixFlags
