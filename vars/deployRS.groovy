@@ -98,7 +98,7 @@ def call(Map args = [:]) {
                                 } else {
                                     if (args.sequential) {
                                         // Hosts in changeSet are first.
-                                        hosts = (hostsInchangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> nixFile2host(file) }).unique()
+                                        hosts = (hostsInchangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> nixFile2host("${file}") }).unique()
 
                                         hosts.each{ host ->
                                             sh ((["nix-shell --run",
