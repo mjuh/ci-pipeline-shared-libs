@@ -11,7 +11,7 @@ def gc(Boolean enable) {
 }
 
 @NonCPS
-def hosts() {
+def hostsInchangeSets() {
     output = []
     currentBuild.changeSets.each { changeSet ->
         changeSet.items.each { entry ->
@@ -93,7 +93,10 @@ def call(Map args = [:]) {
                                     args.deployPhase(args)
                                 } else {
                                     if (args.sequential) {
-                                        hosts().each{ host ->
+                                        // Hosts in changeSet are first.
+                                        hosts = (hostsInchangeSets() + findFiles(glob: 'hosts/*.nix')).unique()
+
+                                        hosts.each{ host ->
                                             sh ((["nix-shell --run",
                                                   quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
                                                                 + Constants.nixFlags
