@@ -206,6 +206,12 @@ def call(def Map args = [:]) {
                     buildStatus: currentBuild.result,
                     threadMessages: slackMessages
                 )
+                archiveArtifacts (
+                    artifacts: 'build/reports/**',
+                    allowEmptyArchive: true,
+                    followSymlinks: true,
+                    onlyIfSuccessful: false
+                )
             }
         }
     }
