@@ -94,7 +94,7 @@ def call(Map args = [:]) {
                                 } else {
                                     if (args.sequential) {
                                         // Hosts in changeSet are first.
-                                        hosts = (hostsInChangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> host = file.split("/").last() - ".nix"; "${host}"}).unique()
+                                        hosts = (hostsInChangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
 
                                         counter = 0
                                         hosts.each{ host ->
