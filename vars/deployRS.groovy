@@ -10,6 +10,10 @@ def gc(Boolean enable) {
     enable == false ? "1" : "0"
 }
 
+def nixFile2host(string) {
+    string.split("/").last() - ".nix"
+}
+
 @NonCPS
 def hostsInchangeSets() {
     output = []
@@ -17,7 +21,7 @@ def hostsInchangeSets() {
         changeSet.items.each { entry ->
             (new ArrayList(entry.affectedFiles)).each { file ->
                 if (file.path.startsWith("hosts")) {
-                    output = output + (file.path.split("/").last() - ".nix")
+                    output = output + nixFile2host(file.path)
                 }
             }
         }
@@ -94,7 +98,7 @@ def call(Map args = [:]) {
                                 } else {
                                     if (args.sequential) {
                                         // Hosts in changeSet are first.
-                                        hosts = (hostsInchangeSets() + findFiles(glob: 'hosts/*.nix')).unique()
+                                        hosts = (hostsInchangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> nixFile2host(file) }).unique()
 
                                         hosts.each{ host ->
                                             sh ((["nix-shell --run",
