@@ -17,7 +17,7 @@ def hostsInChangeSets() {
         changeSet.items.each { entry ->
             (new ArrayList(entry.affectedFiles)).each { file ->
                 if (file.path.startsWith("hosts")) {
-                    output = output + file.path.split("/").last() - ".nix"
+                    output = output + (file.path.split("/").last() - ".nix")
                 }
             }
         }
