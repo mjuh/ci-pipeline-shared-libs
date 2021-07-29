@@ -30,15 +30,6 @@ def call(Map args = [:]) {
                     }
                 }
             }
-            stage('yarn build ci') {
-                when { not { branch 'master' }
-                       beforeAgent true }
-                steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        sh 'yarn run-script build-test'
-                    }
-                }
-            }
             stage('artifacts') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
