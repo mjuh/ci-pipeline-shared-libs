@@ -33,7 +33,7 @@ def call(Map args = [:]) {
             stage('artifacts') {
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        dir('public') {
+                        dir('build') {
                             stash name: "my-stash", includes: "**"
                             archiveArtifacts artifacts: "**"
                         }
