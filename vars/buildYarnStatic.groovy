@@ -26,7 +26,7 @@ def call(Map args = [:]) {
                        beforeAgent true }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        sh 'yarn run-script build'
+                        sh 'yarn build'
                     }
                 }
             }
