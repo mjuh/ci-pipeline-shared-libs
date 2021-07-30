@@ -22,6 +22,8 @@ def call(Map args = [:]) {
                 }
             }
             stage('yarn build') {
+                when { branch 'master'
+                       beforeAgent true }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
                         sh 'yarn build'
