@@ -26,7 +26,16 @@ def call(Map args = [:]) {
                        beforeAgent true }
                 steps {
                     gitlabCommitStatus(STAGE_NAME) {
-                        sh 'yarn build'
+                        sh 'REACT_APP_ENVIRONMENT=production yarn build'
+                    }
+                }
+            }
+            stage('yarn build ci') {
+                when { not { branch 'master' }
+                       beforeAgent true }
+                steps {
+                    gitlabCommitStatus(STAGE_NAME) {
+                        sh 'REACT_APP_ENVIRONMENT=development yarn build'
                     }
                 }
             }
