@@ -54,8 +54,14 @@ def check(Map args = [:]) {
     ([:]
      + (args.scanPasswords == true ?
         ["bfg": { build (job: "../../ci/bfg/master",
-                         parameters: [string(name: "GIT_REPOSITORY_TARGET_URL",
-                                             value: gitRemoteOrigin.getRemote().url)])}]
+                         parameters: [
+                            string(name: "GIT_REPOSITORY_TARGET_URL",
+                                   value: gitRemoteOrigin.getRemote().url),
+                            string(name: "PROJECT_NAME",
+                                   value: args.projectName),
+                            string(name: "GROUP_NAME",
+                                   value: args.groupName),
+                        ])}]
         : [:])
      + (args.deploy != true || GIT_BRANCH != "master" ?
         ["nix flake check": {

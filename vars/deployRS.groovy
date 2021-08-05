@@ -34,6 +34,8 @@ def call(Map args = [:]) {
             disableConcurrentBuilds()
 	}
         environment {
+            PROJECT_NAME = gitRemoteOrigin.getProject()
+            GROUP_NAME = gitRemoteOrigin.getGroup()
             GC_DONT_GC = gc(args.gc)
         }
         stages {
@@ -52,8 +54,14 @@ def call(Map args = [:]) {
                                           + (args.scanPasswords == true ?
                                              ["bfg": {
                                                 build (job: "../../ci/bfg/master",
-                                                       parameters: [string(name: "GIT_REPOSITORY_TARGET_URL",
-                                                                           value: gitRemoteOrigin.getRemote().url)])}]
+                                                       parameters: [
+                                                        string(name: "GIT_REPOSITORY_TARGET_URL",
+                                                               value: gitRemoteOrigin.getRemote().url),
+                                                        string(name: "PROJECT_NAME",
+                                                               value: PROJECT_NAME),
+                                                        string(name: "GROUP_NAME",
+                                                               value: GROUP_NAME),
+                                                    ])}]
                                              : [:])
                                           + (args.deploy != true || GIT_BRANCH != "master" ?
                                              ["nix flake check": {
