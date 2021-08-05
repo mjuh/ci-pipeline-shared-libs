@@ -6,7 +6,7 @@ def nixPath (n) {
 }
 
 def projectName (Map args = [:]) {
-    args.projectName ?: gitRemoteOrigin.getProject()
+    args.projectName == null ? gitRemoteOrigin.getProject() : args.projectName
 }
 
 def call(Map args = [:]) {
@@ -55,8 +55,14 @@ def call(Map args = [:]) {
                                           + (args.scanPasswords == true ?
                                              ["bfg": {
                                                 build (job: "../../ci/bfg/master",
-                                                       parameters: [string(name: "GIT_REPOSITORY_TARGET_URL",
-                                                                           value: gitRemoteOrigin.getRemote().url)])}]
+                                                       parameters: [
+                                                        string(name: "GIT_REPOSITORY_TARGET_URL",
+                                                               value: gitRemoteOrigin.getRemote().url),
+                                                        string(name: "PROJECT_NAME",
+                                                               value: PROJECT_NAME),
+                                                        string(name: "GROUP_NAME",
+                                                               value: GROUP_NAME),
+                                                    ])}]
                                              : [:]))
                                 Boolean testHook = (args.testHook ?: { return true })()
                                 testHook || Utils.markStageSkippedForConditional("tests")
