@@ -35,6 +35,13 @@ public class Constants {
 
     public static final String githubOrganization = 'mjuh'
 
+    public static final ArrayList<String> securityTeam = [
+        "ostapchuk@majordomo.ru",
+        "pyhalov@majordomo.ru",
+        "rezvov@majordomo.ru",
+        "sidorov@majordomo.ru"
+    ]
+
     public static final String nixOverlay = 'git@gitlab.intr:_ci/nixpkgs.git'
     public static final ArrayList<String> nixDeployments = ["ns", "router", "swarm", "web", "nginx", "webmail", "jenkins", "xyz"]
     public static final ArrayList<String> developmentNixMachines = ["nginx3", "jenkins2", "web98", "mx1", "mx2"]
