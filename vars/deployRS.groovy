@@ -96,33 +96,35 @@ def call(Map args = [:]) {
                 steps {
                     script {
                         gitlabCommitStatus(STAGE_NAME) {
-                            ansiColor("xterm") {
-                                if (args.deployPhase) {
-                                    args.deployPhase(args)
-                                } else {
-                                    if (args.sequential) {
-                                        // Hosts in changeSet are first.
-                                        hosts = (hostsInChangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
+                            if (args.deployPhase) {
+                                args.deployPhase(args)
+                            } else {
+                                if (args.sequential) {
+                                    // Hosts in changeSet are first.
+                                    hosts = (hostsInChangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
 
-                                        counter = 0
-                                        hosts.each{ host ->
-                                            counter += 1
-                                            echo("${counter}/${hosts.size()}")
+                                    counter = 0
+                                    hosts.each{ host ->
+                                        counter += 1
+                                        echo("${counter}/${hosts.size()}")
+                                        ansiColor("xterm") {
                                             sh ((["nix-shell --run",
-                                                  quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
-                                                                + Constants.nixFlags
-                                                                + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" ")) 
-                                        }
-                                    } else {
-                                        sh ((["nix-shell --run",
-                                              quoteString ((["deploy", ".", "--"]
+                                              quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
                                                             + Constants.nixFlags
                                                             + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                             + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                        }
                                     }
-                                }                                
-                            }
+                                } else {
+                                    ansiColor("xterm") {
+                                        h ((["nix-shell --run",
+                                          quoteString ((["deploy", ".", "--"]
+                                                        + Constants.nixFlags
+                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                    }
+                                }
+                            }                                
                         }
                     }
                 }
