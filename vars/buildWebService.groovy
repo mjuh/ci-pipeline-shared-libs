@@ -211,10 +211,13 @@ def call(Map args = [:]) {
                                             if (scanPasswords) {
                                                 build (
                                                     job: "../../ci/bfg/master",
-                                                    parameters: [string(
-                                                            name: "GIT_REPOSITORY_TARGET_URL",
-                                                            value: gitRemoteOrigin.getRemote().url
-                                                        )
+                                                    parameters: [
+                                                        string(name: "GIT_REPOSITORY_TARGET_URL",
+                                                               value: gitRemoteOrigin.getRemote().url),
+                                                        string(name: "PROJECT_NAME",
+                                                               value: PROJECT_NAME),
+                                                        string(name: "GROUP_NAME",
+                                                               value: GROUP_NAME),
                                                     ]
                                                 )
                                             } else {
