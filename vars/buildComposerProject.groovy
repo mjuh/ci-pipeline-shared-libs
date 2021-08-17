@@ -35,7 +35,10 @@ def call(String phpVersion) {
             stage('Test Docker image structure') {
                 when { expression { fileExists 'container-structure-test.yaml' } }
                 steps {
-                    containerStructureTest (image: dockerImage, uid: '999')
+                    containerStructureTest (image: dockerImage,
+                                            uid: '999',
+                                            GITLAB_PROJECT_NAME: GITLAB_PROJECT_NAME,
+                                            GITLAB_PROJECT_NAMESPACE: GITLAB_PROJECT_NAMESPACE)
                 }
             }
             stage('Push Docker image') {
