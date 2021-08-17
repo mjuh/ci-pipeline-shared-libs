@@ -6,13 +6,15 @@ def call(String phpVersion) {
         options {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
+        environment {
+            GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
+            GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME))
+        }
         stages {
             stage('Install PHP dependencies with Composer') {
                 steps {
                     println "id".execute().text
                     script {
-                        def GITLAB_PROJECT_NAME = jenkinsJob.getProject()
-                        def GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup()
                         echo "GITLAB_PROJECT_NAMESPACE=${GITLAB_PROJECT_NAMESPACE}"
                         echo "GITLAB_PROJECT_NAME=${GITLAB_PROJECT_NAME}"
                         composer (phpVersion: phpVersion,
