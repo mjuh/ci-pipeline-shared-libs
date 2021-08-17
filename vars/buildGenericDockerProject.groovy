@@ -12,13 +12,11 @@ def call(Map args = [:]) {
                                   defaultValue: false,
                                   description: 'пропустить сборку и тестирование')}
         environment {
-            PROJECT_NAME = gitRemoteOrigin.getProject()
-            GROUP_NAME = gitRemoteOrigin.getGroup()
+            PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
+            GROUP_NAME = jenkinsJob.getGroup(env.JOB_NAME)
         }
         options {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
-            gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['Build Docker image', 'Test Docker image structure', 'Push Docker image'])
         }
         stages {
             stage('Build Docker image') {
@@ -27,9 +25,7 @@ def call(Map args = [:]) {
                     beforeAgent true
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
-                    }
+                    script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
                 }
             }
             stage('Test Docker image structure') {
@@ -40,9 +36,7 @@ def call(Map args = [:]) {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        containerStructureTest image: dockerImage
-                    }
+                    containerStructureTest image: dockerImage
                 }
             }
             stage('Push Docker image') {
@@ -51,11 +45,9 @@ def call(Map args = [:]) {
                     beforeAgent true
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        pushDocker image: dockerImage
-                        script {
-                            (args.postPush ?: { return true })([input: [image: dockerImage]])
-                        }
+                    pushDocker image: dockerImage
+                    script {
+                        (args.postPush ?: { return true })([input: [image: dockerImage]])
                     }
                 }
             }
@@ -85,14 +77,12 @@ def call(Map args = [:]) {
                 }
                 agent { label Constants.productionNodeLabel }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy(
-                            stack: (args.stack == null ? GROUP_NAME : args.stack),
-                            service: PROJECT_NAME,
-                            image: dockerImage,
-                            dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
-                        )
-                    }
+                    dockerStackDeploy(
+                        stack: (args.stack == null ? GROUP_NAME : args.stack),
+                        service: PROJECT_NAME,
+                        image: dockerImage,
+                        dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                    )
                 }
                 post {
                     success {
