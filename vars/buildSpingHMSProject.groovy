@@ -38,7 +38,8 @@ def call(def Map args = [:]) {
             )
         }
         tools {
-            gradle (args.gradle ?: "latest")
+            gradle (args.gradle ?: "4")
+            jdk (args.java ?: "8")
         }
         stages {
             stage("Build Gradle") {
