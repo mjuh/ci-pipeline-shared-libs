@@ -6,6 +6,10 @@ def call(String phpVersion) {
         options {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
+        environment {
+            GITLAB_PROJECT_NAME = jenkinsJob.getProject()
+            GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup()
+        }
         stages {
             stage('Install PHP dependencies with Composer') {
                 steps {
