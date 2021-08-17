@@ -51,7 +51,7 @@ def call(def Map args = [:]) {
                     beforeAgent true
                 }
                 steps {
-                    runGradle(java: args.java)
+                    sh "java -version; gradle build"
                 }
             }
             stage("Build Docker jdk image") {
