@@ -10,9 +10,11 @@ def call(String phpVersion) {
             stage('Install PHP dependencies with Composer') {
                 steps {
                     println "id".execute().text
-                    composer (phpVersion: phpVersion,
-                              GITLAB_PROJECT_NAMESPACE: env.GITLAB_PROJECT_NAMESPACE,
-                              GITLAB_PROJECT_NAME: env.GITLAB_PROJECT_NAME)
+                    script {
+                        composer (phpVersion: phpVersion,
+                                  GITLAB_PROJECT_NAMESPACE: GITLAB_PROJECT_NAMESPACE,
+                                  GITLAB_PROJECT_NAME: GITLAB_PROJECT_NAME)
+                    }
                 }
             }
             stage('Build Docker image') {
