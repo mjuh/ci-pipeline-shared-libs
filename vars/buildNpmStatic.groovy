@@ -3,49 +3,39 @@ def call(Map args = [:]) {
     pipeline {
         agent { label 'master' }
         environment {
-            PROJECT_NAME = gitRemoteOrigin.getProject()
-            GROUP_NAME = gitRemoteOrigin.getGroup()
+            PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
+            GROUP_NAME = jenkinsJob.getGroup(env.JOB_NAME)
         }
         options {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
-            gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['npm install', 'artifacts'])
             preserveStashes(buildCount: 9)
         }
         stages {
             stage('npm install') {
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        sh 'npm --version'
-                        sh 'npm install'
-                    }
+                    sh 'npm --version'
+                    sh 'npm install'
                 }
             }
             stage('npm build') {
                 when { branch 'master'
                        beforeAgent true }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        sh 'npm run-script build'
-                    }
+                    sh 'npm run-script build'
                 }
             }
             stage('npm build ci') {
                 when { not { branch 'master' }
                        beforeAgent true }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        sh 'npm run-script build-test'
-                    }
+                    sh 'npm run-script build-test'
                 }
             }
             stage('artifacts') {
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dir('public') {
-                            stash name: "my-stash", includes: "**"
-                            archiveArtifacts artifacts: "**"
-                        }
+                    dir('public') {
+                        stash name: "my-stash", includes: "**"
+                        archiveArtifacts artifacts: "**"
                     }
                 }
             }
@@ -53,21 +43,19 @@ def call(Map args = [:]) {
               when { branch 'master'
                      beforeAgent true }
               steps {
-                 gitlabCommitStatus(STAGE_NAME) {
-                   script {
-                       parallel (args.unstashHosts.collectEntries{ host ->
-                                  [(host): {
-                                          node(host) {
-                                              dir(args.dstpath) {
-                                                  unstash "my-stash"
-                                              }
-                                          }
-                                  }]
-                                })
-                   }
-                 }
-              }
-              post {
+                    script {
+                        parallel (args.unstashHosts.collectEntries{ host ->
+                                [(host): {
+                                        node(host) {
+                                            dir(args.dstpath) {
+                                                unstash "my-stash"
+                                            }
+                                        }
+                                    }]
+                            })
+                    }
+                }
+                post {
                  success {
                     notifySlack "${PROJECT_NAME} deployed to production"
                  }
@@ -76,15 +64,13 @@ def call(Map args = [:]) {
             stage('unstash-ci') {
               when { not { branch 'master' }}
               steps {
-                 gitlabCommitStatus(STAGE_NAME) {
                     node('ci') {
                         dir(args.dstpath) {
                             unstash "my-stash"
                         }
                     }
-                 }
-              }
-              post {
+                }
+                post {
                  success {
                     notifySlack "${PROJECT_NAME} deployed to ci"
                  }
