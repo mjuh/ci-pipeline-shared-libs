@@ -125,7 +125,7 @@ def call(def Map args = [:]) {
                 steps {
                     script {
                         pushDocker image: dockerImage
-                        String DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${GIT_COMMIT[0..7]}"
+                        String DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME}/tag/${GIT_COMMIT[0..7]}"
                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
                     }
                 }
@@ -162,7 +162,7 @@ def call(def Map args = [:]) {
                 }
                 post {
                     success {
-                        notifySlack "${GITLAB_PROJECT_PATH_NAMESPACE} deployed to ${INACTIVE_STACK} stack"
+                        notifySlack "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to ${INACTIVE_STACK} stack"
                     }
                 }
             }
