@@ -7,7 +7,7 @@ public class Constants {
     public static final String dockerStacksGitRepoUrl = 'git@gitlab.intr:_ci/docker-stacks.git'
     public static final String dockerStacksDeployDir = 'docker-stacks'
 
-    public static final String gitCredId = 'gitlab-personal-access-token'
+    public static final String gitCredId = 'jenkins-ssh-deploy'
     public static final String gitHost = 'gitlab.intr'
 
     public static final String gitLabConnection = 'gitlab.intr'
