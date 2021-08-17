@@ -34,12 +34,6 @@ def call(def Map args = [:]) {
                     artifactNumToKeepStr: "10"
                 )
             )
-            gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: [
-                    "Build Gradle",
-                    "Push Docker image"
-                ]
-            )
         }
         tools {
             gradle (args.gradle ?: "latest")
