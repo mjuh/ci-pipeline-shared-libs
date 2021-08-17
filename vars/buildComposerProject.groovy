@@ -3,65 +3,53 @@ def call(String phpVersion) {
 
     pipeline {
         agent { label 'master' }
-        environment {
-            PROJECT_NAME = gitRemoteOrigin.getProject()
-            GROUP_NAME = gitRemoteOrigin.getGroup()
-        }
         options {
-            gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['Install PHP dependencies with Composer', 'Build Docker image', 'Test Docker image structure', 'Push Docker image'])
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
         stages {
             stage('Install PHP dependencies with Composer') {
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        println "id".execute().text
-                        composer phpVersion: phpVersion
-                    }
+                    println "id".execute().text
+                    composer phpVersion: phpVersion
                 }
             }
             stage('Build Docker image') {
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
+                    script {
+                        dockerImage = buildDocker (namespace: GITLAB_PROJECT_NAMESPACE,
+                                                   name: GITLAB_PROJECT_NAME,
+                                                   tag: GIT_COMMIT[0..7])
                     }
                 }
             }
             stage('Test Docker image structure') {
                 when { expression { fileExists 'container-structure-test.yaml' } }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        containerStructureTest image: dockerImage, uid: '999'
-                    }
+                    containerStructureTest (image: dockerImage, uid: '999')
                 }
             }
             stage('Push Docker image') {
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        pushDocker image: dockerImage
-                    }
+                    pushDocker (image: dockerImage)
                 }
             }
             stage('Pull Docker image') {
                 when { branch 'master' }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerPull image: dockerImage
-                    }
+                    dockerPull image: dockerImage
                 }
             }
             stage('Deploy service to swarm') {
                 when { branch 'master' }
                 agent { label Constants.productionNodeLabel }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy stack: GROUP_NAME, service: PROJECT_NAME, image: dockerImage
-                    }
+                    dockerStackDeploy (stack: GITLAB_PROJECT_NAMESPACE,
+                                       service: GITLAB_PROJECT_NAME,
+                                       image: dockerImage)
                 }
                 post {
                     success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                        notifySlack "${GITLAB_PROJECT_PATH_NAMESPACE} deployed to production"
                     }
                 }
             }
