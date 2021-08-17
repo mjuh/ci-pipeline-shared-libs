@@ -8,6 +8,8 @@ def call(def Map args = [:]) {
         environment {
             GITLAB_PROJECT_NAME = jenkinsJob.getProject()
             GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup()
+            INACTIVE_STACK = nginx.getInactive("/hms")
+            GRADLE_OPTS = "${GRADLE_OPTS}"
         }
         parameters {
             string(
@@ -26,10 +28,6 @@ def call(def Map args = [:]) {
                 defaultValue: false,
                 description: "Свичнуть стэки?"
             )
-        }
-        environment {
-            INACTIVE_STACK = nginx.getInactive("/hms")
-            GRADLE_OPTS = "${GRADLE_OPTS}"
         }
         options {
             buildDiscarder(
