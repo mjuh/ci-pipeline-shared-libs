@@ -11,15 +11,15 @@ def call(String phpVersion) {
                 steps {
                     println "id".execute().text
                     composer (phpVersion: phpVersion,
-                              GITLAB_PROJECT_NAMESPACE: GITLAB_PROJECT_NAMESPACE,
-                              GITLAB_PROJECT_NAME: GITLAB_PROJECT_NAME)
+                              GITLAB_PROJECT_NAMESPACE: env.GITLAB_PROJECT_NAMESPACE,
+                              GITLAB_PROJECT_NAME: env.GITLAB_PROJECT_NAME)
                 }
             }
             stage('Build Docker image') {
                 steps {
                     script {
-                        dockerImage = buildDocker (namespace: GITLAB_PROJECT_NAMESPACE,
-                                                   name: GITLAB_PROJECT_NAME,
+                        dockerImage = buildDocker (namespace: env.GITLAB_PROJECT_NAMESPACE,
+                                                   name: env.GITLAB_PROJECT_NAME,
                                                    tag: GIT_COMMIT[0..7])
                     }
                 }
@@ -45,8 +45,8 @@ def call(String phpVersion) {
                 when { branch 'master' }
                 agent { label Constants.productionNodeLabel }
                 steps {
-                    dockerStackDeploy (stack: GITLAB_PROJECT_NAMESPACE,
-                                       service: GITLAB_PROJECT_NAME,
+                    dockerStackDeploy (stack: env.GITLAB_PROJECT_NAMESPACE,
+                                       service: env.GITLAB_PROJECT_NAME,
                                        image: dockerImage)
                 }
                 post {
