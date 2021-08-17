@@ -61,9 +61,7 @@ def call(Map args = [:]) {
                     beforeAgent true
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerPull image: dockerImage
-                    }
+                    dockerPull image: dockerImage
                 }
             }
             stage('Deploy service to swarm') {
