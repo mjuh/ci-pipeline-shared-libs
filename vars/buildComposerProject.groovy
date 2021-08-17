@@ -11,6 +11,8 @@ def call(String phpVersion) {
                 steps {
                     println "id".execute().text
                     script {
+                        echo "GITLAB_PROJECT_NAMESPACE=${GITLAB_PROJECT_NAMESPACE}"
+                        echo "GITLAB_PROJECT_NAME=${GITLAB_PROJECT_NAME}"
                         composer (phpVersion: phpVersion,
                                   GITLAB_PROJECT_NAMESPACE: GITLAB_PROJECT_NAMESPACE,
                                   GITLAB_PROJECT_NAME: GITLAB_PROJECT_NAME)
