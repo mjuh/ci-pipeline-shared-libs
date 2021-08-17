@@ -11,42 +11,45 @@ def call(String composeProject) {
                     defaultValue: false,
                     description: 'пропустить сборку и тестирование')}
         environment {
-            PROJECT_NAME = gitRemoteOrigin.getProject()
-            GROUP_NAME = gitRemoteOrigin.getGroup()
+            PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
+            GROUP_NAME = jenkinsJob.getGroup(env.JOB_NAME)
         }
-        options { gitLabConnection(Constants.gitLabConnection) }
         stages {
             stage('Build Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
+                when {
+                    not { expression { return params.skipToDeploy } }
+                    beforeAgent true
+                }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        script { dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
-                    }
+                    script { dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
                 }
             }
             stage('Push Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
+                when {
+                    not { expression { return params.skipToDeploy } }
+                    beforeAgent true
+                }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        pushDocker image: dockerImage
-                    }
+                    pushDocker image: dockerImage
                 }
             }
             stage('Pull Docker image') {
-                when { branch 'master' }
+                when {
+                    branch 'master'
+                    beforeAgent true
+                }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerPull image: dockerImage, nodeLabel: [composeProject]
-                    }
+                    dockerPull image: dockerImage, nodeLabel: [composeProject]
                 }
             }
             stage('Deploy service') {
-                when { branch 'master' }
+                when {
+                    branch 'master'
+                    beforeAgent true
+                }
                 agent { label composeProject }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerComposeDeploy project: composeProject, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
-                    }
+                    dockerComposeDeploy project: composeProject, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
                 }
                 post {
                     success {
