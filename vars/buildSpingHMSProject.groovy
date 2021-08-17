@@ -47,9 +47,7 @@ def call(def Map args = [:]) {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        runGradle(java: args.java)
-                    }
+                    runGradle(java: args.java)
                 }
             }
             stage("Build Docker jdk image") {
@@ -80,9 +78,7 @@ def call(def Map args = [:]) {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        pushDocker image: dockerImage
-                    }
+                    pushDocker image: dockerImage
                 }
             }
             stage("Build Docker jre image") {
@@ -93,14 +89,12 @@ def call(def Map args = [:]) {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        script {
-                            dockerImage = buildDocker (
-                                namespace: GROUP_NAME,
-                                name: GITLAB_PROJECT_NAME,
-                                tag: GIT_COMMIT[0..7]
-                            )
-                        }
+                    script {
+                        dockerImage = buildDocker (
+                            namespace: GROUP_NAME,
+                            name: GITLAB_PROJECT_NAME,
+                            tag: GIT_COMMIT[0..7]
+                        )
                     }
                 }
             }
@@ -113,9 +107,7 @@ def call(def Map args = [:]) {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        containerStructureTest image: dockerImage
-                    }
+                    containerStructureTest image: dockerImage
                 }
             }
             stage("Push Docker image") {
@@ -126,12 +118,10 @@ def call(def Map args = [:]) {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        script {
-                            pushDocker image: dockerImage
-                            String DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${GIT_COMMIT[0..7]}"
-                            slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
-                        }
+                    script {
+                        pushDocker image: dockerImage
+                        String DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${GIT_COMMIT[0..7]}"
+                        slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
                     }
                 }
             }
@@ -143,9 +133,7 @@ def call(def Map args = [:]) {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerPull image: dockerImage
-                    }
+                    dockerPull image: dockerImage
                 }
             }
             stage("Deploy service to swarm") {
@@ -157,15 +145,13 @@ def call(def Map args = [:]) {
                 }
                 agent { label Constants.productionNodeLabel }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dockerStackDeploy (
-                            stack: INACTIVE_STACK,
-                            service: GITLAB_PROJECT_NAME,
-                            image: dockerImage,
-                            stackConfigFile: "hms.yml",
-                            dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
-                        )
-                    }
+                    dockerStackDeploy (
+                        stack: INACTIVE_STACK,
+                        service: GITLAB_PROJECT_NAME,
+                        image: dockerImage,
+                        stackConfigFile: "hms.yml",
+                        dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                    )
                 }
                 post {
                     success {
@@ -181,12 +167,10 @@ def call(def Map args = [:]) {
                     }
                 }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        script {
-                            nginx.Switch("/hms")
-                            slackMessages +=
-                                "Switched to ${INACTIVE_STACK} stack"
-                        }
+                    script {
+                        nginx.Switch("/hms")
+                        slackMessages +=
+                            "Switched to ${INACTIVE_STACK} stack"
                     }
                 }
             }
