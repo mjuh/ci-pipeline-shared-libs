@@ -26,8 +26,8 @@ def call(String phpVersion) {
             stage('Build Docker image') {
                 steps {
                     script {
-                        dockerImage = buildDocker (namespace: env.GITLAB_PROJECT_NAMESPACE,
-                                                   name: env.GITLAB_PROJECT_NAME,
+                        dockerImage = buildDocker (namespace: GITLAB_PROJECT_NAMESPACE,
+                                                   name: GITLAB_PROJECT_NAME,
                                                    tag: GIT_COMMIT[0..7])
                     }
                 }
@@ -53,8 +53,8 @@ def call(String phpVersion) {
                 when { branch 'master' }
                 agent { label Constants.productionNodeLabel }
                 steps {
-                    dockerStackDeploy (stack: env.GITLAB_PROJECT_NAMESPACE,
-                                       service: env.GITLAB_PROJECT_NAME,
+                    dockerStackDeploy (stack: GITLAB_PROJECT_NAMESPACE,
+                                       service: GITLAB_PROJECT_NAME,
                                        image: dockerImage)
                 }
                 post {
