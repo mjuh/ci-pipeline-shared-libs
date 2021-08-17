@@ -3,49 +3,39 @@ def call(Map args = [:]) {
     pipeline {
         agent { label 'master' }
         environment {
-            PROJECT_NAME = gitRemoteOrigin.getProject()
-            GROUP_NAME = gitRemoteOrigin.getGroup()
+            PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
+            GROUP_NAME = jenkinsJob.getProject(env.JOB_NAME)
         }
         options {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
-            gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['yarn install', 'artifacts'])
             preserveStashes(buildCount: 9)
         }
         stages {
             stage('yarn install') {
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        sh 'yarn --version'
-                        sh 'yarn install'
-                    }
+                    sh 'yarn --version'
+                    sh 'yarn install'
                 }
             }
             stage('yarn build') {
                 when { branch 'master'
                        beforeAgent true }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        sh 'REACT_APP_ENVIRONMENT=production yarn build'
-                    }
+                    sh 'REACT_APP_ENVIRONMENT=production yarn build'
                 }
             }
             stage('yarn build ci') {
                 when { not { branch 'master' }
                        beforeAgent true }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        sh 'REACT_APP_ENVIRONMENT=development yarn build'
-                    }
+                    sh 'REACT_APP_ENVIRONMENT=development yarn build'
                 }
             }
             stage('artifacts') {
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        dir('build') {
-                            stash name: "my-stash", includes: "**"
-                            archiveArtifacts artifacts: "**"
-                        }
+                    dir('build') {
+                        stash name: "my-stash", includes: "**"
+                        archiveArtifacts artifacts: "**"
                     }
                 }
             }
@@ -53,21 +43,19 @@ def call(Map args = [:]) {
               when { branch 'master'
                      beforeAgent true }
               steps {
-                 gitlabCommitStatus(STAGE_NAME) {
-                   script {
-                       parallel (args.unstashHosts.collectEntries{ host ->
-                                  [(host): {
-                                          node(host) {
-                                              dir(args.dstpath) {
-                                                  unstash "my-stash"
-                                              }
-                                          }
-                                  }]
-                                })
-                   }
-                 }
-              }
-              post {
+                    script {
+                        parallel (args.unstashHosts.collectEntries{ host ->
+                                [(host): {
+                                        node(host) {
+                                            dir(args.dstpath) {
+                                                unstash "my-stash"
+                                            }
+                                        }
+                                    }]
+                            })
+                    }
+                }
+                post {
                  success {
                     notifySlack "${PROJECT_NAME} deployed to production"
                  }
@@ -76,15 +64,13 @@ def call(Map args = [:]) {
             stage('unstash-ci') {
               when { not { branch 'master' }}
               steps {
-                 gitlabCommitStatus(STAGE_NAME) {
                     node('ci') {
                         dir(args.dstpath) {
                             unstash "my-stash"
                         }
                     }
-                 }
-              }
-              post {
+                }
+                post {
                  success {
                     notifySlack "${PROJECT_NAME} deployed to ci"
                  }
