@@ -29,8 +29,6 @@ def call(Map args = [:]) {
     pipeline {
         agent { label "master" }
         options {
-            gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ["tests"])
             disableConcurrentBuilds()
 	}
         environment {
@@ -43,43 +41,39 @@ def call(Map args = [:]) {
                 steps {
                     script {
                         if (args.checkPhase) {
-                            gitlabCommitStatus(STAGE_NAME) {
-                                ansiColor("xterm") {
-                                    args.checkPhase(args)
-                                }
+                            ansiColor("xterm") {
+                                args.checkPhase(args)
                             }
                         } else {
-                            gitlabCommitStatus(STAGE_NAME) {
-                                parallel ([:]
-                                          + (args.scanPasswords == true ?
-                                             ["bfg": {
-                                                build (job: "../../ci/bfg/master",
-                                                       parameters: [
-                                                        string(name: "GIT_REPOSITORY_TARGET_URL",
-                                                               value: gitRemoteOrigin.getRemote().url),
-                                                        string(name: "PROJECT_NAME",
-                                                               value: PROJECT_NAME),
-                                                        string(name: "GROUP_NAME",
-                                                               value: GROUP_NAME),
-                                                    ])}]
-                                             : [:])
-                                          + (args.deploy != true || GIT_BRANCH != "master" ?
-                                             ["nix flake check": {
-                                                ansiColor("xterm") {
-                                                    sh (nix.shell (run: ((["nix flake check"]
-                                                                          + Constants.nixFlags
-                                                                          + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                          + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
-                                             : [:]))
-                                // WARNING: Try to dry activate only after BFG
-                                // succeeded to check no credentials are leaked.
-                                ansiColor("xterm") {
-                                    sh ((["nix-shell --run",
-                                          quoteString ((["deploy", "--skip-checks", "--dry-activate", ".", "--"]
-                                                        + Constants.nixFlags
-                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
-                                }
+                            parallel ([:]
+                                      + (args.scanPasswords == true ?
+                                         ["bfg": {
+                                            build (job: "../../ci/bfg/master",
+                                                   parameters: [
+                                                    string(name: "GIT_REPOSITORY_TARGET_URL",
+                                                           value: gitRemoteOrigin.getRemote().url),
+                                                    string(name: "PROJECT_NAME",
+                                                           value: PROJECT_NAME),
+                                                    string(name: "GROUP_NAME",
+                                                           value: GROUP_NAME),
+                                                ])}]
+                                         : [:])
+                                      + (args.deploy != true || GIT_BRANCH != "master" ?
+                                         ["nix flake check": {
+                                            ansiColor("xterm") {
+                                                sh (nix.shell (run: ((["nix flake check"]
+                                                                      + Constants.nixFlags
+                                                                      + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
+                                         : [:]))
+                            // WARNING: Try to dry activate only after BFG
+                            // succeeded to check no credentials are leaked.
+                            ansiColor("xterm") {
+                                sh ((["nix-shell --run",
+                                      quoteString ((["deploy", "--skip-checks", "--dry-activate", ".", "--"]
+                                                    + Constants.nixFlags
+                                                    + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                    + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                             }
                         }
                     }
@@ -95,37 +89,35 @@ def call(Map args = [:]) {
                 }
                 steps {
                     script {
-                        gitlabCommitStatus(STAGE_NAME) {
-                            if (args.deployPhase) {
-                                args.deployPhase(args)
-                            } else {
-                                if (args.sequential) {
-                                    // Hosts in changeSet are first.
-                                    hosts = (hostsInChangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
+                        if (args.deployPhase) {
+                            args.deployPhase(args)
+                        } else {
+                            if (args.sequential) {
+                                // Hosts in changeSet are first.
+                                hosts = (hostsInChangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
 
-                                    counter = 0
-                                    hosts.each{ host ->
-                                        counter += 1
-                                        echo("${counter}/${hosts.size()}")
-                                        ansiColor("xterm") {
-                                            sh ((["nix-shell --run",
+                                counter = 0
+                                hosts.each{ host ->
+                                    counter += 1
+                                    echo("${counter}/${hosts.size()}")
+                                    ansiColor("xterm") {
+                                        sh ((["nix-shell --run",
                                               quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
                                                             + Constants.nixFlags
                                                             + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                             + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
-                                        }
-                                    }
-                                } else {
-                                    ansiColor("xterm") {
-                                        h ((["nix-shell --run",
-                                          quoteString ((["deploy", ".", "--"]
-                                                        + Constants.nixFlags
-                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                                     }
                                 }
-                            }                                
-                        }
+                            } else {
+                                ansiColor("xterm") {
+                                    h ((["nix-shell --run",
+                                         quoteString ((["deploy", ".", "--"]
+                                                       + Constants.nixFlags
+                                                       + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                       + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                }
+                            }
+                        }                                
                     }
                 }
             }
