@@ -11,29 +11,29 @@ def call() {
                                   defaultValue: false,
                                   description: 'пропустить сборку и тестирование')}
         environment {
-            PROJECT_NAME = gitRemoteOrigin.getProject()
-            GROUP_NAME = gitRemoteOrigin.getGroup()
+            PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
+            GROUP_NAME = jenkinsJob.getGroup(env.JOB_NAME)
         }
         options {
             buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
-            gitLabConnection(Constants.gitLabConnection)
-            gitlabBuilds(builds: ['Build Docker image', 'Test Docker image structure', 'Push Docker image'])
         }
         stages {
             stage('Build Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
+                when {
+                    not { expression { return params.skipToDeploy } }
+                    beforeAgent true
+                }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
-                    }
+                    script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
                 }
             }
             stage('Push Docker image') {
-                when { not { expression { return params.skipToDeploy } } }
+                when {
+                    not { expression { return params.skipToDeploy } }
+                    beforeAgent true
+                }
                 steps {
-                    gitlabCommitStatus(STAGE_NAME) {
-                        pushDocker image: dockerImage
-                    }
+                    pushDocker image: dockerImage
                 }
                 post {
                     success {
