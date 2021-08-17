@@ -16,20 +16,15 @@ def call(Map args = [:]) {
         pipeline {
             agent { label "master" }
             options {
-                gitLabConnection(Constants.gitLabConnection)
-                gitlabBuilds(builds: ["build", "tests", "deploy"])
                 timeout(time: 6, unit: "HOURS")
             }
             environment {
-                PROJECT_NAME = projectName(projectName: args.projectName)
-                GROUP_NAME = gitRemoteOrigin.getGroup()
-                DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${TAG}"
+                DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${TAG}"
                 NIX_PATH="nixpkgs=https://github.com/NixOS/nixpkgs/archive/d5291756487d70bc336e33512a9baf9fa1788faf.tar.gz"
             }
             stages {
                 stage("build") {
                     steps {
-                        gitlabCommitStatus(STAGE_NAME) {
                             script {
                                 (args.preBuild ?: { return true })()
 
@@ -38,13 +33,11 @@ def call(Map args = [:]) {
                                                       + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#container"]
                                                       + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                             }
-                        }
                     }
                 }
                 stage("tests") {
                     steps {
                         script {
-                            gitlabCommitStatus(STAGE_NAME) {
                                 parallel (["nix flake check": {
                                             ansiColor("xterm") {
                                                 sh (nix.shell (run: ((["nix flake check"]
@@ -61,18 +54,16 @@ def call(Map args = [:]) {
                                                         string(name: "PROJECT_NAME",
                                                                value: PROJECT_NAME),
                                                         string(name: "GROUP_NAME",
-                                                               value: GROUP_NAME),
+                                                               value: GITLAB_PROJECT_NAMESPACE),
                                                     ])}]
                                              : [:]))
                                 Boolean testHook = (args.testHook ?: { return true })()
                                 testHook || Utils.markStageSkippedForConditional("tests")
                             }
-                        }
                     }
                 }
                 stage("deploy") {
                     steps {
-                        gitlabCommitStatus(STAGE_NAME) {
                             script {
                                 sh (nix.shell (run: ((["nix", "run"]
                                                       + Constants.nixFlags
@@ -81,7 +72,7 @@ def call(Map args = [:]) {
                                 slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
 
                                 dockerImage = new DockerImageTarball(
-                                    imageName: (Constants.dockerRegistryHost + "/" + GROUP_NAME + "/" + PROJECT_NAME + ":" + gitTag()),
+                                    imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + PROJECT_NAME + ":" + gitTag()),
                                     path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
                                 )
 
@@ -89,16 +80,15 @@ def call(Map args = [:]) {
                                 if (args.stackDeploy && GIT_BRANCH == "master") {
                                     node(Constants.productionNodeLabel) {
                                         slackMessages += dockerStackDeploy (
-                                            stack: GROUP_NAME,
+                                            stack: GITLAB_PROJECT_NAMESPACE,
                                             service: PROJECT_NAME,
                                             image: dockerImage
                                         )
-                                        slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                                        slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${PROJECT_NAME} deployed to production"
                                     }
                                 }
 
                             }
-                        }
                     }
                 }
             }
@@ -119,8 +109,6 @@ def call(Map args = [:]) {
         pipeline {
             agent { label "nixbld" }
             options {
-                gitLabConnection(Constants.gitLabConnection)
-                gitlabBuilds(builds: ["Build", "Test"])
                 timeout(time: 6, unit: "HOURS")
                 buildDiscarder(
                     logRotator(numToKeepStr: "10", artifactNumToKeepStr: "10")
@@ -141,9 +129,9 @@ def call(Map args = [:]) {
                              description: "Deploy Docker image to registry")
             }
             environment {
-                PROJECT_NAME = projectName(projectName: args.projectName)
-                GROUP_NAME = gitRemoteOrigin.getGroup()
-                DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${TAG}"
+                GITLAB_PROJECT_NAME = projectName(projectName: args.projectName)
+                GITLAB_PROJECT_NAMESPACE = gitRemoteOrigin.getGroup()
+                DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${TAG}"
                 NIX_PATH = nixPath params.NIX_PATH
                 TAG = nixRepoTag (
                     overlaybranch: params.OVERLAY_BRANCH_NAME,
@@ -153,7 +141,6 @@ def call(Map args = [:]) {
             stages {
                 stage("Build") {
                     steps {
-                        gitlabCommitStatus(STAGE_NAME) {
                             script {
                                 parallel (
                                     ["Build container": {
@@ -164,7 +151,7 @@ def call(Map args = [:]) {
 
                                             if (TAG == "master") {
                                                 buildBadge = addEmbeddableBadgeConfiguration(
-                                                    id: (GROUP_NAME + "-" + PROJECT_NAME),
+                                                    id: (GITLAB_PROJECT_NAMESPACE + "-" + GITLAB_PROJECT_NAME),
                                                     subject: "<nixpkgs>: $nixVersion"
                                                 )
                                                 buildBadge.setStatus("running")
@@ -184,8 +171,8 @@ def call(Map args = [:]) {
                                                          + "/tree/" + majordomo_overlay.branch))
 
                                             dockerImage = nixBuildDocker(
-                                                namespace: GROUP_NAME,
-                                                name: PROJECT_NAME,
+                                                namespace: GITLAB_PROJECT_NAMESPACE,
+                                                name: GITLAB_PROJECT_NAME,
                                                 tag: TAG,
                                                 overlay: majordomo_overlay,
                                                 nixFile: nixFile,
@@ -194,8 +181,8 @@ def call(Map args = [:]) {
 
                                             if (args.debug) {
                                                 dockerImageDebug = nixBuildDocker(
-                                                    namespace: GROUP_NAME,
-                                                    name: PROJECT_NAME,
+                                                    namespace: GITLAB_PROJECT_NAMESPACE,
+                                                    name: GITLAB_PROJECT_NAME,
                                                     tag: (TAG + "-debug"),
                                                     overlay: majordomo_overlay,
                                                     nixArgs: ["--arg debug true"],
@@ -215,9 +202,9 @@ def call(Map args = [:]) {
                                                         string(name: "GIT_REPOSITORY_TARGET_URL",
                                                                value: gitRemoteOrigin.getRemote().url),
                                                         string(name: "PROJECT_NAME",
-                                                               value: PROJECT_NAME),
+                                                               value: GITLAB_PROJECT_NAME),
                                                         string(name: "GROUP_NAME",
-                                                               value: GROUP_NAME),
+                                                               value: GITLAB_PROJECT_NAMESPACE),
                                                     ]
                                                 )
                                             } else {
@@ -226,13 +213,11 @@ def call(Map args = [:]) {
                                         }
                                     ]
                                 )
-                            }
                         }
                     }
                 }
                 stage("Test") {
                     steps {
-                        gitlabCommitStatus(STAGE_NAME) {
                             script {
                                 parallel (
                                     ["Check": {
@@ -267,7 +252,7 @@ def call(Map args = [:]) {
                                      "Check CVE": {
                                             if ((fileExists("JenkinsfileVulnix.groovy") &&
                                                  TAG == "master")) {
-                                                build (job: "../../security/$PROJECT_NAME/master",
+                                                build (job: "../../security/$GITLAB_PROJECT_NAME/master",
                                                        parameters: [[$class: "StringParameterValue",
                                                                      name: "DOCKER_IMAGE",
                                                                      value: dockerImage.path]])
@@ -277,7 +262,6 @@ def call(Map args = [:]) {
                                         }
                                     ]
                                 )
-                            }
                         }
                     }
                 }
@@ -308,11 +292,11 @@ def call(Map args = [:]) {
                                         if (args.stackDeploy && TAG == "master") {
                                             node(Constants.productionNodeLabel) {
                                                 slackMessages += dockerStackDeploy (
-                                                    stack: GROUP_NAME,
-                                                    service: PROJECT_NAME,
+                                                    stack: GITLAB_PROJECT_NAMESPACE,
+                                                    service: GITLAB_PROJECT_NAME,
                                                     image: dockerImage
                                                 )
-                                                slackMessages += "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+                                                slackMessages += "${GITLAB_PROJECT_PATH_NAMESPACE} deployed to production"
                                             }
                                         }
 
@@ -322,10 +306,10 @@ def call(Map args = [:]) {
                                  "Push to GitHub": {
                                         if (args.publishOnInternet && TAG == "master") {
                                             comGithub.push(
-                                                group: GROUP_NAME,
-                                                name: PROJECT_NAME
+                                                group: GITLAB_PROJECT_NAMESPACE,
+                                                name: GITLAB_PROJECT_NAME
                                             )
-                                            slackMessages += "Pushed to https://github.com/${Constants.githubOrganization}/${GROUP_NAME}-${PROJECT_NAME}"
+                                            slackMessages += "Pushed to https://github.com/${Constants.githubOrganization}/${GITLAB_PROJECT_NAMESPACE}-${PROJECT_NAME}"
                                         } else {
                                             Utils.markStageSkippedForConditional("Push to GitHub")
                                         }
