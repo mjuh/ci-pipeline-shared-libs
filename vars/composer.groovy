@@ -39,7 +39,7 @@ def call(Map args = [:]) {
                     COMPOSER_HOME: '/composer/home',
                     GIT_SSH: "${jenkinsHomeInComposerContainer}/.ssh/ssh_wrapper.sh"],
               image: "${composerImage}:${composerTag}",
-              name: "composer-jenkins-${GITLAB_PROJECT_NAMESPACE}-${GITLAB_PROJECT_NAME}-${env.BUILD_NUMBER}",
+              name: "composer-jenkins-${args.GITLAB_PROJECT_NAMESPACE}-${args.GITLAB_PROJECT_NAME}-${env.BUILD_NUMBER}",
               cmd: cmd)
     echo 'Removing composer.lock for next build'
     sh "rm -f $WORKSPACE/build/composer.lock"
