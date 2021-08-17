@@ -61,7 +61,7 @@ def call(def Map args = [:]) {
                 steps {
                     script {
                         dockerImage = buildDocker (
-                            namespace: GROUP_NAME,
+                            namespace: GITLAB_PROJECT_NAMESPACE,
                             dockerfile: "Dockerfile.jdk",
                             name: GITLAB_PROJECT_NAME,
                             tag: GIT_COMMIT[0..7] + "-jdk"
@@ -91,7 +91,7 @@ def call(def Map args = [:]) {
                 steps {
                     script {
                         dockerImage = buildDocker (
-                            namespace: GROUP_NAME,
+                            namespace: GITLAB_PROJECT_NAMESPACE,
                             name: GITLAB_PROJECT_NAME,
                             tag: GIT_COMMIT[0..7]
                         )
