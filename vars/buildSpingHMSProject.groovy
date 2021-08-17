@@ -47,6 +47,7 @@ def call(def Map args = [:]) {
                         not { expression { params.skipToDeploy } }
                         not { expression { params.switchStacks } }
                     }
+                    beforeAgent true
                 }
                 steps {
                     runGradle(java: args.java)
@@ -89,6 +90,7 @@ def call(def Map args = [:]) {
                         not { expression { params.skipToDeploy } }
                         not { expression { params.switchStacks } }
                     }
+                    beforeAgent true
                 }
                 steps {
                     script {
@@ -118,6 +120,7 @@ def call(def Map args = [:]) {
                         not { expression { params.skipToDeploy } }
                         not { expression { params.switchStacks } }
                     }
+                    beforeAgent true
                 }
                 steps {
                     script {
@@ -133,6 +136,7 @@ def call(def Map args = [:]) {
                         branch "master"
                         not { expression { params.switchStacks } }
                     }
+                    beforeAgent true
                 }
                 steps {
                     dockerPull image: dockerImage
@@ -144,6 +148,7 @@ def call(def Map args = [:]) {
                         branch "master"
                         not { expression { params.switchStacks } }
                     }
+                    beforeAgent true
                 }
                 agent { label Constants.productionNodeLabel }
                 steps {
@@ -167,6 +172,7 @@ def call(def Map args = [:]) {
                         branch "master"
                         expression { params.switchStacks }
                     }
+                    beforeAgent true
                 }
                 steps {
                     script {
