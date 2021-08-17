@@ -21,6 +21,7 @@ def call(Map args = [:]) {
             environment {
             	GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
             	GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
+		GITLAB_PROJECT_PATH_NAMESPACE = GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME
                 DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${TAG}"
                 NIX_PATH="nixpkgs=https://github.com/NixOS/nixpkgs/archive/d5291756487d70bc336e33512a9baf9fa1788faf.tar.gz"
             }
@@ -54,7 +55,7 @@ def call(Map args = [:]) {
                                                         string(name: "GIT_REPOSITORY_TARGET_URL",
                                                                value: gitRemoteOrigin.getRemote().url),
                                                         string(name: "PROJECT_NAME",
-                                                               value: PROJECT_NAME),
+                                                               value: GITLAB_PROJECT_NAME),
                                                         string(name: "GROUP_NAME",
                                                                value: GITLAB_PROJECT_NAMESPACE),
                                                     ])}]
@@ -74,7 +75,7 @@ def call(Map args = [:]) {
                                 slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
 
                                 dockerImage = new DockerImageTarball(
-                                    imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + PROJECT_NAME + ":" + gitTag()),
+                                    imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitTag()),
                                     path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
                                 )
 
@@ -83,10 +84,10 @@ def call(Map args = [:]) {
                                     node(Constants.productionNodeLabel) {
                                         slackMessages += dockerStackDeploy (
                                             stack: GITLAB_PROJECT_NAMESPACE,
-                                            service: PROJECT_NAME,
+                                            service: GITLAB_PROJECT_NAME,
                                             image: dockerImage
                                         )
-                                        slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${PROJECT_NAME} deployed to production"
+                                        slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
                                     }
                                 }
 
@@ -131,8 +132,9 @@ def call(Map args = [:]) {
                              description: "Deploy Docker image to registry")
             }
             environment {
-                GITLAB_PROJECT_NAME = projectName(projectName: args.projectName)
-                GITLAB_PROJECT_NAMESPACE = gitRemoteOrigin.getGroup()
+            	GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
+            	GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
+		GITLAB_PROJECT_PATH_NAMESPACE = GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME
                 DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${TAG}"
                 NIX_PATH = nixPath params.NIX_PATH
                 TAG = nixRepoTag (
@@ -311,7 +313,7 @@ def call(Map args = [:]) {
                                                 group: GITLAB_PROJECT_NAMESPACE,
                                                 name: GITLAB_PROJECT_NAME
                                             )
-                                            slackMessages += "Pushed to https://github.com/${Constants.githubOrganization}/${GITLAB_PROJECT_NAMESPACE}-${PROJECT_NAME}"
+                                            slackMessages += "Pushed to https://github.com/${Constants.githubOrganization}/${GITLAB_PROJECT_NAMESPACE}-${GITLAB_PROJECT_NAME}"
                                         } else {
                                             Utils.markStageSkippedForConditional("Push to GitHub")
                                         }
