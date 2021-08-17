@@ -8,7 +8,7 @@ def call(String phpVersion) {
         }
         environment {
             GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
-            GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME))
+            GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
         }
         stages {
             stage('Install PHP dependencies with Composer') {
