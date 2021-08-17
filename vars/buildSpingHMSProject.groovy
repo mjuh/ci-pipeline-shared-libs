@@ -24,8 +24,6 @@ def call(def Map args = [:]) {
             )
         }
         environment {
-            PROJECT_NAME = gitRemoteOrigin.getProject()
-            GROUP_NAME = gitRemoteOrigin.getGroup()
             INACTIVE_STACK = nginx.getInactive("/hms")
             GRADLE_OPTS = "${GRADLE_OPTS}"
         }
@@ -73,7 +71,7 @@ def call(def Map args = [:]) {
                         dockerImage = buildDocker (
                             namespace: GROUP_NAME,
                             dockerfile: "Dockerfile.jdk",
-                            name: PROJECT_NAME,
+                            name: GITLAB_PROJECT_NAME,
                             tag: GIT_COMMIT[0..7] + "-jdk"
                         )
                     }
@@ -105,7 +103,7 @@ def call(def Map args = [:]) {
                         script {
                             dockerImage = buildDocker (
                                 namespace: GROUP_NAME,
-                                name: PROJECT_NAME,
+                                name: GITLAB_PROJECT_NAME,
                                 tag: GIT_COMMIT[0..7]
                             )
                         }
@@ -137,7 +135,7 @@ def call(def Map args = [:]) {
                     gitlabCommitStatus(STAGE_NAME) {
                         script {
                             pushDocker image: dockerImage
-                            String DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GROUP_NAME}/${PROJECT_NAME}/tag/${GIT_COMMIT[0..7]}"
+                            String DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${GIT_COMMIT[0..7]}"
                             slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
                         }
                     }
@@ -168,7 +166,7 @@ def call(def Map args = [:]) {
                     gitlabCommitStatus(STAGE_NAME) {
                         dockerStackDeploy (
                             stack: INACTIVE_STACK,
-                            service: PROJECT_NAME,
+                            service: GITLAB_PROJECT_NAME,
                             image: dockerImage,
                             stackConfigFile: "hms.yml",
                             dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
@@ -177,7 +175,7 @@ def call(def Map args = [:]) {
                 }
                 post {
                     success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to ${INACTIVE_STACK} stack"
+                        notifySlack "${GITLAB_PROJECT_PATH_NAMESPACE} deployed to ${INACTIVE_STACK} stack"
                     }
                 }
             }
