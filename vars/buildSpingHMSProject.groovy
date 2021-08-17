@@ -5,6 +5,10 @@ def call(def Map args = [:]) {
 
     pipeline {
         agent { label "master" }
+        environment {
+            GITLAB_PROJECT_NAME = jenkinsJob.getProject()
+            GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup()
+        }
         parameters {
             string(
                 name: "dockerStacksRepoCommitId",
