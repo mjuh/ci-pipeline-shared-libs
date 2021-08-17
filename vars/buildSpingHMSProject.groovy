@@ -6,8 +6,8 @@ def call(def Map args = [:]) {
     pipeline {
         agent { label "master" }
         environment {
-            GITLAB_PROJECT_NAME = jenkinsJob.getProject()
-            GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup()
+            GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
+            GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
             INACTIVE_STACK = nginx.getInactive("/hms")
             GRADLE_OPTS = "${GRADLE_OPTS}"
         }
