@@ -62,7 +62,7 @@ def call(String phpVersion) {
                 }
                 post {
                     success {
-                        notifySlack "${GITLAB_PROJECT_PATH_NAMESPACE} deployed to production"
+                        notifySlack "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
                     }
                 }
             }
