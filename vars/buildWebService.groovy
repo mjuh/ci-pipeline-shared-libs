@@ -50,7 +50,7 @@ def call(Map args = [:]) {
                                                                       + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
                                           + (args.scanPasswords == true ?
                                              ["bfg": {
-                                                build (job: "../../ci/bfg/master",
+                                                build (job: "../../_ci/bfg/master",
                                                        parameters: [
                                                         string(name: "GIT_REPOSITORY_TARGET_URL",
                                                                value: gitRemoteOrigin.getRemote().url),
