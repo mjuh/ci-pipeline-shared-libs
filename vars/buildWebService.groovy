@@ -50,7 +50,7 @@ def call(Map args = [:]) {
                                                                       + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
                                           + (args.scanPasswords == true ?
                                              ["bfg": {
-                                                build (job: "../../_ci/bfg/master",
+                                                build (job: "../../${Constants.bfgJobName}/master",
                                                        parameters: [
                                                         string(name: "GIT_REPOSITORY_TARGET_URL",
                                                                value: gitRemoteOrigin.getRemote().url),
@@ -201,7 +201,7 @@ def call(Map args = [:]) {
                                      "Scan passwords in Git history": {
                                             if (scanPasswords) {
                                                 build (
-                                                    job: "../../ci/bfg/master",
+                                                    job: "../../${Constants.bfgJobName}/master",
                                                     parameters: [
                                                         string(name: "GIT_REPOSITORY_TARGET_URL",
                                                                value: gitRemoteOrigin.getRemote().url),

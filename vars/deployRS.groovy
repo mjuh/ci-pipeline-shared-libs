@@ -49,7 +49,7 @@ def call(Map args = [:]) {
                             parallel ([:]
                                       + (args.scanPasswords == true ?
                                          ["bfg": {
-                                            build (job: "../../_ci/bfg/master",
+                                            build (job: "../../${Constants.bfgJobName}/master",
                                                    parameters: [
                                                     string(name: "GIT_REPOSITORY_TARGET_URL",
                                                            value: gitRemoteOrigin.getRemote().url),
