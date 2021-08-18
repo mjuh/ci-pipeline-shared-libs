@@ -37,7 +37,13 @@ def call(String stack, def Map args = [:]) {
                     }
                 }
                 steps {
-                        script { dockerImage = buildDocker namespace: GROUP_NAME, dockerfile: 'Dockerfile.jdk',name: PROJECT_NAME, tag: GIT_COMMIT[0..7]+'-jdk' }
+                    script {
+                        dockerImage =
+                            buildDocker (namespace: GROUP_NAME,
+                                         dockerfile: 'Dockerfile.jdk',
+                                         name: PROJECT_NAME,
+                                         tag: gitHeadShort() + '-jdk')
+                    }
                 }
             }
             stage('Push Docker jdk image') {
@@ -58,7 +64,12 @@ def call(String stack, def Map args = [:]) {
                     beforeAgent true
                 }
                 steps {
-                    script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
+                    script {
+                        dockerImage =
+                            buildDocker (namespace: GROUP_NAME,
+                                         name: PROJECT_NAME,
+                                         tag: gitHeadShort())
+                    }
                 }
             }
             stage('Test Docker image structure') {

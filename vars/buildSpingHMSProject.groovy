@@ -68,7 +68,7 @@ def call(def Map args = [:]) {
                             namespace: GITLAB_PROJECT_NAMESPACE,
                             dockerfile: "Dockerfile.jdk",
                             name: GITLAB_PROJECT_NAME,
-                            tag: GIT_COMMIT[0..7] + "-jdk"
+                            tag: gitHeadShort() + "-jdk"
                         )
                     }
                 }
@@ -95,10 +95,11 @@ def call(def Map args = [:]) {
                 }
                 steps {
                     script {
+                        tag = gitHeadShort()
                         dockerImage = buildDocker (
                             namespace: GITLAB_PROJECT_NAMESPACE,
                             name: GITLAB_PROJECT_NAME,
-                            tag: GIT_COMMIT[0..7]
+                            tag: tag
                         )
                     }
                 }
@@ -126,7 +127,7 @@ def call(def Map args = [:]) {
                 steps {
                     script {
                         pushDocker image: dockerImage
-                        String DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME}/tag/${GIT_COMMIT[0..7]}"
+                        String DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME}/tag/${tag}"
                         slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
                     }
                 }

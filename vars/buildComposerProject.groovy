@@ -26,9 +26,10 @@ def call(String phpVersion) {
             stage('Build Docker image') {
                 steps {
                     script {
-                        dockerImage = buildDocker (namespace: GITLAB_PROJECT_NAMESPACE,
-                                                   name: GITLAB_PROJECT_NAME,
-                                                   tag: GIT_COMMIT[0..7])
+                        dockerImage =
+                            buildDocker (namespace: GITLAB_PROJECT_NAMESPACE,
+                                         name: GITLAB_PROJECT_NAME,
+                                         tag: gitHeadShort())
                     }
                 }
             }
