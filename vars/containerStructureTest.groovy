@@ -14,7 +14,6 @@ def call(Map args = [:]) {
     dockerRun(volumes: [(configOnHost): "/${config}",
                         '/var/run/docker.sock': '/var/run/docker.sock'],
               image: containerStructureTestImage,
-              name: "container-structure-test-jenkins-${args.GITLAB_PROJECT_NAMESPACE}-${args.GITLAB_PROJECT_NAME}-${env.BUILD_NUMBER}",
               cmd: "test --image ${imageName} --config ${config}",
               uid: '0')
 }
