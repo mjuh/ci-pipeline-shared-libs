@@ -14,6 +14,9 @@ def call(String composeProject) {
             PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
             GROUP_NAME = jenkinsJob.getGroup(env.JOB_NAME)
         }
+        options {
+            timeout(time: 2, unit: "HOURS")
+	}
         stages {
             stage('Build Docker image') {
                 when {
