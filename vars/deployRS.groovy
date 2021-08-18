@@ -111,11 +111,11 @@ def call(Map args = [:]) {
                                 }
                             } else {
                                 ansiColor("xterm") {
-                                    h ((["nix-shell --run",
-                                         quoteString ((["deploy", ".", "--"]
-                                                       + Constants.nixFlags
-                                                       + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                       + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                    ((["nix-shell --run",
+                                       quoteString ((["deploy", ".", "--"]
+                                                     + Constants.nixFlags
+                                                     + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                     + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                                 }
                             }
                         }                                
