@@ -31,6 +31,9 @@ def call(Map args = [:]) {
         options {
             disableConcurrentBuilds()
 	}
+        options {
+            timeout(time: 2, unit: "HOURS")
+        }
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
             GROUP_NAME = gitRemoteOrigin.getGroup()
