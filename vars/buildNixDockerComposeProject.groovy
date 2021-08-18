@@ -21,7 +21,12 @@ def call(String composeProject) {
                     beforeAgent true
                 }
                 steps {
-                    script { dockerImage = nixBuildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
+                    script {
+                        dockerImage =
+                            nixBuildDocker (namespace: GROUP_NAME,
+                                            name: PROJECT_NAME,
+                                            tag: gitHeadShort())
+                    }
                 }
             }
             stage('Push Docker image') {

@@ -2,9 +2,7 @@ def call(Map args = [:]) {
     assert args.image : "No image provided"
 
     List<String> extraTags = args.extraTags ?: ['latest']
-    if (env.GIT_COMMIT) {
-        extraTags += env.GIT_COMMIT[0..7]
-    }
+    extraTags += gitHeadShort()
 
     if(args.image.metaClass.respondsTo(args.image, 'push')) {
         String registryUrl = args.registryUrl ?: "https://" + Constants.dockerRegistryHost

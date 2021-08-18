@@ -19,7 +19,12 @@ def call(Map args = [:]) {
             }
             stage('Build Docker image') {
                 steps {
-                    script { dockerImage = buildDocker namespace: GROUP_NAME, name: PROJECT_NAME, tag: GIT_COMMIT[0..7] }
+                    script {
+                        dockerImage =
+                            buildDocker (namespace: GROUP_NAME,
+                                         name: PROJECT_NAME,
+                                         tag: gitHeadShort())
+                    }
                 }
             }
             stage('Test Docker image structure') {
