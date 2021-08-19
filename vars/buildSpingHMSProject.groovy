@@ -4,7 +4,7 @@ def call(def Map args = [:]) {
     String GRADLE_OPTS = args.GRADLE_OPTS == null ? "" : args.GRADLE_OPTS.join(' ')
 
     pipeline {
-        agent { label "master" }
+        agent { label "jenkins" }
         environment {
             GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
             GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)

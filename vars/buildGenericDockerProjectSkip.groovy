@@ -2,7 +2,7 @@ def call() {
     def dockerImage = null
 
     pipeline {
-        agent { label 'master' }
+        agent { label 'jenkins' }
         parameters { string(name: 'dockerStacksRepoCommitId',
                             defaultValue: '',
                             description: "ID коммита в репозитории ${Constants.dockerStacksGitRepoUrl}, " +

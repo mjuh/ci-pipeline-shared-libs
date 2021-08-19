@@ -2,7 +2,7 @@ def call(String phpVersion) {
     def dockerImage = null
 
     pipeline {
-        agent { label 'master' }
+        agent { label 'jenkins' }
         options {
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
