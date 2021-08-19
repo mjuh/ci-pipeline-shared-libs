@@ -1,7 +1,7 @@
 def call(Map args = [:]) {
     String unstashHosts = args.unstashHosts ? args.unstashHosts : "dhost-production"
     pipeline {
-        agent { label 'master' }
+        agent { label 'jenkins' }
         environment {
             PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
             GROUP_NAME = jenkinsJob.getGroup(env.JOB_NAME)

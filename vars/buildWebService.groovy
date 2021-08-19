@@ -14,7 +14,7 @@ def call(Map args = [:]) {
         def slackMessages = [];
 
         pipeline {
-            agent { label "master" }
+            agent { label "jenkins" }
             options {
                 timeout(time: 6, unit: "HOURS")
             }

@@ -27,7 +27,7 @@ def hostsInChangeSets() {
 
 def call(Map args = [:]) {
     pipeline {
-        agent { label "master" }
+        agent { label "jenkins" }
         options {
             disableConcurrentBuilds()
             timeout(time: 2, unit: "HOURS")
