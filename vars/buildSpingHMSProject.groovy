@@ -51,6 +51,7 @@ def call(def Map args = [:]) {
                     beforeAgent true
                 }
                 steps {
+                    (args.preBuild ?: { return true })
                     sh "java -version; gradle -version; gradle build"
                 }
             }
