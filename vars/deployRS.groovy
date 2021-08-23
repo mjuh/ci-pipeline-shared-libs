@@ -25,6 +25,16 @@ def hostsInChangeSets() {
     output
 }
 
+def applyToHostsSequentially(Closure closure, List<String> hosts) {
+    // Hosts in changeSet are first.
+    counter = 0
+    hosts.each{ host ->
+        counter += 1
+        echo("${counter}/${hosts.size()}")
+        closure(host)
+    }
+}
+
 def call(Map args = [:]) {
     pipeline {
         agent { label "jenkins" }
@@ -41,6 +51,8 @@ def call(Map args = [:]) {
             stage("tests") {
                 steps {
                     script {
+                        hosts = (hostsInChangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
+
                         if (args.checkPhase) {
                             ansiColor("xterm") {
                                 args.checkPhase(args)
@@ -61,11 +73,25 @@ def call(Map args = [:]) {
                                          : [:])
                                       + (args.deploy != true || GIT_BRANCH != "master" ?
                                          ["nix flake check": {
-                                            ansiColor("xterm") {
-                                                sh (nix.shell (run: ((["nix flake check"]
-                                                                      + Constants.nixFlags
-                                                                      + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
+                                            if (args.sequential) {
+                                                applyToHostsSequentially({ host ->
+                                                        ansiColor("xterm") {
+                                                            sh (nix.shell (run: ((["nix flake check .#${host} -- "]
+                                                                                  + Constants.nixFlags
+                                                                                  + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                                                  + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                                                        }
+                                                    },
+                                                    hosts)
+                                            } else {
+                                                ansiColor("xterm") {
+                                                    sh (nix.shell (run: ((["nix flake check"]
+                                                                          + Constants.nixFlags
+                                                                          + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                                          + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                                                }
+                                            }
+                                        }]
                                          : [:]))
                             // WARNING: Try to dry activate only after BFG
                             // succeeded to check no credentials are leaked.
@@ -94,21 +120,16 @@ def call(Map args = [:]) {
                             args.deployPhase(args)
                         } else {
                             if (args.sequential) {
-                                // Hosts in changeSet are first.
-                                hosts = (hostsInChangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
-
-                                counter = 0
-                                hosts.each{ host ->
-                                    counter += 1
-                                    echo("${counter}/${hosts.size()}")
-                                    ansiColor("xterm") {
-                                        sh ((["nix-shell --run",
-                                              quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
-                                                            + Constants.nixFlags
-                                                            + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                            + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
-                                    }
-                                }
+                                applyToHostsSequentially({ host ->
+                                        ansiColor("xterm") {
+                                            sh ((["nix-shell --run",
+                                                  quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
+                                                                + Constants.nixFlags
+                                                                + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                        }
+                                    },
+                                    hosts)
                             } else {
                                 ansiColor("xterm") {
                                     ((["nix-shell --run",
