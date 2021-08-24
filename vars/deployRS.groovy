@@ -26,7 +26,6 @@ def hostsInChangeSets() {
 }
 
 def applyToHostsSequentially(Closure closure, List<String> hosts) {
-    // Hosts in changeSet are first.
     counter = 0
     hosts.each{ host ->
         counter += 1
@@ -51,6 +50,7 @@ def call(Map args = [:]) {
             stage("tests") {
                 steps {
                     script {
+                        // Hosts in changeSet are first.
                         hosts = (hostsInChangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
 
                         if (args.checkPhase) {
