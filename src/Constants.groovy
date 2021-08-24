@@ -48,7 +48,7 @@ public class Constants {
     public static final ArrayList<String> nixReleases = ["20.09", "unstable"]
     public static final ArrayList<String> nixFlags = ["--print-build-logs"]
 
-    public static final String kvmTemplates "https://gitlab.intr/kvm-templates"
+    public static final String kvmTemplates = "https://gitlab.intr/kvm-templates"
 
     public static final String bfgJobName = "_ci/_ci%252Fbfg"
 }
