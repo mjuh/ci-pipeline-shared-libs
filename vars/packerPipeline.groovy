@@ -13,7 +13,7 @@ def call(Map args = [:]) {
                         flake = "show-packer-build" + "-" + args.distribution + "-" + args.release + (args.administration == null ? "" : "-administration")
                         (sh(returnStdout: true,
                             script: """
-                                    nix-shell --packages nixUnstable --run 'nix run \"${Constants.kvmTemplates}#\\\"${flake}\\\"\" --impure'
+                                    nix-shell --packages nixUnstable --run 'nix run \"${Constants.kvmTemplates}#${flake}\" --impure'
                                     """).trim().split("\n")).each { command ->
                                                                     ansiColor("xterm") {
                                                                          sh(["PACKER_LOG=1", "PACKER_CACHE_DIR=/tmp/packer", command].join(" "))
