@@ -51,7 +51,7 @@ def call(Map args = [:]) {
                 steps {
                     script {
                         // Hosts in changeSet are first.
-                        hosts = (hostsInChangeSets() + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
+                        hosts = (hostsInChangeSets().findAll{ fileExists("hosts/${it}.nix") } + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
 
                         if (args.checkPhase) {
                             ansiColor("xterm") {
