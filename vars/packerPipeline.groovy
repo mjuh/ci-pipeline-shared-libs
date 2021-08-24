@@ -10,6 +10,7 @@ def call(Map args = [:]) {
             stage("Build") {
                 steps {
                     script {
+                        sh "nix-shell --packages nixUnstable --run 'nix flake show ${Constants.kvmTemplates} --impure'"
                         flake = "show-packer-build" + "-" + args.distribution + "-" + args.release + (args.administration == null ? "" : "-administration")
                         (sh(returnStdout: true,
                             script: """
