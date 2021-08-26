@@ -46,30 +46,9 @@ def call(Map args = [:]) {
                 stage("tests") {
                     steps {
                         script {
-                                parallel (["nix flake check": {
-                                            ansiColor("xterm") {
-                                                sh (nix.shell (run: ((["nix flake check"]
-                                                                      + Constants.nixFlags
-                                                                      + (args.nixArgs == null ? [] : args.nixArgs)
-                                                                      + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
-                                          + (args.scanPasswords == true ?
-                                             ["bfg": {
-                                                build (job: "../../${Constants.bfgJobName}/master",
-                                                       parameters: [
-                                                        string(name: "GIT_REPOSITORY_TARGET_URL",
-                                                               value: gitRemoteOrigin.getRemote().url),
-                                                        string(name: "PROJECT_NAME",
-                                                               value: GITLAB_PROJECT_NAME),
-                                                        string(name: "GROUP_NAME",
-                                                               value: GITLAB_PROJECT_NAMESPACE),
-                                                    ])}]
-                                             : [:]))
                             echo "================================================================================"
                                 echo dockerImage
                             echo "================================================================================"
-                                Boolean testHook = (args.testHook ?: { return true })([input: [image: dockerImage]])
-                                testHook || Utils.markStageSkippedForConditional("tests")
                             }
                     }
                 }
