@@ -37,7 +37,7 @@ def call(Map args = [:]) {
                                                       + ["--out-link", outLink, ".#container"]
                                                       + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                                 dockerImage = new DockerImageTarball(
-                                  imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitTag()),
+                                  imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + ""),
                                   path: outLink
                                 )
                             }
