@@ -31,10 +31,15 @@ def call(Map args = [:]) {
                             script {
                                 (args.preBuild ?: { return true })()
 
+                                outLink = "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}"
                                 sh (nix.shell (run: ((["nix", "build"]
                                                       + Constants.nixFlags
-                                                      + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#container"]
+                                                      + ["--out-link", outLink, ".#container"]
                                                       + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                                dockerImage = new DockerImageTarball(
+                                  imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitTag()),
+                                  path: outLink
+                                )
                             }
                     }
                 }
@@ -73,11 +78,6 @@ def call(Map args = [:]) {
                                                       + [".#deploy"]
                                                       + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                                 slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
-
-                                dockerImage = new DockerImageTarball(
-                                    imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitTag()),
-                                    path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
-                                )
 
                                 // Deploy to Docker Swarm
                                 if (args.stackDeploy && GIT_BRANCH == "master") {
