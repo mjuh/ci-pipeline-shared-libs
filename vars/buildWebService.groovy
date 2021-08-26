@@ -60,7 +60,7 @@ def call(Map args = [:]) {
                                                                value: GITLAB_PROJECT_NAMESPACE),
                                                     ])}]
                                              : [:]))
-                                Boolean testHook = (args.testHook ?: { return true })([input: [image: dockerImage]])
+                                Boolean testHook = (args.testHook ?: { return true })()
                                 testHook || Utils.markStageSkippedForConditional("tests")
                             }
                     }
