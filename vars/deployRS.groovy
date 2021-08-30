@@ -73,23 +73,11 @@ def call(Map args = [:]) {
                                          : [:])
                                       + (args.deploy != true || GIT_BRANCH != "master" ?
                                          ["nix flake check": {
-                                            if (args.sequential) {
-                                                applyToHostsSequentially({ host ->
-                                                        ansiColor("xterm") {
-                                                            sh (nix.shell (run: ((["nix flake check .#${host} -- "]
-                                                                                  + Constants.nixFlags
-                                                                                  + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                                  + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
-                                                        }
-                                                    },
-                                                    hosts)
-                                            } else {
-                                                ansiColor("xterm") {
-                                                    sh (nix.shell (run: ((["nix flake check"]
-                                                                          + Constants.nixFlags
-                                                                          + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                          + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
-                                                }
+                                            ansiColor("xterm") {
+                                                sh (nix.shell (run: ((["nix flake check"]
+                                                                      + Constants.nixFlags
+                                                                      + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
                                             }
                                         }]
                                          : [:]))
