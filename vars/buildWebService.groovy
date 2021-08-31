@@ -67,7 +67,8 @@ def call(Map args = [:]) {
                 }
                 stage("deploy") {
                     steps {
-                            script {
+                        script {
+                            lock("docker-registry") {
                                 sh (nix.shell (run: ((["nix", "run"]
                                                       + Constants.nixFlags
                                                       + [".#deploy"]
@@ -90,8 +91,8 @@ def call(Map args = [:]) {
                                         slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
                                     }
                                 }
-
                             }
+                        }
                     }
                 }
             }
