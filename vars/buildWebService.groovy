@@ -97,6 +97,8 @@ def call(Map args = [:]) {
                                         slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
                                     }
                                 }
+
+                                (args.postDeploy ?: { return true })()
                             }
                         }
                     }
