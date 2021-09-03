@@ -104,9 +104,7 @@ def call(Map args = [:]) {
                 }
                 steps {
                     script {
-                        if (args.deployPhase) {
-                            args.deployPhase(args)
-                        } else {
+                        if (args.deployPhase == null) {
                             if (args.sequential) {
                                 applyToHostsSequentially({ host ->
                                         ansiColor("xterm") {
@@ -127,7 +125,10 @@ def call(Map args = [:]) {
                                                      + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                                 }
                             }
-                        }                                
+                        }
+                        else {
+                            args.deployPhase(args)
+                        }
                     }
                 }
             }
