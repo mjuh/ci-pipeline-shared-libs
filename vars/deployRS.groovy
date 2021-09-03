@@ -74,6 +74,7 @@ def call(Map args = [:]) {
                                       + (args.deploy != true || GIT_BRANCH != "master" ?
                                          ["nix flake check": {
                                             ansiColor("xterm") {
+                                                sh (nix.shell (run: "nix flake show"))
                                                 sh (nix.shell (run: ((["nix flake check"]
                                                                       + Constants.nixFlags
                                                                       + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
