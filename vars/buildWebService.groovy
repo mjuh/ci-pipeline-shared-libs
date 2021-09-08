@@ -88,7 +88,7 @@ def call(Map args = [:]) {
 
                                 // Deploy to Docker Swarm
                                 if (args.stackDeploy && GIT_BRANCH == "master") {
-                                    dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices.each == null ? [] : args.extraDockerStackServices)
+                                    dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
                                     node(Constants.productionNodeLabel) {
                                             dockerStackServices.each { service ->
                                             slackMessages += dockerStackDeploy (
