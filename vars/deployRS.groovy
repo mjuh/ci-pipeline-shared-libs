@@ -39,7 +39,7 @@ def call(Map args = [:]) {
         agent { label "jenkins" }
         options {
             disableConcurrentBuilds()
-            timeout(time: 2, unit: "HOURS")
+            timeout(time: 3, unit: "HOURS")
 	}
         environment {
             PROJECT_NAME = gitRemoteOrigin.getProject()
