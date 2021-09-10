@@ -13,6 +13,9 @@ def call(Map args = [:]) {
         stages {
             stage('npm install') {
                 steps {
+                    script {
+                        (args.preBuild ?: { return true })()
+                    }
                     sh 'npm --version'
                     sh 'npm install'
                 }
