@@ -14,7 +14,7 @@ def call(Map args = [:]) {
                     file: 'config',
                     text: """
                             Host ${gitHost}
-                            User $USERNAME
+                            User git
                             HostName ${gitHost}
                             IdentityFile ${inConfigDir}/ssh_deploy_key
 
