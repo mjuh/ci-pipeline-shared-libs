@@ -24,7 +24,13 @@ def call(Map args = [:]) {
                 when { branch 'master'
                        beforeAgent true }
                 steps {
-                    sh 'npm run-script build'
+                    script {
+                        if (args.buildPhase) {
+                            args.buildPhase(args)
+                        } else {
+                            sh 'npm run-script build'
+                        }
+                    }
                 }
             }
             stage('npm build ci') {
