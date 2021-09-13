@@ -165,13 +165,13 @@ def call(Map args = [:]) {
                                                 .format("nixpkgs version: %s",
                                                         nixVersion)
 
-                                            if (TAG == "master") {
-                                                buildBadge = addEmbeddableBadgeConfiguration(
-                                                    id: (GITLAB_PROJECT_NAMESPACE + "-" + GITLAB_PROJECT_NAME),
-                                                    subject: "<nixpkgs>: $nixVersion"
-                                                )
-                                                buildBadge.setStatus("running")
-                                            }
+                                            // if (TAG == "master") {
+                                            //     buildBadge = addEmbeddableBadgeConfiguration(
+                                            //         id: (GITLAB_PROJECT_NAMESPACE + "-" + GITLAB_PROJECT_NAME),
+                                            //         subject: "<nixpkgs>: $nixVersion"
+                                            //     )
+                                            //     buildBadge.setStatus("running")
+                                            // }
 
                                             (args.preBuild ?: { return true })()
 
@@ -339,17 +339,17 @@ def call(Map args = [:]) {
             post {
                 success {
                     script {
-                        if (TAG == "master") {
-                            buildBadge.setStatus("passing")
-                        }
+                        // if (TAG == "master") {
+                        //     buildBadge.setStatus("passing")
+                        // }
                     }
                 }
                 failure {
                     script {
-                        if (TAG == "master") {
-                            buildBadge.setStatus("failing")
-                            buildBadge.setColor("pink")
-                        }
+                        // if (TAG == "master") {
+                        //     buildBadge.setStatus("failing")
+                        //     buildBadge.setColor("pink")
+                        // }
                     }
                 }
                 always {
