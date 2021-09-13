@@ -337,21 +337,21 @@ def call(Map args = [:]) {
                 }
             }
             post {
-                success {
-                    script {
-                        // if (TAG == "master") {
-                        //     buildBadge.setStatus("passing")
-                        // }
-                    }
-                }
-                failure {
-                    script {
-                        // if (TAG == "master") {
-                        //     buildBadge.setStatus("failing")
-                        //     buildBadge.setColor("pink")
-                        // }
-                    }
-                }
+                // success {
+                //     script {
+                //         if (TAG == "master") {
+                //             buildBadge.setStatus("passing")
+                //         }
+                //     }
+                // }
+                // failure {
+                //     script {
+                //         if (TAG == "master") {
+                //             buildBadge.setStatus("failing")
+                //             buildBadge.setColor("pink")
+                //         }
+                //     }
+                // }
                 always {
                     nixCleanWS(directory: "${env.WORKSPACE}/result")
                     sendSlackNotifications (buildStatus: currentBuild.result,
