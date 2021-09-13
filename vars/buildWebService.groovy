@@ -47,6 +47,9 @@ def call(Map args = [:]) {
                 stage("tests") {
                     steps {
                         script {
+                                if (args.tests == false) {
+                                    return 0
+                                }
                                 parallel (["nix flake check": {
                                             ansiColor("xterm") {
                                                 sh (nix.shell (run: ((["nix flake check"]
