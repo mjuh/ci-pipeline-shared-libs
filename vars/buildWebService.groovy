@@ -1,10 +1,6 @@
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 import groovy.json.JsonOutput
 
-def projectName (Map args = [:]) {
-    args.projectName == null ? gitRemoteOrigin.getProject() : args.projectName
-}
-
 def call(Map args = [:]) {
     def slackMessages = [];
 
