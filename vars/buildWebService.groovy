@@ -1,10 +1,6 @@
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 import groovy.json.JsonOutput
 
-def nixPath (n) {
-    n ?: System.getenv("NIX_PATH")
-}
-
 def projectName (Map args = [:]) {
     args.projectName == null ? gitRemoteOrigin.getProject() : args.projectName
 }
@@ -22,7 +18,6 @@ def call(Map args = [:]) {
             GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
 	    GITLAB_PROJECT_PATH_NAMESPACE = "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME}"
             DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${TAG}"
-            NIX_PATH="nixpkgs=https://github.com/NixOS/nixpkgs/archive/d5291756487d70bc336e33512a9baf9fa1788faf.tar.gz"
         }
         stages {
             stage("build") {
