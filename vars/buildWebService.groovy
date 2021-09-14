@@ -4,6 +4,9 @@ import groovy.json.JsonOutput
 def call(Map args = [:]) {
     def slackMessages = [];
 
+    def buildTargets = args.buildTargets ?: [ "container" ];
+    def deployTargets = args.deployTargets ?: [ "deploy" ];
+
     pipeline {
         agent { label "jenkins" }
         options {
@@ -12,24 +15,26 @@ def call(Map args = [:]) {
         environment {
             GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
             GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
-	    GITLAB_PROJECT_PATH_NAMESPACE = "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME}"
+            GITLAB_PROJECT_PATH_NAMESPACE = "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME}"
             DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${TAG}"
         }
         stages {
             stage("build") {
                 steps {
                     script {
-                        (args.preBuild ?: { return true })()
+                        buildTargets.each { buildTarget ->
+                            (args.preBuild ?: { return true })()
 
-                        if (args.buildPhase) {
-                            ansiColor("xterm") {
-                                args.buildPhase(args)
+                            if (args.buildPhase) {
+                                ansiColor("xterm") {
+                                    args.buildPhase(args)
+                                }
+                            } else {
+                                sh (nix.shell (run: ((["nix", "build"]
+                                                      + Constants.nixFlags
+                                                      + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#${buildTarget}"]
+                                                      + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                             }
-                        } else {
-                            sh (nix.shell (run: ((["nix", "build"]
-                                                  + Constants.nixFlags
-                                                  + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#container"]
-                                                  + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
                         }
                     }
                 }
@@ -68,33 +73,35 @@ def call(Map args = [:]) {
                 steps {
                     script {
                         lock("docker-registry") {
-                            sh (nix.shell (run: ((["nix", "run"]
-                                                  + Constants.nixFlags
-                                                  + [".#deploy"]
-                                                  + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
-                            slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
+                            deployTargets.each { deployTarget ->
+                                sh (nix.shell (run: ((["nix", "run"]
+                                                      + Constants.nixFlags
+                                                      + [".#${deployTarget}"]
+                                                      + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                                slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
 
-                            dockerImage = new DockerImageTarball(
-                                imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitTag()),
-                                path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
-                            )
+                                dockerImage = new DockerImageTarball(
+                                    imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitTag()),
+                                    path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
+                                )
 
-                            // Deploy to Docker Swarm
-                            if (args.stackDeploy && GIT_BRANCH == "master") {
-                                dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
-                                node(Constants.productionNodeLabel) {
-                                    dockerStackServices.each { service ->
-                                        slackMessages += dockerStackDeploy (
-                                            stack: GITLAB_PROJECT_NAMESPACE,
-                                            service: service,
-                                            image: dockerImage
-                                        )
-                                        slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
+                                // Deploy to Docker Swarm
+                                if (args.stackDeploy && GIT_BRANCH == "master") {
+                                    dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
+                                    node(Constants.productionNodeLabel) {
+                                        dockerStackServices.each { service ->
+                                            slackMessages += dockerStackDeploy (
+                                                stack: GITLAB_PROJECT_NAMESPACE,
+                                                service: service,
+                                                image: dockerImage
+                                            )
+                                            slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
+                                        }
                                     }
                                 }
-                            }
 
-                            (args.postDeploy ?: { return true })()
+                                (args.postDeploy ?: { return true })()
+                            }
                         }
                     }
                 }
