@@ -1,4 +1,4 @@
-def call(Map args = [:]) {
+def call(String composeProject, Map args = [:]) {
     def dockerImage = null
 
     pipeline {
