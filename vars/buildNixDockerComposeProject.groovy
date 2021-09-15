@@ -58,7 +58,7 @@ def call(String composeProject, Map args = [:]) {
                 agent { label composeProject }
                 steps {
                     script {
-                        ([ PROJECT_NAME ] + (args.services == null ? [] : args.services)).each {
+                        (args.services == null ? [ PROJECT_NAME ] : args.services).each {
                             dockerComposeDeploy (
                                 project: composeProject,
                                 service: service,
