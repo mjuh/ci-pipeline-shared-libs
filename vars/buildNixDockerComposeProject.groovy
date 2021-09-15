@@ -1,4 +1,4 @@
-def call(String composeProject) {
+def call(Map args = [:]) {
     def dockerImage = null
 
     pipeline {
@@ -57,7 +57,16 @@ def call(String composeProject) {
                 }
                 agent { label composeProject }
                 steps {
-                    dockerComposeDeploy project: composeProject, service: PROJECT_NAME, image: dockerImage, dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                    script {
+                        ([ PROJECT_NAME ] + (args.services == null ? [] : args.services)).each {
+                            dockerComposeDeploy (
+                                project: composeProject,
+                                service: service,
+                                image: dockerImage,
+                                dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                            )
+                        }
+                    }
                 }
                 post {
                     success {
