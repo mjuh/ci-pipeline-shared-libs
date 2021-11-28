@@ -96,7 +96,7 @@ def call(Map args = [:]) {
 
                             (args.postDeploy ?: { return true })([input: [
                                 image: dockerImage,
-                                PROJECT_NAME: PROJECT_NAME]])
+                                PROJECT_NAME: GITLAB_PROJECT_NAME]])
                         }
                     }
                 }
