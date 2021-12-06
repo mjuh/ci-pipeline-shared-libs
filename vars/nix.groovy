@@ -53,7 +53,7 @@ def shell(Map args = [:]) {
 def check(Map args = [:]) {
     ([:]
      + (args.scanPasswords == true ?
-        ["bfg": { build (job: "../../_ci/bfg/master",
+        ["bfg": { build (job: "../../${Constants.bfgJobName}",
                          parameters: [
                             string(name: "GIT_REPOSITORY_TARGET_URL",
                                    value: gitRemoteOrigin.getRemote().url),
