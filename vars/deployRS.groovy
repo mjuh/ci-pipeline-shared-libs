@@ -107,16 +107,19 @@ def call(Map args = [:]) {
                     script {
                         if (args.deployPhase == null) {
                             if (args.sequential) {
+                                successFlag = false
                                 applyToHostsSequentially({ host ->
                                         ansiColor("xterm") {
                                             sh ((["nix-shell --run",
                                                   quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
                                                                 + Constants.nixFlags
                                                                 + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" ")
+                                                ,returnStatus: true) != 0 ? currentBuild.result = 'UNSTABLE' : successFlag = true
                                         }
                                     },
                                     hosts)
+                                if (!successFlag) currentBuild.result = 'FAILURE'
                             } else {
                                 ansiColor("xterm") {
                                     sh ((["nix-shell --run",
