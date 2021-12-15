@@ -26,10 +26,7 @@ def call(Map args = [:]) {
                                 args.buildPhase(args)
                             }
                         } else {
-                            sh (nix.shell (run: ((["nix", "build"]
-                                                  + Constants.nixFlags
-                                                  + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#container"]
-                                                  + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                            sh (nix.shell (run: nix.build()))
                         }
                     }
                 }

@@ -50,6 +50,13 @@ def shell(Map args = [:]) {
     String.format("nix-shell --run '%s'", args.run)
 }
 
+def build(Map args = [:]) {
+    (["nix", "build"]
+     + Constants.nixFlags
+     + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#container"]
+     + (args.nixArgs == null ? [] : args.nixArgs)).join(" ")
+}
+
 def check(Map args = [:]) {
     ([:]
      + (args.scanPasswords == true ?
