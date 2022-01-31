@@ -42,9 +42,11 @@ def call(Map args = [:]) {
             }
             stage('artifacts') {
                 steps {
-                    dir('public') {
-                        stash name: "my-stash", includes: "**"
-                        archiveArtifacts artifacts: "**"
+                    script {
+                        dir(args.output == null ? "public" : args.output) {
+                            stash name: "my-stash", includes: "**"
+                            archiveArtifacts artifacts: "**"
+                        }
                     }
                 }
             }
