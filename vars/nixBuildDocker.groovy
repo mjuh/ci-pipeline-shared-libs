@@ -26,8 +26,6 @@ def call(Map args = [:]) {
     String imageName = args.imageName ?: "${args.namespace}/${args.name}"
     String tag = args.tag ?: GIT_BRANCH
 
-    createSshDirWithGitKey()
-
     nix.nixBuildWrap()
 
     new DockerImageTarball(
