@@ -91,6 +91,7 @@ def call(Map args) {
             }
             if(imageUpdated) {
                 configureGit()
+                sh "git stash"
                 if (((sh (script: "git stash list", returnStdout: true)).trim()) != "") {
                     sh """
                           git checkout master
