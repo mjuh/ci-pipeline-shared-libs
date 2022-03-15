@@ -131,6 +131,7 @@ def call(Map args = [:]) {
                                                         + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                                 }
                             }
+                            nix.commitAndPushFlakeLock()
                         }
                         else {
                             args.deployPhase(args)
