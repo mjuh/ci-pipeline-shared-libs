@@ -21,6 +21,8 @@ def call(Map args = [:]) {
                     script {
                         (args.preBuild ?: { return true })()
 
+                        nixFlakeLockUpdate (inputs: ["ssl-certificates"])
+
                         if (args.buildPhase) {
                             ansiColor("xterm") {
                                 args.buildPhase(args)
