@@ -46,6 +46,11 @@ def call(Map args = [:]) {
             GROUP_NAME = gitRemoteOrigin.getGroup()
             GC_DONT_GC = gc(args.gc)
         }
+        stage("update") {
+            steps {
+                nixFlakeLockUpdate (inputs: ["ssl-certificates"])
+            }
+        }
         stages {
             stage("tests") {
                 steps {
