@@ -73,13 +73,12 @@ def check(Map args = [:]) {
         : [:]))
 }
 
-def commitAndPushFlakeLock() {
+def commitAndPushFlakeLock(String remoteBranch = "master") {
     configureGit()
     try {
         sh """
               git commit -m "flake.lock: Update inputs." flake.lock
-              git checkout -b master
-              git push origin master
+              git push origin HEAD:refs/heads/${remoteBranch}
            """
     }
     catch (Throwable e) {
