@@ -80,6 +80,7 @@ def commitAndPushFlakeLock() {
               git add flake.lock
               git commit -m "flake.lock: Update inputs."
               git checkout -b master
+              git push origin master
            """
     }
     catch (Throwable e) {
