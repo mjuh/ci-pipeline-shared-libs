@@ -77,9 +77,9 @@ def commitAndPushFlakeLock() {
     configureGit()
     try {
         sh """
-              git checkout -b master
               git add flake.lock
               git commit -m "flake.lock: Update inputs."
+              git checkout -b master
            """
     }
     catch (Throwable e) {
