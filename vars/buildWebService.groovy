@@ -82,22 +82,25 @@ def call(Map args = [:]) {
                             )
 
                             // Deploy to Docker Swarm
-                            if (args.stackDeploy && GIT_BRANCH == "master") {
-                                if (args.dockerStackServices == null) {
-                                    dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
-                                } else {
-                                    dockerStackServices = args.dockerStackServices
-                                }
-                                node(Constants.productionNodeLabel) {
-                                    dockerStackServices.each { service ->
-                                        slackMessages += dockerStackDeploy (
-                                            stack: GITLAB_PROJECT_NAMESPACE,
-                                            service: service,
-                                            image: dockerImage
-                                        )
-                                        slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
+                            if (GIT_BRANCH == "master") {
+                                if (args.stackDeploy) {
+                                    if (args.dockerStackServices == null) {
+                                        dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
+                                    } else {
+                                        dockerStackServices = args.dockerStackServices
+                                    }
+                                    node(Constants.productionNodeLabel) {
+                                        dockerStackServices.each { service ->
+                                            slackMessages += dockerStackDeploy (
+                                                stack: GITLAB_PROJECT_NAMESPACE,
+                                                service: service,
+                                                image: dockerImage
+                                            )
+                                            slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
+                                        }
                                     }
                                 }
+                                nix.commitAndPushFlakeLock()
                             }
 
                             (args.postDeploy ?: { return true })([input: [

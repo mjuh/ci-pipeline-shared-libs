@@ -90,12 +90,7 @@ def call(Map args) {
                 }
             }
             if(imageUpdated) {
-                createSshDirWithGitKey(dir: HOME + '/.ssh')
-                sh """
-                    git config --global user.name 'jenkins'
-                    git config --global user.email 'jenkins@majordomo.ru'
-                    git stash
-                   """
+                configureGit()
                 if (((sh (script: "git stash list", returnStdout: true)).trim()) != "") {
                     sh """
                           git checkout master

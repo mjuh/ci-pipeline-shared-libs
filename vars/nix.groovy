@@ -72,3 +72,17 @@ def check(Map args = [:]) {
                                           + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}}]
         : [:]))
 }
+
+def commitAndPushFlakeLock() {
+    configureGit()
+    try {
+        sh """
+              git checkout -b master
+              git add flake.lock
+              git commit -m "flake.lock: Update inputs."
+           """
+    }
+    catch (Throwable e) {
+        e.printStackTrace();
+    }
+}
