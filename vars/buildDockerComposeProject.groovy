@@ -82,16 +82,7 @@ def call(String composeProject, Map args = [:]) {
                         }
                     )
                 }
-                post {
-                    success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
-                    }
-                }
             }
-        }
-        post {
-            success { cleanWs() }
-            failure { notifySlack "Build failled: ${JOB_NAME} [<${RUN_DISPLAY_URL}|${BUILD_NUMBER}>]", "red" }
         }
     }
 }
