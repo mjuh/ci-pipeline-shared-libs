@@ -54,7 +54,11 @@ def call(def Map args = [:]) {
                 steps {
                     script { (args.preBuild ?: { return true })() }
                     sh "java -version; gradle -version; gradle build"
-                    sh "git add -f build/libs/*.jar; nix build ${Constants.nixFlags.join(' ')}"
+                    sh """
+                       git add -f \"build/libs/*.jar\"
+                       nix build ${Constants.nixFlags.join(' ')}
+                       nix run ${Constants.nixFlags.join(' ')} .#deploy
+                       """
                 }
             }
             stage("deploy") {
@@ -73,16 +77,18 @@ def call(def Map args = [:]) {
                             } else {
                                 dockerStackServices = args.dockerStackServices
                             }
+                            dockerImage = new DockerImageTarball(
+                                imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitTag()),
+                                path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
+                            )
                             node(Constants.productionNodeLabel) {
-                                dockerStackServices.each { service ->
-                                    dockerStackDeploy (
-                                        stack: INACTIVE_STACK,
-                                        service: service,
-                                        image: dockerImage,
-                                        stackConfigFile: "hms.yml",
-                                        dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
-                                    )
-                                }
+                                dockerStackDeploy (
+                                    stack: INACTIVE_STACK,
+                                    service: GITLAB_PROJECT_NAME,
+                                    image: dockerImage,
+                                    stackConfigFile: "hms.yml",
+                                    dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                                )
                             }
                             (args.postDeploy ?: { return true })([input: [
                                 image: dockerImage,
