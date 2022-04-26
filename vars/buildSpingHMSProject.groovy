@@ -188,7 +188,6 @@ def call(def Map args = [:]) {
             }
         }
         post {
-            success { cleanWs() }
             always {
                 sendSlackNotifications (
                     buildStatus: currentBuild.result,
