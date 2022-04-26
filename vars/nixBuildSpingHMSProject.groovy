@@ -9,6 +9,7 @@ def call(def Map args = [:]) {
             GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
             GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
             INACTIVE_STACK = nginx.getInactive("/hms")
+            INACTIVE_STACK = nginx.getInactive("/hms")
             GRADLE_OPTS = "${GRADLE_OPTS}"
             GRADLE_USER_HOME = "/var/lib/jenkins"
         }
@@ -73,9 +74,11 @@ def call(def Map args = [:]) {
                             node(Constants.productionNodeLabel) {
                                 dockerStackServices.each { service ->
                                     dockerStackDeploy (
-                                        stack: GITLAB_PROJECT_NAMESPACE,
+                                        stack: INACTIVE_STACK,
                                         service: service,
-                                        image: dockerImage
+                                        image: dockerImage,
+                                        stackConfigFile: "hms.yml",
+                                        dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
                                     )
                                 }
                             }
