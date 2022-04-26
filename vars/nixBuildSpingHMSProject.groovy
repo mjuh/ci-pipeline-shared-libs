@@ -59,7 +59,10 @@ def call(def Map args = [:]) {
             }
             stage("deploy") {
                 when {
-                    branch "master"
+                    allOf {
+                        branch "master"
+                        not { expression { params.switchStacks } }
+                    }
                     beforeAgent true
                 }
                 steps {
