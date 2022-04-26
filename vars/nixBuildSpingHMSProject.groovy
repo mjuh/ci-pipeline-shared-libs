@@ -65,21 +65,19 @@ def call(def Map args = [:]) {
                 steps {
                     script {
                         lock("docker-registry") {
-                            if (GIT_BRANCH == "master") {
-                                if (args.stackDeploy) {
-                                    if (args.dockerStackServices == null) {
-                                        dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
-                                    } else {
-                                        dockerStackServices = args.dockerStackServices
-                                    }
-                                    node(Constants.productionNodeLabel) {
-                                        dockerStackServices.each { service ->
-                                            dockerStackDeploy (
-                                                stack: GITLAB_PROJECT_NAMESPACE,
-                                                service: service,
-                                                image: dockerImage
-                                            )
-                                        }
+                            if (args.stackDeploy) {
+                                if (args.dockerStackServices == null) {
+                                    dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
+                                } else {
+                                    dockerStackServices = args.dockerStackServices
+                                }
+                                node(Constants.productionNodeLabel) {
+                                    dockerStackServices.each { service ->
+                                        dockerStackDeploy (
+                                            stack: GITLAB_PROJECT_NAMESPACE,
+                                            service: service,
+                                            image: dockerImage
+                                        )
                                     }
                                 }
                             }
