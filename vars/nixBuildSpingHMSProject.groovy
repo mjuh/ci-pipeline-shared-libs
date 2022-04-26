@@ -43,7 +43,7 @@ def call(def Map args = [:]) {
             jdk (args.java ?: "8")
         }
         stages {
-            stage("Build Gradle") {
+            stage("build") {
                 when {
                     allOf {
                         not { expression { params.skipToDeploy } }
@@ -54,6 +54,40 @@ def call(def Map args = [:]) {
                 steps {
                     script { (args.preBuild ?: { return true })() }
                     sh "java -version; gradle -version; gradle build"
+                    sh "git add -f build/libs/*.jar; nix build"
+                }
+            }
+            stage("deploy") {
+                when {
+                    branch "master"
+                    beforeAgent true
+                }
+                steps {
+                    script {
+                        lock("docker-registry") {
+                            if (GIT_BRANCH == "master") {
+                                if (args.stackDeploy) {
+                                    if (args.dockerStackServices == null) {
+                                        dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
+                                    } else {
+                                        dockerStackServices = args.dockerStackServices
+                                    }
+                                    node(Constants.productionNodeLabel) {
+                                        dockerStackServices.each { service ->
+                                            dockerStackDeploy (
+                                                stack: GITLAB_PROJECT_NAMESPACE,
+                                                service: service,
+                                                image: dockerImage
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            (args.postDeploy ?: { return true })([input: [
+                                image: dockerImage,
+                                PROJECT_NAME: GITLAB_PROJECT_NAME]])
+                        }
+                    }
                 }
             }
         }
