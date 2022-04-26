@@ -54,7 +54,7 @@ def call(def Map args = [:]) {
                 steps {
                     script { (args.preBuild ?: { return true })() }
                     sh "java -version; gradle -version; gradle build"
-                    sh "git add -f build/libs/*.jar; nix build"
+                    sh "git add -f build/libs/*.jar; nix build ${Constants.nixFlags}"
                 }
             }
             stage("deploy") {
