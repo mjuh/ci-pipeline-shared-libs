@@ -8,7 +8,6 @@ def call(def Map args = [:]) {
         environment {
             GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
             GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
-            INACTIVE_STACK = nginx.getInactive("/hms")
             GRADLE_OPTS = "${GRADLE_OPTS}"
             GRADLE_USER_HOME = "/var/lib/jenkins"
         }
@@ -157,17 +156,12 @@ def call(def Map args = [:]) {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     dockerStackDeploy (
-                        stack: INACTIVE_STACK,
+                        stack: nginx.getInactive("/hms"),
                         service: GITLAB_PROJECT_NAME,
                         image: dockerImage,
                         stackConfigFile: "hms.yml",
                         dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
                     )
-                }
-                post {
-                    success {
-                        notifySlack "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to ${INACTIVE_STACK} stack"
-                    }
                 }
             }
             stage("Switch stacks") {
@@ -181,8 +175,6 @@ def call(def Map args = [:]) {
                 steps {
                     script {
                         nginx.Switch("/hms")
-                        slackMessages +=
-                            "Switched to ${INACTIVE_STACK} stack"
                     }
                 }
             }
