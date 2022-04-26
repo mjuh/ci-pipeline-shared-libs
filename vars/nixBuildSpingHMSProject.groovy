@@ -77,8 +77,10 @@ def call(def Map args = [:]) {
                             } else {
                                 dockerStackServices = args.dockerStackServices
                             }
+                            imageName = Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitTag()
+                            echo "imageName: ${imageName}"
                             dockerImage = new DockerImageTarball(
-                                imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitTag()),
+                                imageName: imageName,
                                 path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
                             )
                             node(Constants.productionNodeLabel) {
