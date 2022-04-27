@@ -76,8 +76,7 @@ def call(def Map args = [:]) {
                             } else {
                                 dockerStackServices = args.dockerStackServices
                             }
-                            gitCommit = (sh(returnStdout: true, script: "git rev-parse HEAD")).trim()
-                            imageName = Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitCommit.take(8)
+                            imageName = Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitCommit().take(8)
                             echo "imageName: ${imageName}"
                             dockerImage = new DockerImageTarball(
                                 imageName: imageName,
