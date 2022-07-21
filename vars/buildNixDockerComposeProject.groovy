@@ -61,7 +61,8 @@ def call(String composeProject, Map args = [:]) {
                                             dockerComposeDeploy (
                                                 project: composeProject,
                                                 service: service,
-                                                image: dockerImage
+                                                image: dockerImage,
+                                                projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
                                             )
                                         }
                                     }
