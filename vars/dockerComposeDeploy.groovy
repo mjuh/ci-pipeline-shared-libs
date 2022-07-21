@@ -27,6 +27,18 @@ def call(Map args) {
                                     script: "docker ps --format '{{.Names}}' --filter status=running").contains(containerNameBase)
             def imageUpdated = false
 
+            if(imageUpdated) {
+                createSshDirWithGitKey(dir: HOME + '/.ssh')
+                sh """
+                    git config --global user.name 'jenkins'
+                    git config --global user.email 'jenkins@majordomo.ru'
+                    git stash
+                    git checkout master
+                    git pull origin master
+                    git stash pop
+                """
+            }
+
             args.services.each { service ->
                 if(service && imageName && stackDeclaration.services."${service}".image != imageName) {
                     stackDeclaration.services."${service}".image = imageName
@@ -47,12 +59,6 @@ def call(Map args) {
                 if(imageUpdated) {
                     createSshDirWithGitKey(dir: HOME + '/.ssh')
                     sh """
-                        git config --global user.name 'jenkins'
-                        git config --global user.email 'jenkins@majordomo.ru'
-                        git stash
-                        git checkout master
-                        git pull origin master
-                        git stash pop
                         git add ${projectConfigFile}
                         git commit -m '${args.stack}/${service} image updated: ${imageName}'
                     """
