@@ -19,6 +19,7 @@ def call(String composeProject, Map args = [:]) {
 	}
         stages {
             stage("build") {
+                agent { label "jenkins" }
                 steps {
                     script {
                         (args.preBuild ?: { return true })()
@@ -43,7 +44,7 @@ def call(String composeProject, Map args = [:]) {
                     branch 'master'
                     beforeAgent true
                 }
-                agent { label composeProject }
+                agent { label "jenkins" }
                 steps {
                     script {
                         lock("docker-registry") {
