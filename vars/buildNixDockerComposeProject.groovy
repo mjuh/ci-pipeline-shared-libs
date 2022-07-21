@@ -3,13 +3,6 @@ def call(String composeProject, Map args = [:]) {
 
     pipeline {
         agent { label 'nixbld' }
-        parameters { string(name: 'dockerStacksRepoCommitId',
-                defaultValue: '',
-                description: "ID коммита в репозитории ${Constants.dockerStacksGitRepoUrl}, " +
-                        "если оставить пустым, при деплое будет использован последний коммит в master")
-            booleanParam(name: 'skipToDeploy',
-                    defaultValue: false,
-                    description: 'пропустить сборку и тестирование')}
         environment {
             GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
             GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
@@ -62,19 +55,13 @@ def call(String composeProject, Map args = [:]) {
 
                             // Deploy with docker-compose
                             if (GIT_BRANCH == "master") {
-                                if (args.stackDeploy) {
-                                    if (args.dockerStackServices == null) {
-                                        dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
-                                    } else {
-                                        dockerStackServices = args.dockerStackServices
-                                    }
+                                if (args.composeProject) {
                                     node(Constants.productionNodeLabel) {
                                         (args.services == null ? [ PROJECT_NAME ] : args.services).each { service ->
                                             dockerComposeDeploy (
                                                 project: composeProject,
                                                 service: service,
-                                                image: dockerImage,
-                                                dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                                                image: dockerImage
                                             )
                                         }
                                     }
