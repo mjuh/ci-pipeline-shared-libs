@@ -70,13 +70,14 @@ def call(String composeProject, Map args = [:]) {
                     sequentialCall (
                         nodeLabels: [composeProject],
                         procedure: { nodeLabels ->
+                            String projectConfigFile = "elk-" + env.NODE_NAME + ".yml"
                             ansiColor("xterm") {
                                 dockerComposeDeploy (
                                     project: composeProject,
                                     services: args.services == null ? [ PROJECT_NAME ] : args.services,
                                     image: dockerImage,
                                     dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
-                                    projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
+                                    projectConfigFile: projectConfigFile
                                 )
                             }
                         }
