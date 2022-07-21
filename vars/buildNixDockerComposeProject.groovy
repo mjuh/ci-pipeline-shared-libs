@@ -55,7 +55,7 @@ def call(String composeProject, Map args = [:]) {
 
                             // Deploy with docker-compose
                             if (GIT_BRANCH == "master") {
-                                if (args.composeProject) {
+                                if (composeProject) {
                                     node(Constants.productionNodeLabel) {
                                         (args.services == null ? [ PROJECT_NAME ] : args.services).each { service ->
                                             dockerComposeDeploy (
