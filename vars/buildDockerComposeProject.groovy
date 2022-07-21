@@ -61,7 +61,7 @@ def call(String composeProject, Map args = [:]) {
                     dockerPull image: dockerImage, nodeLabel: [composeProject]
                 }
             }
-            stage('Deploy services') {
+            stage('Deploy service') {
                 when {
                     branch 'master'
                     beforeAgent true
@@ -70,14 +70,13 @@ def call(String composeProject, Map args = [:]) {
                     sequentialCall (
                         nodeLabels: [composeProject],
                         procedure: { nodeLabels ->
-                            String projectConfigFile = "elk-" + env.NODE_NAME + ".yml"
                             ansiColor("xterm") {
                                 dockerComposeDeploy (
                                     project: composeProject,
-                                    services: args.services == null ? [ PROJECT_NAME ] : args.services,
+                                    service: PROJECT_NAME,
                                     image: dockerImage,
                                     dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
-                                    projectConfigFile: projectConfigFile
+                                    projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
                                 )
                             }
                         }
