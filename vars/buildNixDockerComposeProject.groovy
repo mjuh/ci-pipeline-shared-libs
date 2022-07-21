@@ -45,42 +45,44 @@ def call(String composeProject, Map args = [:]) {
                 }
                 agent { label composeProject }
                 steps {
-                    lock("docker-registry") {
-                        sh (nix.shell (run: ((["nix", "run"]
-                                              + Constants.nixFlags
-                                              + [".#deploy"]
-                                              + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                    script {
+                        lock("docker-registry") {
+                            sh (nix.shell (run: ((["nix", "run"]
+                                                  + Constants.nixFlags
+                                                  + [".#deploy"]
+                                                  + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
 
-                        dockerImage = new DockerImageTarball(
-                            imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitCommit().take(8)),
-                            path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
-                        )
+                            dockerImage = new DockerImageTarball(
+                                imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitCommit().take(8)),
+                                path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
+                            )
 
-                        // Deploy with docker-compose
-                        if (GIT_BRANCH == "master") {
-                            if (args.stackDeploy) {
-                                if (args.dockerStackServices == null) {
-                                    dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
-                                } else {
-                                    dockerStackServices = args.dockerStackServices
-                                }
-                                node(Constants.productionNodeLabel) {
-                                    (args.services == null ? [ PROJECT_NAME ] : args.services).each { service ->
-                                        dockerComposeDeploy (
-                                            project: composeProject,
-                                            service: service,
-                                            image: dockerImage,
-                                            dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
-                                        )
+                            // Deploy with docker-compose
+                            if (GIT_BRANCH == "master") {
+                                if (args.stackDeploy) {
+                                    if (args.dockerStackServices == null) {
+                                        dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
+                                    } else {
+                                        dockerStackServices = args.dockerStackServices
+                                    }
+                                    node(Constants.productionNodeLabel) {
+                                        (args.services == null ? [ PROJECT_NAME ] : args.services).each { service ->
+                                            dockerComposeDeploy (
+                                                project: composeProject,
+                                                service: service,
+                                                image: dockerImage,
+                                                dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                                            )
+                                        }
                                     }
                                 }
+                                nix.commitAndPushFlakeLock()
                             }
-                            nix.commitAndPushFlakeLock()
-                        }
 
-                        (args.postDeploy ?: { return true })([input: [
-                            image: dockerImage,
-                            PROJECT_NAME: GITLAB_PROJECT_NAME]])
+                            (args.postDeploy ?: { return true })([input: [
+                                image: dockerImage,
+                                PROJECT_NAME: GITLAB_PROJECT_NAME]])
+                        }
                     }
                 }
             }
