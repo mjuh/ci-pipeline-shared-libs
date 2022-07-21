@@ -28,8 +28,8 @@ def call(Map args) {
             def imageUpdated = false
 
             args.services.each { service ->
-                if(args.service && imageName && stackDeclaration.services."${args.service}".image != imageName) {
-                    stackDeclaration.services."${args.service}".image = imageName
+                if(service && imageName && stackDeclaration.services."${service}".image != imageName) {
+                    stackDeclaration.services."${service}".image = imageName
                     sh "rm -f ${projectConfigFile}"
                     writeYaml(file: projectConfigFile, data: stackDeclaration)
                     imageUpdated = true
@@ -37,12 +37,12 @@ def call(Map args) {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
                                   usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
                     sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
-                    def serviceDeclaration = stackDeclaration.services."${args.service}"
-                    if(!serviceDeclaration) { error "${args.service} is not declared in ${args.stack}.yml" }
-                    if(serviceRunning){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} stop ${args.service}" }
-                    if(serviceExists){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} rm -f ${args.service}" }
-                    sh "docker-compose -p ${args.project} -f ${projectConfigFile} create ${args.service}"
-                    sh "docker-compose -p ${args.project} -f ${projectConfigFile} start ${args.service}"
+                    def serviceDeclaration = stackDeclaration.services."${service}"
+                    if(!serviceDeclaration) { error "${service} is not declared in ${args.stack}.yml" }
+                    if(serviceRunning){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} stop ${service}" }
+                    if(serviceExists){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} rm -f ${service}" }
+                    sh "docker-compose -p ${args.project} -f ${projectConfigFile} create ${service}"
+                    sh "docker-compose -p ${args.project} -f ${projectConfigFile} start ${service}"
                 }
                 if(imageUpdated) {
                     createSshDirWithGitKey(dir: HOME + '/.ssh')
@@ -54,7 +54,7 @@ def call(Map args) {
                         git pull origin master
                         git stash pop
                         git add ${projectConfigFile}
-                        git commit -m '${args.stack}/${args.service} image updated: ${imageName}'
+                        git commit -m '${args.stack}/${service} image updated: ${imageName}'
                     """
                 }
             }
