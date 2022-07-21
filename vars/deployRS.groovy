@@ -91,24 +91,11 @@ def call(Map args = [:]) {
                             // WARNING: Try to dry activate only after BFG
                             // succeeded to check no credentials are leaked.
                             ansiColor("xterm") {
-                                if (args.sequential) {
-                                    applyToHostsSequentially({ host ->
-                                        ansiColor("xterm") {
-                                            sh ((["nix-shell --run",
-                                                  quoteString ((["deploy", "--skip-checks", "--dry-activate", ".#${host}", "--"]
-                                                                + Constants.nixFlags
-                                                                + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
-                                        }
-                                    },
-                                        hosts)
-                                } else {
-                                    sh ((["nix-shell --run",
-                                          quoteString ((["deploy", "--skip-checks", "--dry-activate", ".", "--"]
-                                                        + Constants.nixFlags
-                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
-                                }
+                                sh ((["nix-shell --run",
+                                      quoteString ((["deploy", "--skip-checks", "--dry-activate", ".", "--"]
+                                                    + Constants.nixFlags
+                                                    + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                    + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                             }
                         }
                     }
