@@ -38,7 +38,10 @@ def call(Map args) {
                                   usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
                     sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
                     def serviceDeclaration = stackDeclaration.services."${args.service}"
-                    if(!serviceDeclaration) { error "${args.service} is not declared in ${args.stack}.yml" }
+                    if(!serviceDeclaration) {
+                        this.binding.variables.each {k,v -> println "$k = $v"}
+                        error "${args.service} is not declared in ${args.stack}.yml"
+                    }
                     if(serviceRunning){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} stop ${args.service}" }
                     if(serviceExists){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} rm -f ${args.service}" }
                     sh "docker-compose -p ${args.project} -f ${projectConfigFile} create ${args.service}"
