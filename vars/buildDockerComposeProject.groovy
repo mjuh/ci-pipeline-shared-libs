@@ -61,7 +61,7 @@ def call(String composeProject, Map args = [:]) {
                     dockerPull image: dockerImage, nodeLabel: [composeProject]
                 }
             }
-            stage('Deploy service') {
+            stage('Deploy services') {
                 when {
                     branch 'master'
                     beforeAgent true
@@ -73,7 +73,7 @@ def call(String composeProject, Map args = [:]) {
                             ansiColor("xterm") {
                                 dockerComposeDeploy (
                                     project: composeProject,
-                                    service: PROJECT_NAME,
+                                    services: [ PROJECT_NAME ],
                                     image: dockerImage,
                                     dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
                                     projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
