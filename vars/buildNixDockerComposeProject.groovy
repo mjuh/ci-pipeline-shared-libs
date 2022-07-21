@@ -18,36 +18,24 @@ def call(String composeProject, Map args = [:]) {
             timeout(time: 2, unit: "HOURS")
 	}
         stages {
-            stage('Build Docker image') {
-                when {
-                    not { expression { return params.skipToDeploy } }
-                    beforeAgent true
-                }
+            stage("build") {
                 steps {
                     script {
-                        dockerImage =
-                            nixBuildDocker (namespace: GROUP_NAME,
-                                            name: PROJECT_NAME,
-                                            tag: gitHeadShort())
+                        (args.preBuild ?: { return true })()
+
+                        nixFlakeLockUpdate (inputs: ["ssl-certificates"])
+
+                        if (args.buildPhase) {
+                            ansiColor("xterm") {
+                                args.buildPhase(args)
+                            }
+                        } else {
+                            sh (nix.shell (run: ((["nix", "build"]
+                                                  + Constants.nixFlags
+                                                  + ["--out-link", "result/${env.JOB_NAME}/docker-${env.BUILD_NUMBER}", ".#container"]
+                                                  + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                        }
                     }
-                }
-            }
-            stage('Push Docker image') {
-                when {
-                    not { expression { return params.skipToDeploy } }
-                    beforeAgent true
-                }
-                steps {
-                    pushDocker image: dockerImage
-                }
-            }
-            stage('Pull Docker image') {
-                when {
-                    branch 'master'
-                    beforeAgent true
-                }
-                steps {
-                    dockerPull image: dockerImage, nodeLabel: [composeProject]
                 }
             }
             stage('Deploy service') {
@@ -57,27 +45,45 @@ def call(String composeProject, Map args = [:]) {
                 }
                 agent { label composeProject }
                 steps {
-                    script {
-                        (args.services == null ? [ PROJECT_NAME ] : args.services).each { service ->
-                            dockerComposeDeploy (
-                                project: composeProject,
-                                service: service,
-                                image: dockerImage,
-                                dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
-                            )
+                    lock("docker-registry") {
+                        sh (nix.shell (run: ((["nix", "run"]
+                                              + Constants.nixFlags
+                                              + [".#deploy"]
+                                              + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+
+                        dockerImage = new DockerImageTarball(
+                            imageName: (Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitCommit().take(8)),
+                            path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
+                        )
+
+                        // Deploy with docker-compose
+                        if (GIT_BRANCH == "master") {
+                            if (args.stackDeploy) {
+                                if (args.dockerStackServices == null) {
+                                    dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
+                                } else {
+                                    dockerStackServices = args.dockerStackServices
+                                }
+                                node(Constants.productionNodeLabel) {
+                                    (args.services == null ? [ PROJECT_NAME ] : args.services).each { service ->
+                                        dockerComposeDeploy (
+                                            project: composeProject,
+                                            service: service,
+                                            image: dockerImage,
+                                            dockerStacksRepoCommitId: params.dockerStacksRepoCommitId
+                                        )
+                                    }
+                                }
+                            }
+                            nix.commitAndPushFlakeLock()
                         }
-                    }
-                }
-                post {
-                    success {
-                        notifySlack "${GROUP_NAME}/${PROJECT_NAME} deployed to production"
+
+                        (args.postDeploy ?: { return true })([input: [
+                            image: dockerImage,
+                            PROJECT_NAME: GITLAB_PROJECT_NAME]])
                     }
                 }
             }
-        }
-        post {
-            success { cleanWs() }
-            failure { notifySlack "Build failled: ${JOB_NAME} [<${RUN_DISPLAY_URL}|${BUILD_NUMBER}>]", "red" }
         }
     }
 }
