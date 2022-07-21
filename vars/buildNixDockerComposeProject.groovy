@@ -56,16 +56,20 @@ def call(String composeProject, Map args = [:]) {
                             // Deploy with docker-compose
                             if (GIT_BRANCH == "master") {
                                 if (composeProject) {
-                                    node(Constants.productionNodeLabel) {
-                                        (args.services == null ? [ PROJECT_NAME ] : args.services).each { service ->
-                                            dockerComposeDeploy (
-                                                project: composeProject,
-                                                service: service,
-                                                image: dockerImage,
-                                                projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
-                                            )
+                                    sequentialCall (
+                                        nodeLabels: [composeProject],
+                                        procedure: { nodeLabels ->
+                                            ansiColor("xterm") {
+                                                dockerComposeDeploy (
+                                                    project: composeProject,
+                                                    service: PROJECT_NAME,
+                                                    image: dockerImage,
+                                                    dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
+                                                    projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
+                                                )
+                                            }
                                         }
-                                    }
+                                    )
                                 }
                                 nix.commitAndPushFlakeLock()
                             }
