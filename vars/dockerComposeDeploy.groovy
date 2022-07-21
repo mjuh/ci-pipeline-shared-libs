@@ -1,6 +1,6 @@
 def call(Map args) {
     assert args.project : "No project name provided"
-    assert args.service : "No service name provided"
+    assert args.services : "No services provided"
 
     def credentialsId = args.credentialsId ?: Constants.dockerRegistryCredId
     def registry = args.registry ?: Constants.dockerRegistryHost
@@ -27,34 +27,39 @@ def call(Map args) {
                                     script: "docker ps --format '{{.Names}}' --filter status=running").contains(containerNameBase)
             def imageUpdated = false
 
-            if(args.service && imageName && stackDeclaration.services."${args.service}".image != imageName) {
-                stackDeclaration.services."${args.service}".image = imageName
-                sh "rm -f ${projectConfigFile}"
-                writeYaml(file: projectConfigFile, data: stackDeclaration)
-                imageUpdated = true
-            }
-
-            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
-                              usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
-                sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
-                def serviceDeclaration = stackDeclaration.services."${args.service}"
-                if(!serviceDeclaration) { error "${args.service} is not declared in ${args.stack}.yml" }
-                if(serviceRunning){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} stop ${args.service}" }
-                if(serviceExists){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} rm -f ${args.service}" }
-                sh "docker-compose -p ${args.project} -f ${projectConfigFile} create ${args.service}"
-                sh "docker-compose -p ${args.project} -f ${projectConfigFile} start ${args.service}"
+            args.services.each { service ->
+                if(args.service && imageName && stackDeclaration.services."${args.service}".image != imageName) {
+                    stackDeclaration.services."${args.service}".image = imageName
+                    sh "rm -f ${projectConfigFile}"
+                    writeYaml(file: projectConfigFile, data: stackDeclaration)
+                    imageUpdated = true
                 }
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId,
+                                  usernameVariable: 'REGISTRY_USERNAME', passwordVariable: 'REGISTRY_PASSWORD']]) {
+                    sh "docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD ${registry}"
+                    def serviceDeclaration = stackDeclaration.services."${args.service}"
+                    if(!serviceDeclaration) { error "${args.service} is not declared in ${args.stack}.yml" }
+                    if(serviceRunning){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} stop ${args.service}" }
+                    if(serviceExists){ sh "docker-compose -p ${args.project} -f ${projectConfigFile} rm -f ${args.service}" }
+                    sh "docker-compose -p ${args.project} -f ${projectConfigFile} create ${args.service}"
+                    sh "docker-compose -p ${args.project} -f ${projectConfigFile} start ${args.service}"
+                }
+                if(imageUpdated) {
+                    createSshDirWithGitKey(dir: HOME + '/.ssh')
+                    sh """
+                        git config --global user.name 'jenkins'
+                        git config --global user.email 'jenkins@majordomo.ru'
+                        git stash
+                        git checkout master
+                        git pull origin master
+                        git stash pop
+                        git add ${projectConfigFile}
+                        git commit -m '${args.stack}/${args.service} image updated: ${imageName}'
+                    """
+                }
+            }
             if(imageUpdated) {
-                createSshDirWithGitKey(dir: HOME + '/.ssh')
                 sh """
-                    git config --global user.name 'jenkins'
-                    git config --global user.email 'jenkins@majordomo.ru'
-                    git stash
-                    git checkout master
-                    git pull origin master
-                    git stash pop
-                    git add ${projectConfigFile}
-                    git commit -m '${args.stack}/${args.service} image updated: ${imageName}'
                     git push origin master
                 """
             }
