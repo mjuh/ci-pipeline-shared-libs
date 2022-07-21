@@ -73,7 +73,7 @@ def call(String composeProject, Map args = [:]) {
                             ansiColor("xterm") {
                                 dockerComposeDeploy (
                                     project: composeProject,
-                                    services: [ PROJECT_NAME ],
+                                    services: args.services == null ? [ PROJECT_NAME ] : args.services,
                                     image: dockerImage,
                                     dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
                                     projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
