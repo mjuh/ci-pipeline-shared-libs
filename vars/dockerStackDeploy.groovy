@@ -72,6 +72,9 @@ def call(Map args) {
                     if(serviceDeclaration.ports) {
                         cmd += serviceDeclaration.ports.collect {"--publish-add ${it} "}.join()
                     }
+                    if(serviceDeclaration.tmpfs) {
+                        cmd += serviceDeclaration.ports.collect {"--tmpfs ${it} "}.join()
+                    }
                     if(serviceDeclaration.environment) {
                         cmd += serviceDeclaration.environment.collect {"--env-add ${it} "}.join()
                     }
