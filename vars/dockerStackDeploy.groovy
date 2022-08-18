@@ -73,7 +73,7 @@ def call(Map args) {
                         cmd += serviceDeclaration.ports.collect {"--publish-add ${it} "}.join()
                     }
                     if(serviceDeclaration.tmpfs) {
-                        cmd += serviceDeclaration.tmpfs.collect {"--tmpfs ${it} "}.join()
+                        echo "Warning: 'docker service update' does not handle tmpfs declaration, use 'docker stack deploy' instead."
                     }
                     if(serviceDeclaration.environment) {
                         cmd += serviceDeclaration.environment.collect {"--env-add ${it} "}.join()
