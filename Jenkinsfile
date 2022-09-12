@@ -1,3 +1,6 @@
+def lib = library('mj-shared-library')
+def Constants = lib.Constants.new()
+
 pipeline {
     agent { label "jenkins" }
     options  {
