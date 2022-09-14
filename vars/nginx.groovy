@@ -52,7 +52,7 @@ def Switch(String apipath) {
 
     println(nginx.dump())
 
-    println(credentials('nginx-auth-pass'))
+    println(credentials('nginx-auth-pass').dump())
 
     nginx = new RESTClient(Constants.nginx2ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
