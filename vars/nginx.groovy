@@ -54,6 +54,19 @@ def Switch(String apipath) {
 
     println(credentials('nginx-auth-pass').dump())
 
+    // define the secrets and the env variables
+    // engine version can be defined on secret, job, folder or global.
+    // the default is engine version 2 unless otherwise specified globally.
+    def secrets = [[path: 'secret/admin.majordomo.ru/admin',
+                    engineVersion: 2,
+                    secretValues: [[vaultKey: 'username'], [vaultKey: 'password']]]]
+
+    // inside this block your credentials will be available as env variables
+    withVault([vaultSecrets: secrets]) {
+        sh 'echo $username $password > /tmp/out2.txt'
+    }
+
+
     withCredentials([
         usernamePassword(credentialsId: 'nginx-auth-pass',
                          usernameVariable: 'username',
