@@ -52,7 +52,7 @@ def Switch(String apipath) {
 
     println(nginx.dump())
 
-    println(credentials('nginx-auth-pass').dump())
+    // println(credentials('nginx-auth-pass').dump())
 
     // define the secrets and the env variables
     // engine version can be defined on secret, job, folder or global.
