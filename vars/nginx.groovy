@@ -51,10 +51,10 @@ def Switch(String apipath) {
     nginx = new RESTClient(Constants.nginx2ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
 
-    resp = nginx.post(
-            path: apipath,
-            body: json,
-            requestContentType: URLENC)
+    // resp = nginx.post(
+    //         path: apipath,
+    //         body: json,
+    //         requestContentType: URLENC)
 
     // assert resp.status == 200
 
