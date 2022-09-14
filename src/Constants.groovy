@@ -36,10 +36,9 @@ public class Constants {
     public static final String githubOrganization = 'mjuh'
 
     public static final ArrayList<String> securityTeam = [
-        "ostapchuk@majordomo.ru",
+        "lyashenko@majordomo.ru",
         "pyhalov@majordomo.ru",
-        "rezvov@majordomo.ru",
-        "sidorov@majordomo.ru"
+        "zelinskiy@majordomo.ru"
     ]
 
     public static final String nixOverlay = 'git@gitlab.intr:_ci/nixpkgs.git'
