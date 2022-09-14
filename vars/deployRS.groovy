@@ -126,7 +126,7 @@ def call(Map args = [:]) {
                             } else {
                                 ansiColor("xterm") {
                                     sh ((["nix-shell --run",
-                                          quoteString ((["deploy", ".", "--"]
+                                          quoteString ((["deploy", (args.flake == null ? "." : args.flake), "--"]
                                                         + Constants.nixFlags
                                                         + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                         + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
