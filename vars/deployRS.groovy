@@ -92,7 +92,7 @@ def call(Map args = [:]) {
                             // succeeded to check no credentials are leaked.
                             ansiColor("xterm") {
                                 sh ((["nix-shell --run",
-                                      quoteString ((["deploy", "--skip-checks", "--dry-activate", (args.flake == null ? "." : args.flake), "--"]
+                                      quoteString ((["deploy", "--skip-checks", "--dry-activate", ".", "--"]
                                                     + Constants.nixFlags
                                                     + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                     + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
@@ -116,7 +116,7 @@ def call(Map args = [:]) {
                                 applyToHostsSequentially({ host ->
                                         ansiColor("xterm") {
                                             sh ((["nix-shell --run",
-                                                  quoteString ((["deploy", "--skip-checks", "--debug-logs", ".#${host}", "--"]
+                                                  quoteString ((["deploy", "--skip-checks", "--debug-logs", (args.flake == null ? ".#${host}" : args.flake), "--"]
                                                                 + Constants.nixFlags
                                                                 + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                                 + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
