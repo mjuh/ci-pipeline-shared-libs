@@ -92,7 +92,7 @@ def call(Map args = [:]) {
                             // succeeded to check no credentials are leaked.
                             ansiColor("xterm") {
                                 sh ((["nix-shell --run",
-                                      quoteString ((["deploy", "--skip-checks", "--dry-activate", ".", "--"]
+                                      quoteString ((["deploy", "--skip-checks", "--dry-activate", (args.flake == null ? "." : args.flake), "--"]
                                                     + Constants.nixFlags
                                                     + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                     + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
