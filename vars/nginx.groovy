@@ -64,7 +64,7 @@ def Switch(String apipath) {
 
     // inside this block your credentials will be available as env variables
     withVault([vaultSecrets: secrets]) {
-        sh 'echo $username $password > /tmp/out2.txt'
+        println(username)
     }
 
     nginx = new RESTClient(Constants.nginx2ApiUrl)
