@@ -48,6 +48,8 @@ def Switch(String apipath) {
 
     // assert resp.status == 200
 
+    println(nginx.get(path: apipath, requestContentType: URLENC))
+
     println(nginx.dump())
 
     nginx = new RESTClient(Constants.nginx2ApiUrl)
