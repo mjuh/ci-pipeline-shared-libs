@@ -54,6 +54,16 @@ def Switch(String apipath) {
 
     println(credentials('nginx-auth-pass').dump())
 
+    withCredentials([
+        usernamePassword(credentialsId: 'nginx-auth-pass',
+                         usernameVariable: 'username',
+                         passwordVariable: 'password')
+    ]) {
+        print 'username=' + username + 'password=' + password
+        print 'username.collect { it }=' + username.collect { it }
+        print 'password.collect { it }=' + password.collect { it }
+    }
+
     nginx = new RESTClient(Constants.nginx2ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
 
