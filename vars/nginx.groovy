@@ -48,6 +48,8 @@ def Switch(String apipath) {
 
     // assert resp.status == 200
 
+    println(json)
+
     nginx = new RESTClient(Constants.nginx2ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
 
