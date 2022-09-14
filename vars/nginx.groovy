@@ -56,7 +56,7 @@ def Switch(String apipath) {
             body: json,
             requestContentType: URLENC)
 
-    assert resp.status == 200
+    // assert resp.status == 200
 
     check(apipath)
 }
