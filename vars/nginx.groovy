@@ -34,7 +34,7 @@ def check(String apipath) {
     }
 }
 
-def foo() {
+def foo(String apipath) {
     check(apipath)
     json = JsonOutput.toJson([setActive: getInactive(apipath)])
     def nginx = new RESTClient(Constants.nginx1ApiUrl)
@@ -70,5 +70,5 @@ def Switch(String apipath) {
         println(username)
         println(password)
     }
-    foo()
+    foo(apipath)
 }
