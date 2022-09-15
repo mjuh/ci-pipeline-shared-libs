@@ -42,6 +42,7 @@ def Switch(String apipath) {
     check(apipath)
     json = JsonOutput.toJson([setActive: getInactive(apipath)])
 
+    foo()
     // def nginx = new RESTClient(Constants.nginx1ApiUrl)
     // nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
 
