@@ -68,7 +68,7 @@ def Switch(String apipath) {
     // inside this block your credentials will be available as env variables
     withVault([vaultSecrets: secrets]) {
         println(username)
-        println(password)
+        // println(password)
     }
     foo(apipath)
 }
