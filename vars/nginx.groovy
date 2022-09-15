@@ -18,6 +18,7 @@ def getInactive(String apipath) {
     (hms.available - hms.active)[0]
 }
 
+@NonCPS
 def vault() {
     // define the secrets and the env variables
     // engine version can be defined on secret, job, folder or global.
