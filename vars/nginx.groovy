@@ -3,7 +3,6 @@ import groovyx.net.http.RESTClient
 import groovy.json.JsonOutput
 import static groovyx.net.http.ContentType.URLENC
 
-@NonCPS
 def getActive(String apipath) {
     def nginx = new RESTClient(Constants.nginx1ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
@@ -11,7 +10,6 @@ def getActive(String apipath) {
     (hms.available - hms.inactive)[0]
 }
 
-@NonCPS
 def getInactive(String apipath) {
     check(apipath)
     def nginx = new RESTClient(Constants.nginx1ApiUrl)
@@ -31,15 +29,12 @@ def vault() {
                                    [vaultKey: 'password']]]]
 
     // inside this block your credentials will be available as env variables
-
-    @NonCPS
     withVault([vaultSecrets: secrets]) {
         [username, password]
     }
 
 }
 
-@NonCPS
 def check(String apipath) {
     def nginx1 = new RESTClient(Constants.nginx1ApiUrl)
     nginx1.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
@@ -56,7 +51,6 @@ def check(String apipath) {
     }
 }
 
-@NonCPS
 def Switch(String apipath) {
     check(apipath)
     json = JsonOutput.toJson([setActive: getInactive(apipath)])
