@@ -55,9 +55,9 @@ def Request(String apipath, String username, String password) {
     //         requestContentType: URLENC)
     // assert resp.status == 200
     check(apipath)
-    echo foo
-    echo username
-    echo password
+    println("foo")
+    println(username)
+    println(password)
 }
 
 def Switch(String apipath) { 
