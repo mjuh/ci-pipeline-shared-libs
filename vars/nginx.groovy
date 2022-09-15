@@ -62,14 +62,6 @@ def Switch(String apipath) {
                     secretValues: [[vaultKey: 'username'],
                                    [vaultKey: 'password']]]]
 
-    stage("foo")
-    {
-        // inside this block your credentials will be available as env variables
-        withVault([vaultSecrets: secrets]) {
-            println(username)
-            println(password)
-        }
-    }
     nginx = new RESTClient(Constants.nginx2ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
 
