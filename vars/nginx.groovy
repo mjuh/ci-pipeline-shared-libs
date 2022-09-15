@@ -35,6 +35,7 @@ def vault() {
 
 }
 
+@NonCPS
 def check(String apipath) {
     def nginx1 = new RESTClient(Constants.nginx1ApiUrl)
     nginx1.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
