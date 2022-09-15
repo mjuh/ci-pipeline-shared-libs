@@ -68,7 +68,7 @@ def Switch(String apipath) {
 
     println(nginx.dump())
 
-    vault()
+    // vault()
 
     // println(credentials('nginx-auth-pass').dump())
 
