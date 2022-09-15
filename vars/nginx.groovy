@@ -18,22 +18,6 @@ def getInactive(String apipath) {
     (hms.available - hms.active)[0]
 }
 
-def vault() {
-    // define the secrets and the env variables
-    // engine version can be defined on secret, job, folder or global.
-    // the default is engine version 2 unless otherwise specified globally.
-    def secrets = [[path: 'secret/vaultPass/majordomo/nginx1.intr',
-                    engineVersion: 2,
-                    secretValues: [[vaultKey: 'username'],
-                                   [vaultKey: 'password']]]]
-
-    // inside this block your credentials will be available as env variables
-    withVault([vaultSecrets: secrets]) {
-        [username, password]
-    }
-
-}
-
 def check(String apipath) {
     def nginx1 = new RESTClient(Constants.nginx1ApiUrl)
     nginx1.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
