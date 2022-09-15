@@ -51,6 +51,7 @@ def check(String apipath) {
     }
 }
 
+@NonCPS
 def Switch(String apipath) {
     check(apipath)
     json = JsonOutput.toJson([setActive: getInactive(apipath)])
