@@ -34,7 +34,7 @@ def check(String apipath) {
     }
 }
 
-def Switch(String apipath) {
+def Switch(String apipath) { stage("foo") {
     check(apipath)
     json = JsonOutput.toJson([setActive: getInactive(apipath)])
 
@@ -65,5 +65,5 @@ def Switch(String apipath) {
     // assert resp.status == 200
 
     check(apipath)
-}
+}}
 
