@@ -69,8 +69,16 @@ def Switch(String apipath) {
                     secretValues: [[vaultKey: 'username'],
                                    [vaultKey: 'password']]]]
     // inside this block your credentials will be available as env variables
-    withVault([vaultSecrets: secrets]) {
-        Request(apipath, username, password)        
-        // println(password)
+    // withVault([vaultSecrets: secrets]) {
+    //     Request(apipath, username, password)        
+    //     // println(password)
+    // }
+
+    withCredentials([usernamePassword(credentialsId: 'nginx-auth-pass',
+                                      passwordVariable: 'password',
+                                      usernameVariable: 'username')]) {
+        println("bar")
+        println(username)
+        println(password)
     }
 }
