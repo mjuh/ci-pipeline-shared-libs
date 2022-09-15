@@ -31,6 +31,8 @@ def vault() {
                                    [vaultKey: 'password']]]]
 
     // inside this block your credentials will be available as env variables
+
+    @NonCPS
     withVault([vaultSecrets: secrets]) {
         [username, password]
     }
