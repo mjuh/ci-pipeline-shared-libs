@@ -70,4 +70,5 @@ def Switch(String apipath) {
         println(username)
         println(password)
     }
+    foo()
 }
