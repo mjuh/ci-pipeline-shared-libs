@@ -35,51 +35,51 @@ def check(String apipath) {
 }
 
 def Switch(String apipath) { stage("foo") {
-    check(apipath)
-    json = JsonOutput.toJson([setActive: getInactive(apipath)])
+    // check(apipath)
+    // json = JsonOutput.toJson([setActive: getInactive(apipath)])
 
-    def nginx = new RESTClient(Constants.nginx1ApiUrl)
-    nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
+    // def nginx = new RESTClient(Constants.nginx1ApiUrl)
+    // nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
 
-    // def resp = nginx.post(
-    //         path: apipath,
-    //         body: json,
-    //         requestContentType: URLENC)
+    // // def resp = nginx.post(
+    // //         path: apipath,
+    // //         body: json,
+    // //         requestContentType: URLENC)
 
-    // assert resp.status == 200
+    // // assert resp.status == 200
 
-    println(nginx.get(path: apipath, requestContentType: URLENC).data)
+    // println(nginx.get(path: apipath, requestContentType: URLENC).data)
 
-    println(nginx.dump())
-
-
-    // // define the secrets and the env variables
-    // // engine version can be defined on secret, job, folder or global.
-    // // the default is engine version 2 unless otherwise specified globally.
-    // def secrets = [[path: 'secret/vaultPass/majordomo/nginx1.intr',
-    //                 engineVersion: 2,
-    //                 secretValues: [[vaultKey: 'username'],
-    //                                [vaultKey: 'password']]]]
-
-    // // inside this block your credentials will be available as env variables
-    // withVault([vaultSecrets: secrets]) {
-    //     println(username)
-    //     println(password)
-    // }
+    // println(nginx.dump())
 
 
-    // println(credentials('nginx-auth-pass').dump())
+    // define the secrets and the env variables
+    // engine version can be defined on secret, job, folder or global.
+    // the default is engine version 2 unless otherwise specified globally.
+    def secrets = [[path: 'secret/vaultPass/majordomo/nginx1.intr',
+                    engineVersion: 2,
+                    secretValues: [[vaultKey: 'username'],
+                                   [vaultKey: 'password']]]]
 
-    nginx = new RESTClient(Constants.nginx2ApiUrl)
-    nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
+    // inside this block your credentials will be available as env variables
+    withVault([vaultSecrets: secrets]) {
+        println(username)
+        println(password)
+    }
 
-    // resp = nginx.post(
-    //         path: apipath,
-    //         body: json,
-    //         requestContentType: URLENC)
 
-    // assert resp.status == 200
+    // // println(credentials('nginx-auth-pass').dump())
 
-    check(apipath)
+    // nginx = new RESTClient(Constants.nginx2ApiUrl)
+    // nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
+
+    // // resp = nginx.post(
+    // //         path: apipath,
+    // //         body: json,
+    // //         requestContentType: URLENC)
+
+    // // assert resp.status == 200
+
+    // check(apipath)
 }}
 
