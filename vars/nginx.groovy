@@ -29,8 +29,7 @@ def vault() {
 
     // inside this block your credentials will be available as env variables
     withVault([vaultSecrets: secrets]) {
-        println(username)
-        println(password)
+        [username, password]
     }
 
 }
@@ -69,7 +68,7 @@ def Switch(String apipath) {
 
     println(nginx.dump())
 
-    vault()
+    println(vault())
 
     // println(credentials('nginx-auth-pass').dump())
 
