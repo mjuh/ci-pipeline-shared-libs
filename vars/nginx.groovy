@@ -47,6 +47,9 @@ def Request(String apipath, String username, String password) {
     println(nginx.get(path: apipath, requestContentType: URLENC).data)
     println(nginx.dump())
     // println(credentials('nginx-auth-pass').dump())
+    println("foo")
+    println(username)
+    println(password)
     nginx = new RESTClient(Constants.nginx2ApiUrl)
     nginx.auth.basic Constants.nginxAuthUser, Constants.nginxAuthPass
     // resp = nginx.post(
@@ -55,9 +58,6 @@ def Request(String apipath, String username, String password) {
     //         requestContentType: URLENC)
     // assert resp.status == 200
     check(apipath)
-    println("foo")
-    println(username)
-    println(password)
 }
 
 def Switch(String apipath) { 
