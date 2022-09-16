@@ -141,10 +141,5 @@ def call(Map args = [:]) {
                 }
             }
         }
-        post {
-            always {
-                sendNotifications currentBuild.result
-            }
-        }
     }
 }
