@@ -137,6 +137,7 @@ def call(Map args = [:]) {
                         else {
                             args.deployPhase(args)
                         }
+                        (args.postDeploy ?: { return true })()
                     }
                 }
             }
