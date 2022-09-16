@@ -65,7 +65,7 @@ def call(String composeProject, Map args = [:]) {
                                                     service: GITLAB_PROJECT_NAME,
                                                     image: dockerImage,
                                                     dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
-                                                    projectConfigFile: "elk-" + env.NODE_NAME + ".yml"
+                                                    projectConfigFile: composeProject + "-" + env.NODE_NAME + ".yml"
                                                 )
                                             }
                                         }
