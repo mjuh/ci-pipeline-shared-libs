@@ -11,7 +11,7 @@ def getActive(String apipath, String username, String password) {
 }
 
 def getInactive(String apipath, String username, String password) {
-    check(apipath)
+    check(apipath, username, password)
     def nginx = new RESTClient(Constants.nginx1ApiUrl)
     nginx.auth.basic username, password
     def hms = nginx.get(path: apipath).data
