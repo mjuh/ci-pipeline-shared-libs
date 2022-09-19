@@ -35,8 +35,8 @@ def check(String apipath, String username, String password) {
 }
 
 def request(String apipath, String username, String password) {
-    check(apipath)
-    json = JsonOutput.toJson([setActive: getInactive(apipath)])
+    check(apipath, username, password)
+    json = JsonOutput.toJson([setActive: getInactive(apipath, username, password)])
 
     def nginx = new RESTClient(Constants.nginx1ApiUrl)
     nginx.auth.basic username, password
@@ -58,7 +58,7 @@ def request(String apipath, String username, String password) {
 
     assert resp.status == 200
 
-    check(apipath)
+    check(apipath, username, password)
 }
 
 def Switch(String apipath) {
@@ -66,5 +66,13 @@ def Switch(String apipath) {
                                       passwordVariable: 'password',
                                       usernameVariable: 'username')]) {
         request(apipath, username, password)
+    }
+}
+
+def Inactive(String apipath) {
+    withCredentials([usernamePassword(credentialsId: 'nginx-auth-pass',
+                                      passwordVariable: 'password',
+                                      usernameVariable: 'username')]) {
+        getInactive(apipath, username, password)
     }
 }

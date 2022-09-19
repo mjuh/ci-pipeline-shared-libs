@@ -156,7 +156,7 @@ def call(def Map args = [:]) {
                 agent { label Constants.productionNodeLabel }
                 steps {
                     dockerStackDeploy (
-                        stack: nginx.getInactive("/hms"),
+                        stack: nginx.Inactive("/hms"),
                         service: GITLAB_PROJECT_NAME,
                         image: dockerImage,
                         stackConfigFile: "hms.yml",
