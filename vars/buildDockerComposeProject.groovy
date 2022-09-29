@@ -15,6 +15,7 @@ def call(String composeProject, Map args = [:]) {
             GROUP_NAME = jenkinsJob.getGroup(env.JOB_NAME)
         }
         options {
+            disableConcurrentBuilds()
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         }
         stages {
