@@ -17,6 +17,7 @@ def call(String composeProject, Map args = [:]) {
         options {
             disableConcurrentBuilds()
             buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+            timeout(time: 3, unit: "HOURS")
         }
         stages {
             stage('Build Docker image') {
