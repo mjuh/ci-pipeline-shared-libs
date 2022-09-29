@@ -69,20 +69,30 @@ def call(String composeProject, Map args = [:]) {
                     beforeAgent true
                 }
                 steps {
-                    sequentialCall (
-                        nodeLabels: [composeProject],
-                        procedure: { nodeLabels ->
-                            ansiColor("xterm") {
-                                dockerComposeDeploy (
-                                    project: composeProject,
-                                    service: PROJECT_NAME,
-                                    image: dockerImage,
-                                    dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
-                                    projectConfigFile: PROJECT_NAME + "-" + env.NODE_NAME + ".yml"
-                                )
-                            }
+                    script {
+                        if (params.skipToDeploy == null) {
+                            imageName = Constants.dockerRegistryHost + "/" + GITLAB_PROJECT_NAMESPACE + "/" + GITLAB_PROJECT_NAME + ":" + gitCommit().take(8)
+                            echo "imageName: ${imageName}"
+                            dockerImage = new DockerImageTarball(
+                                imageName: imageName,
+                                path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
+                            )
                         }
-                    )
+                        sequentialCall (
+                            nodeLabels: [composeProject],
+                            procedure: { nodeLabels ->
+                                ansiColor("xterm") {
+                                    dockerComposeDeploy (
+                                        project: composeProject,
+                                        service: PROJECT_NAME,
+                                        image: dockerImage,
+                                        dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
+                                        projectConfigFile: PROJECT_NAME + "-" + env.NODE_NAME + ".yml"
+                                    )
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
