@@ -69,12 +69,5 @@ def call(Map args = [:]) {
                 }
             } 
         } 
-        post {
-            success { cleanWs() }
-            always {
-                sendSlackNotifications (buildStatus: currentBuild.result,
-                                        threadMessages: slackMessages)
-            }
-        }
     }
 }
