@@ -64,7 +64,8 @@ def call(Map args = [:]) {
                     script {
                         (args.deploy ?: { return false })([input: [
                                     image: dockerImage,
-                                    PROJECT_NAME: PROJECT_NAME]])
+                            PROJECT_NAME: PROJECT_NAME]])
+                        (args.postDeploy ?: { return true })()
                     }
                 }
             } 
