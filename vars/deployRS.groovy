@@ -121,7 +121,7 @@ def call(Map args = [:]) {
                                                   quoteString ((["deploy", "--skip-checks", "--debug-logs"]
                                                                 + (args.deployRsOptions == null ? [] : args.deployRsOptions)
                                                                 + (args.flake == null ? ".#${host}" : args.flake)
-                                                                ["--"]
+                                                                + ["--"]
                                                                 + Constants.nixFlags
                                                                 + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                                 + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
