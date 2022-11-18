@@ -82,13 +82,25 @@ def call(String composeProject, Map args = [:]) {
                             nodeLabels: [composeProject],
                             procedure: { nodeLabels ->
                                 ansiColor("xterm") {
-                                    dockerComposeDeploy (
-                                        project: composeProject,
-                                        service: PROJECT_NAME,
-                                        image: dockerImage,
-                                        dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
-                                        projectConfigFile: PROJECT_NAME + "-" + env.NODE_NAME + ".yml"
-                                    )
+                                    if (args.services == null) {
+                                        dockerComposeDeploy (
+                                            project: composeProject,
+                                            service: PROJECT_NAME,
+                                            image: dockerImage,
+                                            dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
+                                            projectConfigFile: PROJECT_NAME + "-" + env.NODE_NAME + ".yml"
+                                        )
+                                    } else {
+                                        args.service.each { service ->
+                                            dockerComposeDeploy (
+                                                project: composeProject,
+                                                service: service,
+                                                image: dockerImage,
+                                                dockerStacksRepoCommitId: params.dockerStacksRepoCommitId,
+                                                projectConfigFile: PROJECT_NAME + "-" + env.NODE_NAME + ".yml"
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         )
