@@ -91,7 +91,7 @@ def call(String composeProject, Map args = [:]) {
                                             projectConfigFile: PROJECT_NAME + "-" + env.NODE_NAME + ".yml"
                                         )
                                     } else {
-                                        args.service.each { service ->
+                                        args.services.each { service ->
                                             dockerComposeDeploy (
                                                 project: composeProject,
                                                 service: service,
