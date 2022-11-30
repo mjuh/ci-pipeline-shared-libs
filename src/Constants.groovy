@@ -48,4 +48,6 @@ public class Constants {
     public static final String kvmTemplates = "git+https://gitlab.intr/kvm-templates/packer"
 
     public static final String bfgJobName = "_ci/_ci%252Fbfg"
+
+    public static final String backupHost = "backup.intr"
 }
