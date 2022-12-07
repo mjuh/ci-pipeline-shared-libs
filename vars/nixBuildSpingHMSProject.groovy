@@ -84,7 +84,7 @@ def call(def Map args = [:]) {
                             )
                             node(Constants.productionNodeLabel) {
                                 dockerStackDeploy (
-                                    stack: nginx.getInactive("/hms"),
+                                    stack: nginx.Inactive("/hms"),
                                     service: GITLAB_PROJECT_NAME,
                                     image: dockerImage,
                                     stackConfigFile: "hms.yml",
