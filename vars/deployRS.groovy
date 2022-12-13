@@ -40,6 +40,7 @@ def call(Map args = [:]) {
         options {
             disableConcurrentBuilds()
             timeout(time: 3, unit: "HOURS")
+            timestamps()
             ansiColor('xterm')
 	}
         environment {
