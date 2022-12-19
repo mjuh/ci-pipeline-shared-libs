@@ -10,6 +10,7 @@ def call(def Map args = [:]) {
             GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
             GRADLE_OPTS = "${GRADLE_OPTS}"
             GRADLE_USER_HOME = ".gradle"
+            HOME = "."
         }
         parameters {
             string(
