@@ -52,7 +52,8 @@ def call(def Map args = [:]) {
                 }
                 steps {
                     script { (args.preBuild ?: { return true })() }
-                    sh "java -version; gradle -version"
+                    sh "type -p java; java -version"
+                    sh "type -p gradle; gradle -version"
                     sh ((["gradle", "build"] + (args.gradleOptions == null ? [] : args.gradleOptions)).join(" "))
                 }
             }
