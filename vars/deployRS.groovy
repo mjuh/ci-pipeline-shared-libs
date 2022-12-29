@@ -95,6 +95,7 @@ def call(Map args = [:]) {
                                                 + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                 + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                         }
+                        (args.postTests ?: { return true })()
                     }
                 }
             }
