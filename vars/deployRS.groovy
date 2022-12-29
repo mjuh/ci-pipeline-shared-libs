@@ -142,5 +142,12 @@ def call(Map args = [:]) {
                 }
             }
         }
+        post {
+            always {
+                script {
+                    (args.always ?: { return true })()
+                }
+            }
+        }
     }
 }
