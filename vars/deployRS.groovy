@@ -115,7 +115,7 @@ def call(Map args = [:]) {
                                     sh ((["nix-shell --run",
                                           quoteString ((["deploy", "--skip-checks", "--debug-logs"]
                                                         + (args.deployRsOptions == null ? [] : args.deployRsOptions)
-                                                        + (args.flake == null ? ".#\"${host}\"." : args.flake)
+                                                        + (args.flake == null ? ".#\\\"${host}\\\"." : args.flake)
                                                         + ["--"]
                                                         + Constants.nixFlags
                                                         + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
