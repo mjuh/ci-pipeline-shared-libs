@@ -50,8 +50,11 @@ def call(Map args = [:]) {
         stages {
             stage("update") {
                 steps {
-                    script { (args.preBuild ?: { return true })() }
-                    nixFlakeLockUpdate (inputs: ["ssl-certificates"])
+                    script {
+                        (args.preBuild ?: { return true })()
+                        nixFlakeLockUpdate (inputs: ["ssl-certificates"])
+                        (args.postBuild ?: { return true })()
+                    }
                 }
             }
             stage("tests") {
