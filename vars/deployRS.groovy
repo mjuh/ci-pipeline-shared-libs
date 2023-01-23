@@ -115,6 +115,7 @@ def call(Map args = [:]) {
                         if (args.deployPhase == null) {
                             if (args.sequential) {
                                 applyToHostsSequentially({ host ->
+                                    (args.preHostDeploy ?: { return true })([host: host])
                                     sh ((["nix-shell --run",
                                           quoteString ((["deploy", "--skip-checks", "--debug-logs"]
                                                         + (args.deployRsOptions == null ? [] : args.deployRsOptions)
@@ -123,6 +124,7 @@ def call(Map args = [:]) {
                                                         + Constants.nixFlags
                                                         + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                         + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                    (args.postHostDeploy ?: { return true })([host: host])
                                 },
                                     hosts)
                             } else {
