@@ -39,6 +39,7 @@ def call(Map args = [:]) {
                     ansiColor("xterm") {
                         script {
                             sh (nix.shell(run: "deploy . -- --print-build-logs"))
+                            (args.postDeploy ?: { return true })()
                         }
                     }
                 }
