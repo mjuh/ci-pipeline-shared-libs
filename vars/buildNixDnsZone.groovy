@@ -1,6 +1,6 @@
 def call(Map args = [:]) {
     pipeline {
-        agent { label "master" }
+        agent { label "jenkins" }
         environment {
             GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
         }
