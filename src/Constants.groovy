@@ -50,4 +50,6 @@ public class Constants {
     public static final String bfgJobName = "_ci/_ci%252Fbfg"
 
     public static final String backupHost = "backup.intr"
+
+    public static final ArrayList<String> kubernetesClusters = ["cluster1", "cluster2"]
 }

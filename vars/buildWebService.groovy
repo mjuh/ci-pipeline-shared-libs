@@ -1,6 +1,10 @@
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 import groovy.json.JsonOutput
 
+def kustomize(command) {
+    sh "nix develop git+https://gitlab.intr/nixos/kubernetes --command kustomize ${command.join(" ")}"
+}
+
 def call(Map args = [:]) {
     def slackMessages = [];
 
@@ -46,6 +50,7 @@ def call(Map args = [:]) {
                             return 0
                         }
                         (args.preTest ?: { return true })([result: result, imageName: imageName])
+                        commit = gitCommit().take(8)
                         parallel (["nix flake check": {
                                      ansiColor("xterm") {
                                          sh (nix.shell (run: ((["nix flake check"]
@@ -57,7 +62,7 @@ def call(Map args = [:]) {
                                       if (fileExists ("container-structure-test.yaml")) {
                                           containerStructureTest (namespace: GITLAB_PROJECT_NAMESPACE,
                                                                   name: GITLAB_PROJECT_NAME,
-                                                                  tag: gitCommit().take(8))
+                                                                  tag: commit)
                                       } else {
                                           return true
                                       }
@@ -93,33 +98,58 @@ def call(Map args = [:]) {
                                 imageName: imageName,
                                 path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
                             )
+                        }
 
-                            // Deploy to Docker Swarm
-                            if (GIT_BRANCH == "master") {
-                                if (args.stackDeploy) {
-                                    if (args.dockerStackServices == null) {
-                                        dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
-                                    } else {
-                                        dockerStackServices = args.dockerStackServices
-                                    }
-                                    node(Constants.productionNodeLabel) {
-                                        dockerStackServices.each { service ->
-                                            slackMessages += dockerStackDeploy (
-                                                stack: GITLAB_PROJECT_NAMESPACE,
-                                                service: service,
-                                                image: dockerImage
-                                            )
-                                            slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
+                        if (true) { //GIT_BRANCH == "master"
+                            // Deploy to Kubernetes via FluxCD.
+                            if (args.fluxcd.enabled) {
+                                lock("git@gitlab.intr:cd/fluxcd") {
+                                    dir("fluxcd") {
+                                        checkout([$class: 'GitSCM',
+                                                  userRemoteConfigs: [[url: "git@gitlab.intr:cd/fluxcd"]]])
+                                        (args.fluxcd.clusters ? args.fluxcd.clusters : Constants.kubernetesClusters).each { cluster ->
+                                            dir("${args.fluxcd.type}/${cluster}/${args.fluxcd.project.name}") {
+                                                sh "git reset --hard origin/master"
+                                                kustomize(["edit", "set", "image", imageName])
+                                                sh """
+                                                       if ! git diff --exit-code kustomization.yaml
+                                                       then
+                                                           git add kustomization.yaml
+                                                           git commit --message='infrastructure: ${cluster}: nixos: Update image to ${imageName}.'
+                                                           git push --verbose origin HEAD:refs/heads/${args.fluxcd.type}-${cluster}-${args.fluxcd.project.name}-${commit}
+                                                       fi
+                                                       """
+                                            }
                                         }
                                     }
                                 }
-                                nix.commitAndPushFlakeLock()
                             }
 
-                            (args.postDeploy ?: { return true })([input: [
-                                image: dockerImage,
-                                PROJECT_NAME: GITLAB_PROJECT_NAME]])
+                            // Deploy to Docker Swarm.
+                            if (args.stackDeploy) {
+                                if (args.dockerStackServices == null) {
+                                    dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
+                                } else {
+                                    dockerStackServices = args.dockerStackServices
+                                }
+                                node(Constants.productionNodeLabel) {
+                                    dockerStackServices.each { service ->
+                                        slackMessages += dockerStackDeploy (
+                                            stack: GITLAB_PROJECT_NAMESPACE,
+                                            service: service,
+                                            image: dockerImage
+                                        )
+                                        slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
+                                    }
+                                }
+                            }
                         }
+
+                        nix.commitAndPushFlakeLock()
+
+                        (args.postDeploy ?: { return true })([input: [
+                            image: dockerImage,
+                            PROJECT_NAME: GITLAB_PROJECT_NAME]])
                     }
                 }
             }
