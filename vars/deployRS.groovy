@@ -144,6 +144,15 @@ def call(Map args = [:]) {
                             args.deployPhase(args)
                         }
                         (args.postDeploy ?: { return true })()
+                        findText(
+                            textFinders: [
+                                textFinder(
+                                    regexp: 'ERROR',
+                                    alsoCheckConsoleOutput: true
+                                ),
+                                buildResult: 'FAILURE'
+                            ]
+                        )
                     }
                 }
             }
