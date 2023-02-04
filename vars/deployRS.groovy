@@ -43,8 +43,6 @@ def call(Map args = [:]) {
             ansiColor('xterm')
 	}
         environment {
-            PROJECT_NAME = gitRemoteOrigin.getProject()
-            GROUP_NAME = gitRemoteOrigin.getGroup()
             GC_DONT_GC = gc(args.gc)
         }
         stages {
@@ -60,6 +58,9 @@ def call(Map args = [:]) {
             stage("tests") {
                 steps {
                     script {
+                        def (GROUP_NAME, PROJECT_NAME) =
+                            (env.GIT_URL.split(":")[1].split("/")).collect({ string -> string.contains(".git") ? string - ".git" : string })
+
                         // Hosts in changeSet are first.
                         hosts = (hostsInChangeSets().findAll{ fileExists("hosts/${it}.nix") } + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
 
