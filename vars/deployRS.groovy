@@ -35,6 +35,8 @@ def applyToHostsSequentially(Closure closure, List<String> hosts) {
 }
 
 def call(Map args = [:]) {
+    def (GROUP_NAME, PROJECT_NAME) =
+        (env.GIT_URL.split(":")[1].split("/")).collect({ string -> string.contains(".git") ? string - ".git" : string })
     pipeline {
         agent { label "jenkins" }
         options {
