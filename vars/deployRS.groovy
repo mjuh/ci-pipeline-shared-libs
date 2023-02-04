@@ -72,7 +72,7 @@ def call(Map args = [:]) {
                                             build (job: "../../${Constants.bfgJobName}/master",
                                                    parameters: [
                                                     string(name: "GIT_REPOSITORY_TARGET_URL",
-                                                           value: gitRemoteOrigin.getRemote().url),
+                                                           value: env.GIT_URL),
                                                     string(name: "PROJECT_NAME",
                                                            value: PROJECT_NAME),
                                                     string(name: "GROUP_NAME",
