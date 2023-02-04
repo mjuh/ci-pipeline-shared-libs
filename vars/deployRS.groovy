@@ -144,6 +144,9 @@ def call(Map args = [:]) {
                             args.deployPhase(args)
                         }
                         (args.postDeploy ?: { return true })()
+                        // On failure deploy-rs could rollback the change and
+                        // exit with success (exit code 0) and will print
+                        // ERROR in the console.
                         findText(
                             textFinders: [
                                 textFinder(regexp: 'ERROR',
