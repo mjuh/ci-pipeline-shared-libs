@@ -144,6 +144,8 @@ def call(Map args = [:]) {
                             args.deployPhase(args)
                         }
                         (args.postDeploy ?: { return true })()
+                    }
+                    publishers {
                         findText(
                             textFinders: [
                                 textFinder(
