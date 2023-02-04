@@ -146,15 +146,7 @@ def call(Map args = [:]) {
                         (args.postDeploy ?: { return true })()
                     }
                     publishers {
-                        findText(
-                            textFinders: [
-                                textFinder(
-                                    regexp: 'ERROR',
-                                    alsoCheckConsoleOutput: true
-                                ),
-                                buildResult: 'FAILURE'
-                            ]
-                        )
+                        findText regexp: 'ERROR', alsoCheckConsoleOutput: true
                     }
                 }
             }
