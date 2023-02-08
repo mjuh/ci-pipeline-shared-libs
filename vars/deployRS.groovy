@@ -39,7 +39,7 @@ def call(Map args = [:]) {
         agent { label "jenkins" }
         options {
             disableConcurrentBuilds()
-            timeout(time: 3, unit: "HOURS")
+            timeout(args.timeout ? args.timeout : [time: 3, unit: "HOURS"])
             ansiColor('xterm')
 	}
         environment {
