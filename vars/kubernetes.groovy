@@ -19,7 +19,7 @@ def kustomizationFilesInChangeSets() {
 def lintKustomizations() {
     kustomizationFilesInChangeSets().each { file ->
         dir(FilenameUtils.getPath(file)) {
-            sh "kubectl kustomize | nix shell nixpkgs#kube-linter --command kube-linter lint -"
+            sh "nix shell nixpkgs#kubernetes --command kubectl kustomize | nix shell nixpkgs#kube-linter --command kube-linter lint -"
         }
     }
 }
