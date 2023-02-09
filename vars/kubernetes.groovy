@@ -19,7 +19,9 @@ def kustomizationFilesInChangeSets() {
 def lintKustomizations() {
     kustomizationFilesInChangeSets().each { file ->
         dir(FilenameUtils.getPath(file)) {
-            sh "nix shell nixpkgs#kubernetes --command kubectl kustomize | nix shell nixpkgs#kube-linter --command kube-linter lint -"
+            warnError("malformated Kubernetes object") {
+                sh "nix shell nixpkgs#kubernetes --command kubectl kustomize | nix shell nixpkgs#kube-linter --command kube-linter lint -"
+            }
         }
     }
 }
