@@ -65,7 +65,7 @@ def call(Map args = [:]) {
                         // Hosts in changeSet are first.
                         hosts = (hostsInChangeSets().findAll{ fileExists("hosts/${it}.nix") } + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" })
                             .unique()
-                            .findAll{ host -> ! (host in args.excluded) }
+                            .findAll{ host -> ! (host in (args.excluded == null ? [] : args.excluded)) }
 
                         if (args.checkPhase) {
                             args.checkPhase(args)
