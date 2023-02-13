@@ -128,7 +128,7 @@ def call(Map args = [:]) {
                                                         + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                                     (args.postHostDeploy ?: { return true })([host: host])
                                 },
-                                    hosts)
+                                    hosts.findAll{ host -> ! (host in args.excluded) })
                             } else {
                                 sh ((["nix-shell --run",
                                       quoteString ((["deploy"]
