@@ -100,30 +100,20 @@ def call(Map args = [:]) {
             stage("deploy") {
                 when {
                     allOf {
-                        branch "master"
                         expression { args.deploy == true }
                     }
                     beforeAgent true
                 }
                 steps {
                     script {
-                        if (args.deployPhase == null) {
+                        if (args.checkPhase) {
+                            args.checkPhase(args)
+                        } else {
+                            // WARNING: Try to dry activate only after BFG
+                            // succeeded to check no credentials are leaked.
                             if (args.sequential) {
-                                applyToHostsSequentially({ host ->
-                                    (args.preHostDeploy ?: { return true })([host: host])
-                                    sh ((["nix-shell --run",
-                                          quoteString ((["deploy", "--skip-checks", "--debug-logs"]
-                                                        + (args.deployRsOptions == null ? [] : args.deployRsOptions)
-                                                        + (args.flake == null ? ".#\\\"${host}\\\"." : args.flake)
-                                                        + ["--"]
-                                                        + Constants.nixFlags
-                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
-                                    // WARNING: Try to dry activate only after BFG
-                                    // succeeded to check no credentials are leaked.
-                                    if (args.checkPhase) {
-                                        args.checkPhase(args)
-                                    } else {
+                                applyToHostsSequentially(
+                                    { host ->
                                         sh ((["nix-shell --run",
                                               quoteString ((["deploy", "--skip-checks", "--dry-activate"]
                                                             + (args.deployRsOptions == null ? [] : args.deployRsOptions)
@@ -132,39 +122,51 @@ def call(Map args = [:]) {
                                                             + Constants.nixFlags
                                                             + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                             + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
-                                    }
-                                    (args.postHostDeploy ?: { return true })([host: host])
-                                },
+                                    },
                                     hosts)
                             } else {
-                                // WARNING: Try to dry activate only after BFG
-                                // succeeded to check no credentials are leaked.
-                                if (args.checkPhase) {
-                                    args.checkPhase(args)
-                                } else {
-                                    sh ((["nix-shell --run",
-                                          quoteString ((["deploy", "--skip-checks", "--dry-activate"]
-                                                        + (args.deployRsOptions == null ? [] : args.deployRsOptions)
-                                                        + [".", "--"]
-                                                        + Constants.nixFlags
-                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
-                                }
                                 sh ((["nix-shell --run",
-                                      quoteString ((["deploy"]
+                                      quoteString ((["deploy", "--skip-checks", "--dry-activate"]
                                                     + (args.deployRsOptions == null ? [] : args.deployRsOptions)
-                                                    + (args.flake == null ? "." : args.flake)
-                                                    + ["--"]
+                                                    + [".", "--"]
                                                     + Constants.nixFlags
                                                     + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                     + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                             }
-                            nix.commitAndPushFlakeLock()
                         }
-                        else {
-                            args.deployPhase(args)
+                        if (env.GIT_BRANCH == "master") {
+                            if (args.deployPhase == null) {
+                                if (args.sequential) {
+                                    applyToHostsSequentially({ host ->
+                                        (args.preHostDeploy ?: { return true })([host: host])
+                                        sh ((["nix-shell --run",
+                                              quoteString ((["deploy", "--skip-checks", "--debug-logs"]
+                                                            + (args.deployRsOptions == null ? [] : args.deployRsOptions)
+                                                            + (args.flake == null ? ".#\\\"${host}\\\"." : args.flake)
+                                                            + ["--"]
+                                                            + Constants.nixFlags
+                                                            + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                            + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                        (args.postHostDeploy ?: { return true })([host: host])
+                                    },
+                                        hosts)
+                                } else {
+                                    sh ((["nix-shell --run",
+                                          quoteString ((["deploy"]
+                                                        + (args.deployRsOptions == null ? [] : args.deployRsOptions)
+                                                        + (args.flake == null ? "." : args.flake)
+                                                        + ["--"]
+                                                        + Constants.nixFlags
+                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                }
+                                nix.commitAndPushFlakeLock()
+                            }
+                            else {
+                                args.deployPhase(args)
+                            }
+                            (args.postDeploy ?: { return true })()
                         }
-                        (args.postDeploy ?: { return true })()
                         // On failure deploy-rs could rollback the change and
                         // exit with success (exit code 0) and will print
                         // ERROR in the console.
