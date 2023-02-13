@@ -41,6 +41,7 @@ def call(Map args = [:]) {
             disableConcurrentBuilds()
             timeout(args.timeout ? args.timeout : [time: 3, unit: "HOURS"])
             ansiColor('xterm')
+            quietPeriod(env.GIT_BRANCH == "master" ? 0 : 5)
 	}
         environment {
             GC_DONT_GC = gc(args.gc)
