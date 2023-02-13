@@ -109,6 +109,7 @@ def call(Map args = [:]) {
                         if (args.checkPhase) {
                             args.checkPhase(args)
                         } else {
+                            (args.preDryActivate ?: { return true })()
                             // WARNING: Try to dry activate only after BFG
                             // succeeded to check no credentials are leaked.
                             if (args.sequential) {
