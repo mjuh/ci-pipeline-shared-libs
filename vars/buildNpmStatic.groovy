@@ -75,7 +75,7 @@ def call(Map args = [:]) {
             stage('unstash-ci') {
               when { not { branch 'master' }}
               steps {
-                    node('ci') {
+                    node('ci.intr') {
                         dir(args.dstpath) {
                             unstash "my-stash"
                         }
