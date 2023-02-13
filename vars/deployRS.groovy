@@ -92,15 +92,6 @@ def call(Map args = [:]) {
                                                                  + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
                                     }]
                                          : [:]))
-                            // WARNING: Try to dry activate only after BFG
-                            // succeeded to check no credentials are leaked.
-                            sh ((["nix-shell --run",
-                                  quoteString ((["deploy", "--skip-checks", "--dry-activate"]
-                                                + (args.deployRsOptions == null ? [] : args.deployRsOptions)
-                                                + [".", "--"]
-                                                + Constants.nixFlags
-                                                + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                         }
                         (args.postTests ?: { return true })()
                     }
@@ -128,10 +119,37 @@ def call(Map args = [:]) {
                                                         + Constants.nixFlags
                                                         + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                         + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                    // WARNING: Try to dry activate only after BFG
+                                    // succeeded to check no credentials are leaked.
+                                    if (args.checkPhase) {
+                                        args.checkPhase(args)
+                                    } else {
+                                        sh ((["nix-shell --run",
+                                              quoteString ((["deploy", "--skip-checks", "--dry-activate"]
+                                                            + (args.deployRsOptions == null ? [] : args.deployRsOptions)
+                                                            + (args.flake == null ? ".#\\\"${host}\\\"." : args.flake)
+                                                            + ["--"]
+                                                            + Constants.nixFlags
+                                                            + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                            + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                    }
                                     (args.postHostDeploy ?: { return true })([host: host])
                                 },
                                     hosts)
                             } else {
+                                // WARNING: Try to dry activate only after BFG
+                                // succeeded to check no credentials are leaked.
+                                if (args.checkPhase) {
+                                    args.checkPhase(args)
+                                } else {
+                                    sh ((["nix-shell --run",
+                                          quoteString ((["deploy", "--skip-checks", "--dry-activate"]
+                                                        + (args.deployRsOptions == null ? [] : args.deployRsOptions)
+                                                        + [".", "--"]
+                                                        + Constants.nixFlags
+                                                        + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                        + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
+                                }
                                 sh ((["nix-shell --run",
                                       quoteString ((["deploy"]
                                                     + (args.deployRsOptions == null ? [] : args.deployRsOptions)
