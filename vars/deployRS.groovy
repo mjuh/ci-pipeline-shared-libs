@@ -63,7 +63,9 @@ def call(Map args = [:]) {
                             (env.GIT_URL.split(":")[1].split("/")).collect({ string -> string.contains(".git") ? string - ".git" : string })
 
                         // Hosts in changeSet are first.
-                        hosts = (hostsInChangeSets().findAll{ fileExists("hosts/${it}.nix") } + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" }).unique()
+                        hosts = (hostsInChangeSets().findAll{ fileExists("hosts/${it}.nix") } + findFiles(glob: 'hosts/*.nix').collect { file -> "${file}".split("/").last() - ".nix" })
+                            .unique()
+                            .findAll{ host -> ! (host in args.excluded) }
 
                         if (args.checkPhase) {
                             args.checkPhase(args)
@@ -128,7 +130,7 @@ def call(Map args = [:]) {
                                                         + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                                     (args.postHostDeploy ?: { return true })([host: host])
                                 },
-                                    hosts.findAll{ host -> ! (host in args.excluded) })
+                                    hosts)
                             } else {
                                 sh ((["nix-shell --run",
                                       quoteString ((["deploy"]
