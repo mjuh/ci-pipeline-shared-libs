@@ -133,6 +133,7 @@ def call(Map args = [:]) {
                                                     + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
                                                     + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))]).join(" "))
                             }
+                            (args.postDryActivate ?: { return true })
                         }
                         if (env.GIT_BRANCH == "master") {
                             if (args.deployPhase == null) {
