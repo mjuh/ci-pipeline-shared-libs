@@ -97,28 +97,28 @@ def call(Map args = [:]) {
 
                         if (env.GIT_BRANCH == "master") {
                             // Deploy to Kubernetes via FluxCD.
-                            // if (args?.fluxcd?.enabled) {
-                            //     lock("git@gitlab.intr:cd/fluxcd") {
-                            //         dir("fluxcd") {
-                            //             checkout([$class: 'GitSCM',
-                            //                       userRemoteConfigs: [[url: "git@gitlab.intr:cd/fluxcd"]]])
-                            //             (args.fluxcd.clusters ? args.fluxcd.clusters : Constants.kubernetesClusters).each { cluster ->
-                            //                 dir("${args.fluxcd.type}/${cluster}/${args.fluxcd.project.name}") {
-                            //                     sh "git reset --hard origin/master"
-                            //                     kustomize(["edit", "set", "image", imageName])
-                            //                     sh """
-                            //                            if ! git diff --exit-code kustomization.yaml
-                            //                            then
-                            //                                git add kustomization.yaml
-                            //                                git commit --message='infrastructure: ${cluster}: nixos: Update image to ${imageName}.'
-                            //                                git push --verbose origin HEAD:refs/heads/${args.fluxcd.type}-${cluster}-${args.fluxcd.project.name}-${commit}
-                            //                            fi
-                            //                            """
-                            //                 }
-                            //             }
-                            //         }
-                            //     }
-                            // }
+                            if (args?.fluxcd?.enabled) {
+                                lock("git@gitlab.intr:cd/fluxcd") {
+                                    dir("fluxcd") {
+                                        checkout([$class: 'GitSCM',
+                                                  userRemoteConfigs: [[url: "git@gitlab.intr:cd/fluxcd"]]])
+                                        (args.fluxcd.clusters ? args.fluxcd.clusters : Constants.kubernetesClusters).each { cluster ->
+                                            dir("${args.fluxcd.type}/${cluster}/${args.fluxcd.project.name}") {
+                                                sh "git reset --hard origin/master"
+                                                kustomize(["edit", "set", "image", imageName])
+                                                sh """
+                                                       if ! git diff --exit-code kustomization.yaml
+                                                       then
+                                                           git add kustomization.yaml
+                                                           git commit --message='infrastructure: ${cluster}: nixos: Update image to ${imageName}.'
+                                                           git push --verbose origin HEAD:refs/heads/${args.fluxcd.type}-${cluster}-${args.fluxcd.project.name}-${commit}
+                                                       fi
+                                                       """
+                                            }
+                                        }
+                                    }
+                                }
+                            }
 
                             // Deploy to Docker Swarm.
                             if (args.stackDeploy) {
