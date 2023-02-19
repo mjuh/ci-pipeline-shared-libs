@@ -6,8 +6,6 @@ def kustomize(command) {
 }
 
 def call(Map args = [:]) {
-    def slackMessages = [];
-
     pipeline {
         agent { label "jenkins" }
         options {
@@ -92,8 +90,6 @@ def call(Map args = [:]) {
                                                   + Constants.nixFlags
                                                   + [".#deploy"]
                                                   + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
-                            slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
-
                             dockerImage = new DockerImageTarball(
                                 imageName: imageName,
                                 path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
@@ -131,16 +127,6 @@ def call(Map args = [:]) {
                                     dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
                                 } else {
                                     dockerStackServices = args.dockerStackServices
-                                }
-                                node(Constants.productionNodeLabel) {
-                                    dockerStackServices.each { service ->
-                                        slackMessages += dockerStackDeploy (
-                                            stack: GITLAB_PROJECT_NAMESPACE,
-                                            service: service,
-                                            image: dockerImage
-                                        )
-                                        slackMessages += "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME} deployed to production"
-                                    }
                                 }
                             }
                         }
