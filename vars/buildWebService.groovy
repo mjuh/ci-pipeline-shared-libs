@@ -82,63 +82,6 @@ def call(Map args = [:]) {
                     }
                 }
             }
-            stage("deploy") {
-                steps {
-                    script {
-                        lock("docker-registry") {
-                            sh (nix.shell (run: ((["nix", "run"]
-                                                  + Constants.nixFlags
-                                                  + [".#deploy"]
-                                                  + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
-                            dockerImage = new DockerImageTarball(
-                                imageName: imageName,
-                                path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
-                            )
-                        }
-
-                        if (env.GIT_BRANCH == "master") {
-                            // Deploy to Kubernetes via FluxCD.
-                            // if (args?.fluxcd?.enabled) {
-                            //     lock("git@gitlab.intr:cd/fluxcd") {
-                            //         dir("fluxcd") {
-                            //             checkout([$class: 'GitSCM',
-                            //                       userRemoteConfigs: [[url: "git@gitlab.intr:cd/fluxcd"]]])
-                            //             (args.fluxcd.clusters ? args.fluxcd.clusters : Constants.kubernetesClusters).each { cluster ->
-                            //                 dir("${args.fluxcd.type}/${cluster}/${args.fluxcd.project.name}") {
-                            //                     sh "git reset --hard origin/master"
-                            //                     kustomize(["edit", "set", "image", imageName])
-                            //                     sh """
-                            //                            if ! git diff --exit-code kustomization.yaml
-                            //                            then
-                            //                                git add kustomization.yaml
-                            //                                git commit --message='infrastructure: ${cluster}: nixos: Update image to ${imageName}.'
-                            //                                git push --verbose origin HEAD:refs/heads/${args.fluxcd.type}-${cluster}-${args.fluxcd.project.name}-${commit}
-                            //                            fi
-                            //                            """
-                            //                 }
-                            //             }
-                            //         }
-                            //     }
-                            // }
-
-                            // Deploy to Docker Swarm.
-                            if (args.stackDeploy) {
-                                if (args.dockerStackServices == null) {
-                                    dockerStackServices = [ GITLAB_PROJECT_NAME ] + (args.extraDockerStackServices == null ? [] : args.extraDockerStackServices)
-                                } else {
-                                    dockerStackServices = args.dockerStackServices
-                                }
-                            }
-                        }
-
-                        nix.commitAndPushFlakeLock()
-
-                        (args.postDeploy ?: { return true })([input: [
-                            image: dockerImage,
-                            PROJECT_NAME: GITLAB_PROJECT_NAME]])
-                    }
-                }
-            }
         }
     }
 }
