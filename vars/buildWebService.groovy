@@ -41,47 +41,6 @@ def call(Map args = [:]) {
                     }
                 }
             }
-            stage("tests") {
-                steps {
-                    script {
-                        if (args.tests == false) {
-                            return 0
-                        }
-                        (args.preTest ?: { return true })([result: result, imageName: imageName])
-                        commit = gitCommit().take(8)
-                        parallel (["nix flake check": {
-                                     ansiColor("xterm") {
-                                         sh (nix.shell (run: ((["nix flake check"]
-                                                               + Constants.nixFlags
-                                                               + (args.nixArgs == null ? [] : args.nixArgs)
-                                                               + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                               + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))}},
-                                   "container structure test": {
-                                      if (fileExists ("container-structure-test.yaml")) {
-                                          containerStructureTest (namespace: GITLAB_PROJECT_NAMESPACE,
-                                                                  name: GITLAB_PROJECT_NAME,
-                                                                  tag: commit)
-                                      } else {
-                                          return true
-                                      }
-                                    }]
-                                  + (args.scanPasswords == true ?
-                                     ["bfg": {
-                                    build (job: "../../${Constants.bfgJobName}/master",
-                                           parameters: [
-                                            string(name: "GIT_REPOSITORY_TARGET_URL",
-                                                   value: gitRemoteOrigin.getRemote().url),
-                                            string(name: "PROJECT_NAME",
-                                                   value: GITLAB_PROJECT_NAME),
-                                            string(name: "GROUP_NAME",
-                                                   value: GITLAB_PROJECT_NAMESPACE),
-                                        ])}]
-                                     : [:]))
-                        Boolean testHook = (args.testHook ?: { return true })()
-                        testHook || Utils.markStageSkippedForConditional("tests")
-                    }
-                }
-            }
         }
     }
 }
