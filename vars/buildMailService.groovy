@@ -36,7 +36,7 @@ def call(Map args = [:]) {
                 }
                 steps {
                     build (
-                        job: "../mail%252Fmail-tests/master",
+                        job: "../mail-tests/master",
                         parameters: [
                             string(name: "TARGET_PROJECT", value: PROJECT_NAME),
                             string(name: "TARGET_BRANCH", value: GIT_BRANCH)
