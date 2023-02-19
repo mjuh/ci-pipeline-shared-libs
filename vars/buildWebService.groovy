@@ -11,12 +11,6 @@ def call(Map args = [:]) {
         options {
             timeout(time: 6, unit: "HOURS")
         }
-        environment {
-            GITLAB_PROJECT_NAME = jenkinsJob.getProject(env.JOB_NAME)
-            GITLAB_PROJECT_NAMESPACE = jenkinsJob.getGroup(env.JOB_NAME)
-	    GITLAB_PROJECT_PATH_NAMESPACE = "${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME}"
-            DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_PATH_NAMESPACE}/tag/${TAG}"
-        }
         stages {
             stage("build") {
                 steps {
