@@ -154,11 +154,5 @@ def call(Map args = [:]) {
                 }
             }
         }
-        post {
-            always {
-                sendSlackNotifications (buildStatus: currentBuild.result,
-                                        threadMessages: slackMessages)
-            }
-        }
     }
 }
