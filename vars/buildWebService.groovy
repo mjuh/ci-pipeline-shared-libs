@@ -102,7 +102,7 @@ def call(Map args = [:]) {
 
                         if (true) { //GIT_BRANCH == "master"
                             // Deploy to Kubernetes via FluxCD.
-                            if (args.?fluxcd?.enabled) {
+                            if (args?.fluxcd?.enabled) {
                                 lock("git@gitlab.intr:cd/fluxcd") {
                                     dir("fluxcd") {
                                         checkout([$class: 'GitSCM',
