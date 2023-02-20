@@ -83,29 +83,17 @@ def call(Map args = [:]) {
             stage("deploy") {
                 steps {
                     script {
-                        lock("docker-registry") {
-                            sh (nix.shell (run: ((["nix", "run"]
-                                                  + Constants.nixFlags
-                                                  + [".#deploy"]
-                                                  + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
-                            dockerImage = new DockerImageTarball(
-                                imageName: imageName,
-                                path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
-                            )
-                        }
-
-                        if (env.GIT_BRANCH == "master") {
-                            // Deploy to Kubernetes via FluxCD.
-                            if (args?.fluxcd?.enabled) {
-                                lock("git@gitlab.intr:cd/fluxcd") {
-                                    dir("fluxcd") {
-                                        checkout([$class: 'GitSCM',
-                                                  userRemoteConfigs: [[url: "git@gitlab.intr:cd/fluxcd"]]])
-                                        (args.fluxcd.clusters ? args.fluxcd.clusters : Constants.kubernetesClusters).each { cluster ->
-                                            dir("${args.fluxcd.type}/${cluster}/${args.fluxcd.project.name}") {
-                                                sh "git reset --hard origin/master"
-                                                kustomize(["edit", "set", "image", imageName])
-                                                sh """
+                        // Deploy to Kubernetes via FluxCD.
+                        if (args?.fluxcd?.enabled) {
+                            lock("git@gitlab.intr:cd/fluxcd") {
+                                dir("fluxcd") {
+                                    checkout([$class: 'GitSCM',
+                                              userRemoteConfigs: [[url: "git@gitlab.intr:cd/fluxcd"]]])
+                                    (args.fluxcd.clusters ? args.fluxcd.clusters : Constants.kubernetesClusters).each { cluster ->
+                                        dir("${args.fluxcd.type}/${cluster}/${args.fluxcd.project.name}") {
+                                            sh "git reset --hard origin/master"
+                                            kustomize(["edit", "set", "image", imageName])
+                                            sh """
                                                        if ! git diff --exit-code kustomization.yaml
                                                        then
                                                            git add kustomization.yaml
@@ -113,10 +101,22 @@ def call(Map args = [:]) {
                                                            git push --verbose origin HEAD:refs/heads/${args.fluxcd.type}-${cluster}-${args.fluxcd.project.name}-${commit}
                                                        fi
                                                        """
-                                            }
                                         }
                                     }
                                 }
+                            }
+                        }
+
+                        if (env.GIT_BRANCH == "master") {
+                            lock("docker-registry") {
+                                sh (nix.shell (run: ((["nix", "run"]
+                                                      + Constants.nixFlags
+                                                      + [".#deploy"]
+                                                      + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                                dockerImage = new DockerImageTarball(
+                                    imageName: imageName,
+                                    path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
+                                )
                             }
 
                             // Deploy to Docker Swarm.
@@ -127,13 +127,13 @@ def call(Map args = [:]) {
                                     dockerStackServices = args.dockerStackServices
                                 }
                             }
+
+                            nix.commitAndPushFlakeLock()
+
+                            (args.postDeploy ?: { return true })([input: [
+                                image: dockerImage,
+                                PROJECT_NAME: GITLAB_PROJECT_NAME]])
                         }
-
-                        nix.commitAndPushFlakeLock()
-
-                        (args.postDeploy ?: { return true })([input: [
-                            image: dockerImage,
-                            PROJECT_NAME: GITLAB_PROJECT_NAME]])
                     }
                 }
             }
