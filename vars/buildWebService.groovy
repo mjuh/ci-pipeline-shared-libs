@@ -83,6 +83,17 @@ def call(Map args = [:]) {
             stage("deploy") {
                 steps {
                     script {
+                        lock("docker-registry") {
+                            sh (nix.shell (run: ((["nix", "run"]
+                                                  + Constants.nixFlags
+                                                  + [".#deploy"]
+                                                  + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
+                            dockerImage = new DockerImageTarball(
+                                imageName: imageName,
+                                path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
+                            )
+                        }
+
                         // Deploy to Kubernetes via FluxCD.
                         if (args?.fluxcd?.enabled) {
                             lock("git@gitlab.intr:cd/fluxcd") {
@@ -108,17 +119,6 @@ def call(Map args = [:]) {
                         }
 
                         if (env.GIT_BRANCH == "master") {
-                            lock("docker-registry") {
-                                sh (nix.shell (run: ((["nix", "run"]
-                                                      + Constants.nixFlags
-                                                      + [".#deploy"]
-                                                      + (args.nixArgs == null ? [] : args.nixArgs)).join(" "))))
-                                dockerImage = new DockerImageTarball(
-                                    imageName: imageName,
-                                    path: "" // XXX: Specifiy path in DockerImageTarball for flake buildWebService.
-                                )
-                            }
-
                             // Deploy to Docker Swarm.
                             if (args.stackDeploy) {
                                 if (args.dockerStackServices == null) {
