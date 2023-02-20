@@ -108,7 +108,7 @@ def call(Map args = [:]) {
                                                        if ! git diff --exit-code kustomization.yaml
                                                        then
                                                            git add kustomization.yaml
-                                                           git commit --message='${args.fluxcd.type}: ${cluster}: nixos: Update image to ${imageName}.'
+                                                           git commit --message='${args.fluxcd.type}: ${cluster}: ${args.fluxcd.project.name}: Update image to ${imageName}.'
                                                            git push --verbose origin HEAD:refs/heads/${args.fluxcd.type}-${cluster}-${args.fluxcd.project.name}-${commit}
                                                        fi
                                                        """
