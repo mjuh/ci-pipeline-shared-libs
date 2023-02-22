@@ -1,6 +1,5 @@
 def call(def Map args = [:]) {
     def dockerImage = null
-    def slackMessages = [];
     String GRADLE_OPTS = args.GRADLE_OPTS == null ? "" : args.GRADLE_OPTS.join(' ')
 
     pipeline {
@@ -131,7 +130,6 @@ def call(def Map args = [:]) {
                     script {
                         pushDocker image: dockerImage
                         String DOCKER_REGISTRY_BROWSER_URL = "${Constants.dockerRegistryBrowserUrl}/repo/${GITLAB_PROJECT_NAMESPACE}/${GITLAB_PROJECT_NAME}/tag/${tag}"
-                        slackMessages += "<${DOCKER_REGISTRY_BROWSER_URL}|${DOCKER_REGISTRY_BROWSER_URL}>"
                     }
                 }
             }
@@ -183,10 +181,6 @@ def call(def Map args = [:]) {
         }
         post {
             always {
-                sendSlackNotifications (
-                    buildStatus: currentBuild.result,
-                    threadMessages: slackMessages
-                )
                 archiveArtifacts (
                     artifacts: 'build/reports/**',
                     allowEmptyArchive: true,
