@@ -17,7 +17,7 @@ def call(Map args = [:]) {
                             sh "cp ${result} bind.zone"
                             archiveArtifacts artifacts: "bind.zone"
                             sh """
-                               if curl --fail --output bind.1.zone https://jenkins.intr/job/net/job/net%2F${GITLAB_PROJECT_NAME}/job/master/lastBuild/artifact/bind.zone
+                               if curl --fail --output bind.1.zone https://jenkins.intr/job/net/job/${GITLAB_PROJECT_NAME}/job/master/lastBuild/artifact/bind.zone
                                then
                                    (
                                        set +e
