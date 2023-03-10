@@ -119,7 +119,7 @@ def call(Map args = [:]) {
                                               quoteString ((["deploy", "--skip-checks", "--dry-activate"]
                                                             + (args.deployRsOptions == null ? [] : args.deployRsOptions)
                                                             + (args.flake == null ? ".#\\\"${host}\\\"." : args.flake)
-                                                            + (args.profile == null ? ".#\\\"${host}\\\"." : ".#\\\"${host}.${args.profile}\\\".")
+                                                            + (args.profile == null ? ".#\\\"${host}\\\"." : ".#\\\"${host}\\\".${args.profile}")
                                                             + ["--"]
                                                             + Constants.nixFlags
                                                             + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
@@ -146,7 +146,7 @@ def call(Map args = [:]) {
                                               quoteString ((["deploy", "--skip-checks", "--debug-logs"]
                                                             + (args.deployRsOptions == null ? [] : args.deployRsOptions)
                                                             + (args.flake == null ? ".#\\\"${host}\\\"." : args.flake)
-                                                            + (args.profile == null ? ".#\\\"${host}\\\"." : ".#\\\"${host}.${args.profile}\\\".")
+                                                            + (args.profile == null ? ".#\\\"${host}\\\"." : ".#\\\"${host}\\\".${args.profile}")
                                                             + ["--"]
                                                             + Constants.nixFlags
                                                             + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
