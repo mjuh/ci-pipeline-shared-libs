@@ -83,15 +83,15 @@ def call(Map args = [:]) {
                                                            value: GROUP_NAME),
                                                 ])}]
                                          : [:])
-                                      + (args.deploy != true || GIT_BRANCH != "master" ?
-                                         ["nix flake check": {
-                                           sh (nix.shell (run: "nix flake show"))
-                                           sh (nix.shell (run: ((["nix flake check"]
-                                                                 + Constants.nixFlags
-                                                                 + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
-                                                                 + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
-                                    }]
-                                         : [:]))
+                                      + (args.flakeCheck == false || args.deploy == true || GIT_BRANCH == "master" ?
+                                           [:]
+                                             : ["nix flake check": {
+                                                 sh (nix.shell (run: "nix flake show"))
+                                                 sh (nix.shell (run: ((["nix flake check"]
+                                                                       + Constants.nixFlags
+                                                                       + (args.printBuildLogs == true ? ["--print-build-logs"] : [])
+                                                                       + (args.showTrace == true ? ["--show-trace"] : [])).join(" "))))
+                                    }]))
                         }
                         (args.postTests ?: { return true })()
                     }
